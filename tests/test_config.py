@@ -26,3 +26,9 @@ def test_default_config_uses_common_speech_framing() -> None:
 def test_config_rejects_invalid_boundaries(changes: dict[str, int | float], message: str) -> None:
     with pytest.raises(ValueError, match=message):
         ExperimentConfig(**changes)
+
+
+@pytest.mark.parametrize("field", ["seed", "sample_rate", "frame_ms", "hop_ms"])
+def test_config_rejects_booleans(field: str) -> None:
+    with pytest.raises(TypeError, match="boolean"):
+        ExperimentConfig(**{field: True})
