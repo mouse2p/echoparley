@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
 from dataclasses import dataclass
+from typing import Any
 
 
 @dataclass(frozen=True, slots=True)
@@ -36,3 +39,26 @@ class ExperimentConfig:
     def hop_samples(self) -> int:
         """Return the rounded hop size in samples."""
         return round(self.sample_rate * self.hop_ms / 1000)
+
+    def to_mapping(self) -> dict[str, int | float]:
+        """Return a stable, JSON-ready representation."""
+        return {
+            "frame_ms": self.frame_ms,
+            "hop_ms": self.hop_ms,
+            "sample_rate": self.sample_rate,
+            "seed": self.seed,
+        }
+
+    @classmethod
+    def from_mapping(cls, value: dict[str, Any]) -> ExperimentConfig:
+        """Restore a config while rejecting unknown keys."""
+        expected = {"seed", "sample_rate", "frame_ms", "hop_ms"}
+        unknown = value.keys() - expected
+        if unknown:
+            raise ValueError(f"unknown config keys: {', '.join(sorted(unknown))}")
+        return cls(**value)
+
+    def fingerprint(self) -> str:
+        """Return a compact digest of the canonical configuration."""
+        payload = json.dumps(self.to_mapping(), sort_keys=True, separators=(",", ":"))
+        return hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16]
