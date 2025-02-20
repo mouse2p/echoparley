@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import pytest
 
-from echoparley import __version__
+import echoparley
+from echoparley import ExperimentConfig, SchemaVersion, __version__
 from echoparley.cli import main
 
 
@@ -18,3 +19,9 @@ def test_cli_reports_version(capsys: pytest.CaptureFixture[str]) -> None:
     with pytest.raises(SystemExit, match="0"):
         main(["--version"])
     assert capsys.readouterr().out == f"echoparley {__version__}\n"
+
+
+def test_public_api_exports_foundations() -> None:
+    assert echoparley.__all__ == ["ExperimentConfig", "SchemaVersion", "__version__"]
+    assert ExperimentConfig().seed == 0
+    assert str(SchemaVersion(1)) == "1.0"
