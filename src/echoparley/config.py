@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 from dataclasses import dataclass
 from typing import Any
 
@@ -21,6 +22,8 @@ class ExperimentConfig:
         numeric_values = (self.seed, self.sample_rate, self.frame_ms, self.hop_ms)
         if any(isinstance(value, bool) for value in numeric_values):
             raise TypeError("boolean values are not valid numeric configuration")
+        if not all(math.isfinite(value) for value in numeric_values):
+            raise ValueError("numeric configuration must be finite")
         if self.seed < 0:
             raise ValueError("seed must be non-negative")
         if not 8_000 <= self.sample_rate <= 48_000:

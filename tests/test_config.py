@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import math
+
 import pytest
 
 from echoparley.config import ExperimentConfig
@@ -49,3 +51,9 @@ def test_config_mapping_roundtrip_is_canonical() -> None:
 def test_config_mapping_rejects_unknown_keys() -> None:
     with pytest.raises(ValueError, match="unknown config keys: extra"):
         ExperimentConfig.from_mapping({"extra": 1})
+
+
+@pytest.mark.parametrize("value", [math.inf, -math.inf, math.nan])
+def test_config_rejects_nonfinite_frame_values(value: float) -> None:
+    with pytest.raises(ValueError, match="finite"):
+        ExperimentConfig(frame_ms=value)
