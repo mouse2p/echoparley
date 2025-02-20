@@ -32,3 +32,20 @@ def test_config_rejects_invalid_boundaries(changes: dict[str, int | float], mess
 def test_config_rejects_booleans(field: str) -> None:
     with pytest.raises(TypeError, match="boolean"):
         ExperimentConfig(**{field: True})
+
+
+def test_config_mapping_roundtrip_is_canonical() -> None:
+    config = ExperimentConfig(seed=17, sample_rate=24_000, frame_ms=25.0, hop_ms=12.5)
+    assert config.to_mapping() == {
+        "frame_ms": 25.0,
+        "hop_ms": 12.5,
+        "sample_rate": 24_000,
+        "seed": 17,
+    }
+    assert ExperimentConfig.from_mapping(config.to_mapping()) == config
+    assert config.fingerprint() == "7807ec4da4d6906c"
+
+
+def test_config_mapping_rejects_unknown_keys() -> None:
+    with pytest.raises(ValueError, match="unknown config keys: extra"):
+        ExperimentConfig.from_mapping({"extra": 1})
