@@ -6,6 +6,7 @@ build-backend = "hatchling.build"
 name = "echoparley"
 version = "0.1.0"
 description = "Offline-first mechanics workbench for full-duplex spoken dialogue"
+keywords = ["speech", "dialogue", "turn-taking", "offline", "evaluation"]
 readme = "README.md"
 requires-python = ">=3.11"
 license = { file = "LICENSE" }
@@ -68,4 +69,3 @@ explicit = true
 
 [tool.uv.sources]
 torch = { index = "pytorch-cpu" }
-
