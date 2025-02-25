@@ -10,9 +10,17 @@ python -m venv .venv
 .venv/bin/echoparley --version
 ```
 
+最小配置对象固定采样率、帧移与随机种子，并可生成稳定指纹：
+
+```python
+from echoparley import ExperimentConfig
+
+config = ExperimentConfig(seed=7, sample_rate=16_000)
+print(config.frame_samples, config.hop_samples, config.fingerprint())
+```
+
 echoparley 验证语音对话系统的工程机制，而不是任何真实语音大模型的对话质量。后续模块提供可复现的离线生成、模拟与评估接口。
 
 ## 许可证
 
 [MIT](LICENSE)
-
