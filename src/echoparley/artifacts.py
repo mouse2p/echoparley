@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+from collections.abc import Iterable
 from dataclasses import dataclass
 from typing import Any
 
@@ -70,3 +71,25 @@ class ArtifactEnvelope:
         )
         envelope.verify()
         return envelope
+
+
+def encode_jsonl(envelopes: Iterable[ArtifactEnvelope]) -> bytes:
+    """Encode envelopes as newline-terminated canonical JSONL."""
+    lines = [canonical_json(envelope.to_mapping()) for envelope in envelopes]
+    return (("\n".join(lines) + "\n") if lines else "").encode("utf-8")
+
+
+def decode_jsonl(data: bytes) -> list[ArtifactEnvelope]:
+    """Decode and verify canonical JSONL bytes."""
+    if data and not data.endswith(b"\n"):
+        raise ValueError("JSONL artifact must end with a newline")
+    envelopes: list[ArtifactEnvelope] = []
+    for line_number, raw_line in enumerate(data.splitlines(), 1):
+        if not raw_line:
+            raise ValueError(f"blank JSONL line at {line_number}")
+        try:
+            value = json.loads(raw_line)
+            envelopes.append(ArtifactEnvelope.from_mapping(value))
+        except (TypeError, ValueError, json.JSONDecodeError) as error:
+            raise ValueError(f"invalid JSONL artifact at line {line_number}: {error}") from error
+    return envelopes
