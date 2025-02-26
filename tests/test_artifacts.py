@@ -23,3 +23,21 @@ def test_canonical_json_sorts_keys_and_preserves_unicode() -> None:
 def test_canonical_json_rejects_nonfinite_numbers(value: float) -> None:
     with pytest.raises(ValueError, match="JSON compliant"):
         canonical_json({"value": value})
+
+
+def test_artifact_envelope_roundtrip_and_tamper_detection() -> None:
+    from echoparley.artifacts import ArtifactEnvelope
+
+    envelope = ArtifactEnvelope.create("dialogue", {"turns": 3})
+    assert ArtifactEnvelope.from_mapping(envelope.to_mapping()) == envelope
+    damaged = envelope.to_mapping()
+    damaged["payload"] = {"turns": 4}
+    with pytest.raises(ValueError, match="checksum mismatch"):
+        ArtifactEnvelope.from_mapping(damaged)
+
+
+def test_artifact_envelope_requires_exact_fields() -> None:
+    from echoparley.artifacts import ArtifactEnvelope
+
+    with pytest.raises(ValueError, match="fields"):
+        ArtifactEnvelope.from_mapping({"kind": "dialogue"})
