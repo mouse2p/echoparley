@@ -33,3 +33,30 @@ class SchemaVersion:
         if len(parts) != 2 or not all(part.isascii() and part.isdigit() for part in parts):
             raise ValueError(f"invalid schema version: {value!r}")
         return cls(*(int(part) for part in parts))
+
+
+@dataclass(slots=True)
+class SchemaRegistry:
+    """Track supported versions per artifact kind without global state."""
+
+    _versions: dict[str, set[SchemaVersion]]
+
+    def __init__(self) -> None:
+        self._versions = {}
+
+    def register(self, kind: str, version: SchemaVersion) -> None:
+        if not kind:
+            raise ValueError("schema kind cannot be empty")
+        versions = self._versions.setdefault(kind, set())
+        if version in versions:
+            raise ValueError(f"schema already registered: {kind}@{version}")
+        versions.add(version)
+
+    def supports(self, kind: str, version: SchemaVersion) -> bool:
+        return version in self._versions.get(kind, set())
+
+    def current(self, kind: str) -> SchemaVersion:
+        try:
+            return max(self._versions[kind])
+        except (KeyError, ValueError) as error:
+            raise KeyError(f"unknown schema kind: {kind}") from error
