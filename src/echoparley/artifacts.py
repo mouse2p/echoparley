@@ -63,6 +63,8 @@ class ArtifactEnvelope:
         required = {"checksum", "kind", "payload", "schema_version"}
         if value.keys() != required:
             raise ValueError("artifact envelope fields do not match schema")
+        if not isinstance(value["payload"], dict):
+            raise TypeError("artifact payload must be an object")
         envelope = cls(
             kind=str(value["kind"]),
             schema_version=str(value["schema_version"]),

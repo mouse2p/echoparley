@@ -61,3 +61,12 @@ def test_jsonl_rejects_invalid_framing(data: bytes, message: str) -> None:
 
     with pytest.raises(ValueError, match=message):
         decode_jsonl(data)
+
+
+def test_artifact_rejects_non_object_payload() -> None:
+    from echoparley.artifacts import ArtifactEnvelope
+
+    value = ArtifactEnvelope.create("turn", {}).to_mapping()
+    value["payload"] = []
+    with pytest.raises(TypeError, match="payload must be an object"):
+        ArtifactEnvelope.from_mapping(value)
