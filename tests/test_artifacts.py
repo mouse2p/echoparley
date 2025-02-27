@@ -41,3 +41,23 @@ def test_artifact_envelope_requires_exact_fields() -> None:
 
     with pytest.raises(ValueError, match="fields"):
         ArtifactEnvelope.from_mapping({"kind": "dialogue"})
+
+
+def test_jsonl_roundtrip_is_byte_stable() -> None:
+    from echoparley.artifacts import ArtifactEnvelope, decode_jsonl, encode_jsonl
+
+    envelopes = [
+        ArtifactEnvelope.create("turn", {"id": 1}),
+        ArtifactEnvelope.create("turn", {"id": 2}),
+    ]
+    encoded = encode_jsonl(envelopes)
+    assert encoded.endswith(b"\n")
+    assert encode_jsonl(decode_jsonl(encoded)) == encoded
+
+
+@pytest.mark.parametrize("data,message", [(b"{}", "newline"), (b"\n", "blank JSONL")])
+def test_jsonl_rejects_invalid_framing(data: bytes, message: str) -> None:
+    from echoparley.artifacts import decode_jsonl
+
+    with pytest.raises(ValueError, match=message):
+        decode_jsonl(data)
