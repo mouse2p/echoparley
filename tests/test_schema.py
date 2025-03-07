@@ -22,3 +22,24 @@ def test_schema_version_rejects_noncanonical_text(value: str) -> None:
 def test_schema_version_rejects_out_of_range_parts(major: int, minor: int) -> None:
     with pytest.raises(ValueError, match="major >= 1"):
         SchemaVersion(major, minor)
+
+
+def test_schema_registry_tracks_current_version() -> None:
+    from echoparley.schema import SchemaRegistry
+
+    registry = SchemaRegistry()
+    registry.register("session", SchemaVersion(1, 0))
+    registry.register("session", SchemaVersion(1, 2))
+    assert registry.supports("session", SchemaVersion(1, 0))
+    assert registry.current("session") == SchemaVersion(1, 2)
+
+
+def test_schema_registry_rejects_duplicates_and_unknown_kinds() -> None:
+    from echoparley.schema import SchemaRegistry
+
+    registry = SchemaRegistry()
+    registry.register("session", SchemaVersion(1))
+    with pytest.raises(ValueError, match="already registered"):
+        registry.register("session", SchemaVersion(1))
+    with pytest.raises(KeyError, match="unknown schema"):
+        registry.current("missing")
