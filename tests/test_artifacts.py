@@ -70,3 +70,10 @@ def test_artifact_rejects_non_object_payload() -> None:
     value["payload"] = []
     with pytest.raises(TypeError, match="payload must be an object"):
         ArtifactEnvelope.from_mapping(value)
+
+
+def test_byte_checksum_distinguishes_framing() -> None:
+    from echoparley.artifacts import bytes_checksum
+
+    assert bytes_checksum(b"turn") != bytes_checksum(b"turn\n")
+    assert len(bytes_checksum(b"")) == 64

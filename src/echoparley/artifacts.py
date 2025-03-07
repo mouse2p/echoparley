@@ -22,7 +22,12 @@ def canonical_json(value: object) -> str:
 
 def content_checksum(value: object) -> str:
     """Return a SHA-256 checksum over canonical UTF-8 JSON."""
-    return hashlib.sha256(canonical_json(value).encode("utf-8")).hexdigest()
+    return bytes_checksum(canonical_json(value).encode("utf-8"))
+
+
+def bytes_checksum(value: bytes) -> str:
+    """Return a SHA-256 checksum for an exact byte representation."""
+    return hashlib.sha256(value).hexdigest()
 
 
 @dataclass(frozen=True, slots=True)
