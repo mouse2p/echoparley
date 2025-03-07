@@ -60,3 +60,30 @@ class SchemaRegistry:
             return max(self._versions[kind])
         except (KeyError, ValueError) as error:
             raise KeyError(f"unknown schema kind: {kind}") from error
+
+
+Migration = callable
+
+
+def migrate_mapping(
+    value: dict[str, object],
+    source: SchemaVersion,
+    target: SchemaVersion,
+    migrations: dict[tuple[SchemaVersion, SchemaVersion], object],
+) -> dict[str, object]:
+    """Apply registered same-major minor migrations in order."""
+    if source.major != target.major or source > target:
+        raise ValueError("migration requires an ascending path within one major version")
+    current = source
+    result = dict(value)
+    while current < target:
+        following = SchemaVersion(current.major, current.minor + 1)
+        operation = migrations.get((current, following))
+        if not callable(operation):
+            raise ValueError(f"missing migration {current} -> {following}")
+        migrated = operation(dict(result))
+        if not isinstance(migrated, dict):
+            raise TypeError("migration must return an object")
+        result = migrated
+        current = following
+    return result
