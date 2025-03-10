@@ -34,3 +34,21 @@ class AudioBuffer:
     @property
     def duration_seconds(self) -> float:
         return len(self.samples) / self.sample_rate
+
+
+def encode_pcm16(samples: FloatArray) -> bytes:
+    """Encode normalized mono samples as little-endian signed PCM16."""
+    values = np.asarray(samples, dtype=np.float64)
+    if values.ndim != 1 or not np.all(np.isfinite(values)):
+        raise ValueError("PCM input must be a finite one-dimensional array")
+    clipped = np.clip(values, -1.0, 1.0)
+    integers = np.where(clipped < 0, clipped * 32768.0, clipped * 32767.0)
+    return np.rint(integers).astype("<i2").tobytes()
+
+
+def decode_pcm16(data: bytes) -> FloatArray:
+    """Decode little-endian signed PCM16 into normalized float samples."""
+    if len(data) % 2:
+        raise ValueError("PCM16 data length must be even")
+    integers = np.frombuffer(data, dtype="<i2").astype(np.float64)
+    return np.where(integers < 0, integers / 32768.0, integers / 32767.0)
