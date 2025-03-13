@@ -29,3 +29,15 @@ def test_audio_buffer_copies_and_freezes_samples() -> None:
 def test_audio_buffer_rejects_invalid_inputs(samples: np.ndarray, rate: int, message: str) -> None:
     with pytest.raises(ValueError, match=message):
         audio.AudioBuffer(samples, rate)
+
+
+def test_pcm16_roundtrip_including_endpoints() -> None:
+    samples = np.array([-1.0, -0.5, 0.0, 0.5, 1.0])
+    encoded = audio.encode_pcm16(samples)
+    assert encoded.hex() == "008000c000000040ff7f"
+    np.testing.assert_allclose(audio.decode_pcm16(encoded), samples, atol=1 / 32767)
+
+
+def test_pcm16_rejects_odd_byte_count() -> None:
+    with pytest.raises(ValueError, match="length must be even"):
+        audio.decode_pcm16(b"\x00")
