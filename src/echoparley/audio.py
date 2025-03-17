@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import io
+import wave
 from dataclasses import dataclass
 
 import numpy as np
@@ -52,3 +54,29 @@ def decode_pcm16(data: bytes) -> FloatArray:
         raise ValueError("PCM16 data length must be even")
     integers = np.frombuffer(data, dtype="<i2").astype(np.float64)
     return np.where(integers < 0, integers / 32768.0, integers / 32767.0)
+
+
+def write_wav(buffer: AudioBuffer) -> bytes:
+    """Serialize a mono buffer to a standards-compatible PCM16 WAV."""
+    output = io.BytesIO()
+    with wave.open(output, "wb") as wav:
+        wav.setnchannels(1)
+        wav.setsampwidth(2)
+        wav.setframerate(buffer.sample_rate)
+        wav.writeframes(encode_pcm16(buffer.samples))
+    return output.getvalue()
+
+
+def read_wav(data: bytes) -> AudioBuffer:
+    """Read mono PCM16 WAV bytes under the package audio convention."""
+    try:
+        with wave.open(io.BytesIO(data), "rb") as wav:
+            if wav.getnchannels() != 1:
+                raise ValueError("WAV must be mono")
+            if wav.getsampwidth() != 2 or wav.getcomptype() != "NONE":
+                raise ValueError("WAV must contain uncompressed PCM16")
+            sample_rate = wav.getframerate()
+            frames = wav.readframes(wav.getnframes())
+    except (EOFError, wave.Error) as error:
+        raise ValueError(f"invalid WAV data: {error}") from error
+    return AudioBuffer(decode_pcm16(frames), sample_rate)
