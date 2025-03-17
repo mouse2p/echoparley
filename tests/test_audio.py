@@ -56,3 +56,17 @@ def test_wav_roundtrip_preserves_rate_and_pcm_samples() -> None:
 def test_wav_reader_reports_malformed_containers(data: bytes) -> None:
     with pytest.raises(ValueError, match="invalid WAV"):
         audio.read_wav(data)
+
+
+def test_audio_framing_overlap_and_padding() -> None:
+    samples = np.arange(7, dtype=np.float64)
+    unpadded = audio.frame_audio(samples, 4, 2)
+    padded = audio.frame_audio(samples, 4, 2, pad_end=True)
+    assert unpadded.tolist() == [[0, 1, 2, 3], [2, 3, 4, 5]]
+    assert padded.tolist() == [[0, 1, 2, 3], [2, 3, 4, 5], [4, 5, 6, 0]]
+
+
+def test_audio_framing_short_input_policy() -> None:
+    assert audio.frame_audio(np.array([1.0]), 3, 1).shape == (0, 3)
+    assert audio.frame_audio(np.array([1.0]), 3, 1, pad_end=True).tolist() == [[1, 0, 0]]
+    assert audio.frame_audio(np.array([]), 3, 1, pad_end=True).shape == (0, 3)
