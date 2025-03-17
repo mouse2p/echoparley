@@ -80,3 +80,26 @@ def read_wav(data: bytes) -> AudioBuffer:
     except (EOFError, wave.Error) as error:
         raise ValueError(f"invalid WAV data: {error}") from error
     return AudioBuffer(decode_pcm16(frames), sample_rate)
+
+
+def frame_audio(
+    samples: FloatArray, frame_size: int, hop_size: int, *, pad_end: bool = False
+) -> FloatArray:
+    """Return copied frames, optionally zero-padding the final partial frame."""
+    values = np.asarray(samples, dtype=np.float64)
+    if values.ndim != 1:
+        raise ValueError("framing input must be one-dimensional")
+    if frame_size <= 0 or hop_size <= 0:
+        raise ValueError("frame_size and hop_size must be positive")
+    if values.size < frame_size:
+        count = 1 if pad_end and values.size else 0
+    else:
+        remainder = values.size - frame_size
+        count = 1 + remainder // hop_size
+        if pad_end and remainder % hop_size:
+            count += 1
+    result = np.zeros((count, frame_size), dtype=np.float64)
+    for index in range(count):
+        chunk = values[index * hop_size : index * hop_size + frame_size]
+        result[index, : len(chunk)] = chunk
+    return result
