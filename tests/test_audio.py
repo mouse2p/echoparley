@@ -41,3 +41,18 @@ def test_pcm16_roundtrip_including_endpoints() -> None:
 def test_pcm16_rejects_odd_byte_count() -> None:
     with pytest.raises(ValueError, match="length must be even"):
         audio.decode_pcm16(b"\x00")
+
+
+def test_wav_roundtrip_preserves_rate_and_pcm_samples() -> None:
+    original = audio.AudioBuffer(np.linspace(-1.0, 1.0, 17), 8_000)
+    encoded = audio.write_wav(original)
+    restored = audio.read_wav(encoded)
+    assert encoded[:4] == b"RIFF" and encoded[8:12] == b"WAVE"
+    assert restored.sample_rate == 8_000
+    assert audio.encode_pcm16(restored.samples) == audio.encode_pcm16(original.samples)
+
+
+@pytest.mark.parametrize("data", [b"", b"not a wave file"])
+def test_wav_reader_reports_malformed_containers(data: bytes) -> None:
+    with pytest.raises(ValueError, match="invalid WAV"):
+        audio.read_wav(data)
