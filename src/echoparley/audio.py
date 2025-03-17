@@ -103,3 +103,29 @@ def frame_audio(
         chunk = values[index * hop_size : index * hop_size + frame_size]
         result[index, : len(chunk)] = chunk
     return result
+
+
+@dataclass(frozen=True, slots=True)
+class FrameSpan:
+    """Half-open sample interval represented by one analysis frame."""
+
+    index: int
+    start_sample: int
+    end_sample: int
+
+    def __post_init__(self) -> None:
+        if self.index < 0 or self.start_sample < 0 or self.end_sample < self.start_sample:
+            raise ValueError("invalid frame span")
+
+
+def frame_spans(
+    sample_count: int, frame_size: int, hop_size: int, *, pad_end: bool = False
+) -> tuple[FrameSpan, ...]:
+    """Describe exact source coverage for every frame returned by ``frame_audio``."""
+    if sample_count < 0:
+        raise ValueError("sample_count must be non-negative")
+    frames = frame_audio(np.zeros(sample_count), frame_size, hop_size, pad_end=pad_end)
+    return tuple(
+        FrameSpan(index, index * hop_size, min(index * hop_size + frame_size, sample_count))
+        for index in range(len(frames))
+    )
