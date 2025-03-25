@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import io
+import wave
+
 import numpy as np
 import pytest
 
@@ -91,3 +94,14 @@ def test_pcm_encoder_requires_explicit_clipping() -> None:
     with pytest.raises(ValueError, match="normalized range"):
         audio.encode_pcm16(values)
     assert audio.decode_pcm16(audio.encode_pcm16(values, clip=True)).tolist() == [-1.0, 1.0]
+
+
+def test_wav_reader_rejects_stereo() -> None:
+    output = io.BytesIO()
+    with wave.open(output, "wb") as wav:
+        wav.setnchannels(2)
+        wav.setsampwidth(2)
+        wav.setframerate(8_000)
+        wav.writeframes(b"\x00\x00\x00\x00")
+    with pytest.raises(ValueError, match="must be mono"):
+        audio.read_wav(output.getvalue())
