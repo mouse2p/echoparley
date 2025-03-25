@@ -38,11 +38,13 @@ class AudioBuffer:
         return len(self.samples) / self.sample_rate
 
 
-def encode_pcm16(samples: FloatArray) -> bytes:
-    """Encode normalized mono samples as little-endian signed PCM16."""
+def encode_pcm16(samples: FloatArray, *, clip: bool = False) -> bytes:
+    """Encode normalized mono samples, optionally clipping out-of-range values."""
     values = np.asarray(samples, dtype=np.float64)
     if values.ndim != 1 or not np.all(np.isfinite(values)):
         raise ValueError("PCM input must be a finite one-dimensional array")
+    if not clip and values.size and np.max(np.abs(values)) > 1.0:
+        raise ValueError("PCM input exceeds normalized range")
     clipped = np.clip(values, -1.0, 1.0)
     integers = np.where(clipped < 0, clipped * 32768.0, clipped * 32767.0)
     return np.rint(integers).astype("<i2").tobytes()

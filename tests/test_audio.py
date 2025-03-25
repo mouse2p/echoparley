@@ -84,3 +84,10 @@ def test_frame_spans_match_padded_frame_coverage() -> None:
 def test_frame_spans_reject_negative_sample_count() -> None:
     with pytest.raises(ValueError, match="non-negative"):
         audio.frame_spans(-1, 4, 2)
+
+
+def test_pcm_encoder_requires_explicit_clipping() -> None:
+    values = np.array([-2.0, 2.0])
+    with pytest.raises(ValueError, match="normalized range"):
+        audio.encode_pcm16(values)
+    assert audio.decode_pcm16(audio.encode_pcm16(values, clip=True)).tolist() == [-1.0, 1.0]
