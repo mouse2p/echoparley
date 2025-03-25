@@ -70,3 +70,17 @@ def test_audio_framing_short_input_policy() -> None:
     assert audio.frame_audio(np.array([1.0]), 3, 1).shape == (0, 3)
     assert audio.frame_audio(np.array([1.0]), 3, 1, pad_end=True).tolist() == [[1, 0, 0]]
     assert audio.frame_audio(np.array([]), 3, 1, pad_end=True).shape == (0, 3)
+
+
+def test_frame_spans_match_padded_frame_coverage() -> None:
+    spans = audio.frame_spans(7, 4, 2, pad_end=True)
+    assert [(span.index, span.start_sample, span.end_sample) for span in spans] == [
+        (0, 0, 4),
+        (1, 2, 6),
+        (2, 4, 7),
+    ]
+
+
+def test_frame_spans_reject_negative_sample_count() -> None:
+    with pytest.raises(ValueError, match="non-negative"):
+        audio.frame_spans(-1, 4, 2)
