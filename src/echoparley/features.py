@@ -46,3 +46,26 @@ def mel_to_hertz(mels: FloatArray | float) -> FloatArray:
     if np.any(values < 0) or not np.all(np.isfinite(values)):
         raise ValueError("mel values must be finite and non-negative")
     return 700.0 * (10.0 ** (values / 2595.0) - 1.0)
+
+
+def mel_filterbank(sample_rate: int, fft_size: int, bands: int) -> FloatArray:
+    """Build area-normalized triangular filters across the usable spectrum."""
+    if sample_rate <= 0 or fft_size < 2 or bands <= 0:
+        raise ValueError("sample_rate, fft_size, and bands must be positive")
+    if bands > fft_size // 2:
+        raise ValueError("too many mel bands for FFT resolution")
+    mel_edges = np.linspace(0.0, float(hertz_to_mel(sample_rate / 2)), bands + 2)
+    edges = mel_to_hertz(mel_edges)
+    frequencies = np.fft.rfftfreq(fft_size, 1 / sample_rate)
+    filters = np.zeros((bands, len(frequencies)), dtype=np.float64)
+    for band, (left, center, right) in enumerate(zip(edges, edges[1:], edges[2:], strict=True)):
+        filters[band] = np.maximum(
+            0.0,
+            np.minimum(
+                (frequencies - left) / (center - left), (right - frequencies) / (right - center)
+            ),
+        )
+        total = filters[band].sum()
+        if total:
+            filters[band] /= total
+    return filters
