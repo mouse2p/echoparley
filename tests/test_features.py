@@ -46,3 +46,16 @@ def test_hertz_mel_roundtrip() -> None:
 def test_frequency_transforms_reject_negative_values(function: object) -> None:
     with pytest.raises(ValueError, match="non-negative"):
         function(-1.0)  # type: ignore[operator]
+
+
+def test_mel_filterbank_is_nonnegative_and_normalized() -> None:
+    filters = features.mel_filterbank(16_000, 512, 24)
+    assert filters.shape == (24, 257)
+    assert np.all(filters >= 0)
+    np.testing.assert_allclose(filters.sum(axis=1), np.ones(24))
+    assert np.all(np.argmax(filters, axis=1)[:-1] < np.argmax(filters, axis=1)[1:])
+
+
+def test_mel_filterbank_rejects_excess_resolution() -> None:
+    with pytest.raises(ValueError, match="too many"):
+        features.mel_filterbank(16_000, 8, 5)

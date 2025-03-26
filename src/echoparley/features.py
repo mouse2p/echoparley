@@ -58,7 +58,7 @@ def mel_filterbank(sample_rate: int, fft_size: int, bands: int) -> FloatArray:
     edges = mel_to_hertz(mel_edges)
     frequencies = np.fft.rfftfreq(fft_size, 1 / sample_rate)
     filters = np.zeros((bands, len(frequencies)), dtype=np.float64)
-    for band, (left, center, right) in enumerate(zip(edges, edges[1:], edges[2:], strict=True)):
+    for band, (left, center, right) in enumerate(zip(edges, edges[1:], edges[2:], strict=False)):
         filters[band] = np.maximum(
             0.0,
             np.minimum(
