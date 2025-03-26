@@ -33,3 +33,16 @@ def test_power_spectrum_rejects_vectors_and_empty_width() -> None:
         features.power_spectrum(np.ones(4))
     with pytest.raises(ValueError, match="nonempty-width"):
         features.power_spectrum(np.empty((2, 0)))
+
+
+def test_hertz_mel_roundtrip() -> None:
+    frequencies = np.array([0.0, 80.0, 440.0, 8_000.0])
+    np.testing.assert_allclose(
+        features.mel_to_hertz(features.hertz_to_mel(frequencies)), frequencies
+    )
+
+
+@pytest.mark.parametrize("function", [features.hertz_to_mel, features.mel_to_hertz])
+def test_frequency_transforms_reject_negative_values(function: object) -> None:
+    with pytest.raises(ValueError, match="non-negative"):
+        function(-1.0)  # type: ignore[operator]
