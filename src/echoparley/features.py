@@ -69,3 +69,14 @@ def mel_filterbank(sample_rate: int, fft_size: int, bands: int) -> FloatArray:
         if total:
             filters[band] /= total
     return filters
+
+
+def log_mel_features(
+    frames: FloatArray, sample_rate: int, bands: int = 40, *, floor: float = 1e-10
+) -> FloatArray:
+    """Project power spectra onto mel bands and apply a natural-log floor."""
+    if floor <= 0 or not np.isfinite(floor):
+        raise ValueError("log-mel floor must be finite and positive")
+    spectra = power_spectrum(frames)
+    filters = mel_filterbank(sample_rate, frames.shape[1], bands)
+    return np.log(np.maximum(spectra @ filters.T, floor))
