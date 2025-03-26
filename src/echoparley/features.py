@@ -30,3 +30,19 @@ def power_spectrum(frames: FloatArray, *, window: str = "hann") -> FloatArray:
         raise ValueError("frames must be a nonempty-width matrix")
     transformed = np.fft.rfft(values * analysis_window(values.shape[1], window), axis=1)
     return np.abs(transformed) ** 2 / values.shape[1]
+
+
+def hertz_to_mel(frequency: FloatArray | float) -> FloatArray:
+    """Map non-negative Hertz values to the HTK mel convention."""
+    values = np.asarray(frequency, dtype=np.float64)
+    if np.any(values < 0) or not np.all(np.isfinite(values)):
+        raise ValueError("frequencies must be finite and non-negative")
+    return 2595.0 * np.log10(1.0 + values / 700.0)
+
+
+def mel_to_hertz(mels: FloatArray | float) -> FloatArray:
+    """Invert the HTK mel transform for non-negative values."""
+    values = np.asarray(mels, dtype=np.float64)
+    if np.any(values < 0) or not np.all(np.isfinite(values)):
+        raise ValueError("mel values must be finite and non-negative")
+    return 700.0 * (10.0 ** (values / 2595.0) - 1.0)
