@@ -59,3 +59,14 @@ def test_mel_filterbank_is_nonnegative_and_normalized() -> None:
 def test_mel_filterbank_rejects_excess_resolution() -> None:
     with pytest.raises(ValueError, match="too many"):
         features.mel_filterbank(16_000, 8, 5)
+
+
+def test_log_mel_silence_uses_exact_floor() -> None:
+    result = features.log_mel_features(np.zeros((2, 64)), 8_000, 8, floor=1e-6)
+    np.testing.assert_allclose(result, np.full((2, 8), np.log(1e-6)))
+
+
+@pytest.mark.parametrize("floor", [0.0, -1.0, np.inf])
+def test_log_mel_rejects_invalid_floors(floor: float) -> None:
+    with pytest.raises(ValueError, match="floor"):
+        features.log_mel_features(np.zeros((1, 16)), 8_000, 2, floor=floor)
