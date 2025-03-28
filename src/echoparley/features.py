@@ -92,3 +92,14 @@ def sliding_statistics(features: FloatArray, radius: int = 2) -> FloatArray:
         region = values[max(0, index - radius) : index + radius + 1]
         output[index] = np.concatenate((region.mean(axis=0), region.std(axis=0)))
     return output
+
+
+def temporal_deltas(features: FloatArray) -> FloatArray:
+    """Compute centered deltas with replicated edge frames."""
+    values = np.asarray(features, dtype=np.float64)
+    if values.ndim != 2:
+        raise ValueError("features must be a matrix")
+    if len(values) == 0:
+        return values.copy()
+    padded = np.pad(values, ((1, 1), (0, 0)), mode="edge")
+    return (padded[2:] - padded[:-2]) / 2.0
