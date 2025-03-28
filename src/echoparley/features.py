@@ -80,3 +80,15 @@ def log_mel_features(
     spectra = power_spectrum(frames)
     filters = mel_filterbank(sample_rate, frames.shape[1], bands)
     return np.log(np.maximum(spectra @ filters.T, floor))
+
+
+def sliding_statistics(features: FloatArray, radius: int = 2) -> FloatArray:
+    """Concatenate local mean and standard deviation with clipped boundaries."""
+    values = np.asarray(features, dtype=np.float64)
+    if values.ndim != 2 or radius < 0:
+        raise ValueError("features must be a matrix and radius non-negative")
+    output = np.empty((len(values), values.shape[1] * 2), dtype=np.float64)
+    for index in range(len(values)):
+        region = values[max(0, index - radius) : index + radius + 1]
+        output[index] = np.concatenate((region.mean(axis=0), region.std(axis=0)))
+    return output
