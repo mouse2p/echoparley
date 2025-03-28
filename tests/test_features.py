@@ -70,3 +70,15 @@ def test_log_mel_silence_uses_exact_floor() -> None:
 def test_log_mel_rejects_invalid_floors(floor: float) -> None:
     with pytest.raises(ValueError, match="floor"):
         features.log_mel_features(np.zeros((1, 16)), 8_000, 2, floor=floor)
+
+
+def test_sliding_statistics_clip_context_at_edges() -> None:
+    values = np.array([[1.0], [3.0], [8.0]])
+    result = features.sliding_statistics(values, 1)
+    np.testing.assert_allclose(result[:, 0], [2.0, 4.0, 5.5])
+    np.testing.assert_allclose(result[:, 1], [1.0, np.std([1, 3, 8]), 2.5])
+
+
+def test_zero_radius_statistics_have_zero_variance() -> None:
+    values = np.array([[2.0, 4.0]])
+    assert features.sliding_statistics(values, 0).tolist() == [[2.0, 4.0, 0.0, 0.0]]
