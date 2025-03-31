@@ -82,3 +82,9 @@ def test_sliding_statistics_clip_context_at_edges() -> None:
 def test_zero_radius_statistics_have_zero_variance() -> None:
     values = np.array([[2.0, 4.0]])
     assert features.sliding_statistics(values, 0).tolist() == [[2.0, 4.0, 0.0, 0.0]]
+
+
+def test_temporal_deltas_preserve_shape_and_direction() -> None:
+    values = np.array([[0.0], [2.0], [6.0]])
+    assert features.temporal_deltas(values).tolist() == [[1.0], [3.0], [2.0]]
+    assert features.temporal_deltas(np.empty((0, 2))).shape == (0, 2)
