@@ -88,3 +88,8 @@ def test_temporal_deltas_preserve_shape_and_direction() -> None:
     values = np.array([[0.0], [2.0], [6.0]])
     assert features.temporal_deltas(values).tolist() == [[1.0], [3.0], [2.0]]
     assert features.temporal_deltas(np.empty((0, 2))).shape == (0, 2)
+
+
+@pytest.mark.parametrize("kind", ["hann", "hamming", "rectangular"])
+def test_single_sample_window_has_unit_gain(kind: str) -> None:
+    assert features.analysis_window(1, kind).tolist() == [1.0]

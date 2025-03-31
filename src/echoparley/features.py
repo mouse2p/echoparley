@@ -12,6 +12,8 @@ def analysis_window(length: int, kind: str = "hann") -> FloatArray:
     """Return a periodic Hann, Hamming, or rectangular window."""
     if length <= 0:
         raise ValueError("window length must be positive")
+    if length == 1:
+        return np.ones(1, dtype=np.float64)
     if kind == "rectangular":
         return np.ones(length, dtype=np.float64)
     indices = np.arange(length, dtype=np.float64)
