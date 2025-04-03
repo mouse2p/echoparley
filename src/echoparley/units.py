@@ -57,3 +57,41 @@ def retained_variance(values: FloatArray, projection: PCAProjection) -> float:
     reconstructed = projection.inverse_transform(projection.transform(matrix))
     residual = float(np.sum((matrix - reconstructed) ** 2))
     return round(max(0.0, min(1.0, 1.0 - residual / total)), 12)
+
+
+@dataclass(frozen=True, slots=True)
+class KMeansCodebook:
+    """Centroids ordered by their seeded initialization slots."""
+
+    centroids: FloatArray
+
+    def assign(self, values: FloatArray) -> IntArray:
+        matrix = np.asarray(values, dtype=np.float64)
+        if matrix.ndim != 2 or matrix.shape[1] != self.centroids.shape[1]:
+            raise ValueError("feature width does not match codebook")
+        distances = np.sum((matrix[:, None, :] - self.centroids[None, :, :]) ** 2, axis=2)
+        return np.argmin(distances, axis=1).astype(np.int64)
+
+
+def fit_kmeans(
+    values: FloatArray, clusters: int, *, seed: int = 0, iterations: int = 50
+) -> KMeansCodebook:
+    """Fit Lloyd k-means from distinct seeded observations."""
+    matrix = np.asarray(values, dtype=np.float64)
+    if matrix.ndim != 2 or not np.all(np.isfinite(matrix)):
+        raise ValueError("k-means values must be a finite matrix")
+    if not 1 <= clusters <= len(matrix) or iterations <= 0:
+        raise ValueError("invalid cluster count or iteration limit")
+    rng = np.random.default_rng(seed)
+    centroids = matrix[rng.choice(len(matrix), clusters, replace=False)].copy()
+    for _ in range(iterations):
+        assignments = KMeansCodebook(centroids).assign(matrix)
+        updated = centroids.copy()
+        for index in range(clusters):
+            members = matrix[assignments == index]
+            if len(members):
+                updated[index] = members.mean(axis=0)
+        if np.array_equal(updated, centroids):
+            break
+        centroids = updated
+    return KMeansCodebook(centroids)
