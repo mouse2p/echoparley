@@ -21,3 +21,10 @@ def test_full_rank_pca_roundtrip_and_sign_stability() -> None:
 def test_pca_rejects_invalid_dimension_count(dimensions: int) -> None:
     with pytest.raises(ValueError, match="dimensions"):
         units.fit_pca(np.ones((3, 2)), dimensions)
+
+
+def test_retained_variance_has_known_limits() -> None:
+    values = np.array([[0.0, 0.0], [1.0, 2.0], [2.0, 4.0]])
+    assert units.retained_variance(values, units.fit_pca(values, 1)) == 1.0
+    constant = np.ones((3, 2))
+    assert units.retained_variance(constant, units.fit_pca(constant, 1)) == 1.0
