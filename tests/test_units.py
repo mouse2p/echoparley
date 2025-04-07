@@ -43,3 +43,12 @@ def test_kmeans_is_seeded_and_finds_separated_groups() -> None:
 def test_kmeans_rejects_more_clusters_than_rows() -> None:
     with pytest.raises(ValueError, match="cluster count"):
         units.fit_kmeans(np.ones((2, 1)), 3)
+
+
+def test_unit_extractor_returns_one_id_per_frame() -> None:
+    features = np.array([[-2.0, 0.0], [-1.8, 0.1], [2.0, 0.0], [1.8, -0.1]])
+    extractor = units.fit_unit_extractor(features, 2, 2, seed=8)
+    identifiers = extractor.extract(features)
+    assert identifiers.shape == (4,)
+    assert set(identifiers.tolist()) == {0, 1}
+    np.testing.assert_array_equal(identifiers, extractor.extract(features.copy()))
