@@ -95,3 +95,23 @@ def fit_kmeans(
             break
         centroids = updated
     return KMeansCodebook(centroids)
+
+
+@dataclass(frozen=True, slots=True)
+class UnitExtractor:
+    """Composed PCA projection and semantic codebook."""
+
+    projection: PCAProjection
+    codebook: KMeansCodebook
+
+    def extract(self, features: FloatArray) -> IntArray:
+        return self.codebook.assign(self.projection.transform(features))
+
+
+def fit_unit_extractor(
+    features: FloatArray, dimensions: int, clusters: int, *, seed: int = 0
+) -> UnitExtractor:
+    """Fit both deterministic stages on the same synthetic feature matrix."""
+    projection = fit_pca(features, dimensions)
+    codebook = fit_kmeans(projection.transform(features), clusters, seed=seed)
+    return UnitExtractor(projection, codebook)
