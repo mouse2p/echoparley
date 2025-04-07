@@ -28,3 +28,18 @@ def test_retained_variance_has_known_limits() -> None:
     assert units.retained_variance(values, units.fit_pca(values, 1)) == 1.0
     constant = np.ones((3, 2))
     assert units.retained_variance(constant, units.fit_pca(constant, 1)) == 1.0
+
+
+def test_kmeans_is_seeded_and_finds_separated_groups() -> None:
+    values = np.array([[-2.1], [-2.0], [-1.9], [1.9], [2.0], [2.1]])
+    first = units.fit_kmeans(values, 2, seed=4)
+    second = units.fit_kmeans(values, 2, seed=4)
+    np.testing.assert_array_equal(first.centroids, second.centroids)
+    assert sorted(first.centroids[:, 0].tolist()) == [-2.0, 2.0]
+    labels = first.assign(np.array([[-2.0], [2.0]]))
+    assert labels[0] != labels[1]
+
+
+def test_kmeans_rejects_more_clusters_than_rows() -> None:
+    with pytest.raises(ValueError, match="cluster count"):
+        units.fit_kmeans(np.ones((2, 1)), 3)
