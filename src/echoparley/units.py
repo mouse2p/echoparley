@@ -134,6 +134,8 @@ def expand_units(identifiers: IntArray, durations: IntArray) -> IntArray:
     counts = np.asarray(durations, dtype=np.int64)
     if ids.ndim != 1 or counts.ndim != 1 or len(ids) != len(counts) or np.any(counts <= 0):
         raise ValueError("unit IDs and positive durations must have equal vector lengths")
+    if np.any(ids < 0):
+        raise ValueError("unit identifiers must be non-negative")
     return np.repeat(ids, counts).astype(np.int64)
 
 

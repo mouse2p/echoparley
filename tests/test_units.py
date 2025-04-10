@@ -83,3 +83,8 @@ def test_codebook_usage_known_distributions() -> None:
 def test_codebook_usage_rejects_out_of_range_ids() -> None:
     with pytest.raises(ValueError, match="outside"):
         units.codebook_usage(np.array([2]), 2)
+
+
+def test_unit_expansion_rejects_negative_identifiers() -> None:
+    with pytest.raises(ValueError, match="non-negative"):
+        units.expand_units(np.array([-1]), np.array([1]))
