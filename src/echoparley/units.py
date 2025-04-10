@@ -135,3 +135,23 @@ def expand_units(identifiers: IntArray, durations: IntArray) -> IntArray:
     if ids.ndim != 1 or counts.ndim != 1 or len(ids) != len(counts) or np.any(counts <= 0):
         raise ValueError("unit IDs and positive durations must have equal vector lengths")
     return np.repeat(ids, counts).astype(np.int64)
+
+
+@dataclass(frozen=True, slots=True)
+class UnitSpan:
+    """A semantic unit aligned to a half-open frame interval."""
+
+    identifier: int
+    start_frame: int
+    end_frame: int
+
+
+def align_unit_runs(identifiers: IntArray, durations: IntArray) -> tuple[UnitSpan, ...]:
+    """Map collapsed units to contiguous frame spans."""
+    expanded = expand_units(identifiers, durations)
+    ids, counts = collapse_units(expanded)
+    starts = np.concatenate(([0], np.cumsum(counts)[:-1]))
+    return tuple(
+        UnitSpan(int(identifier), int(start), int(start + count))
+        for identifier, start, count in zip(ids, starts, counts, strict=True)
+    )
