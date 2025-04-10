@@ -71,3 +71,15 @@ def test_unit_alignment_covers_frames_without_gaps() -> None:
     spans = units.align_unit_runs(np.array([2, 5]), np.array([3, 2]))
     assert spans == (units.UnitSpan(2, 0, 3), units.UnitSpan(5, 3, 5))
     assert spans[0].end_frame == spans[1].start_frame
+
+
+def test_codebook_usage_known_distributions() -> None:
+    balanced = units.codebook_usage(np.array([0, 0, 1, 1]), 4)
+    assert balanced == units.CodebookUsage(occupied=2, total=4, perplexity=2.0)
+    empty = units.codebook_usage(np.array([], dtype=np.int64), 3)
+    assert empty == units.CodebookUsage(occupied=0, total=3, perplexity=1.0)
+
+
+def test_codebook_usage_rejects_out_of_range_ids() -> None:
+    with pytest.raises(ValueError, match="outside"):
+        units.codebook_usage(np.array([2]), 2)
