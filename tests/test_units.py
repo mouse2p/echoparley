@@ -52,3 +52,16 @@ def test_unit_extractor_returns_one_id_per_frame() -> None:
     assert identifiers.shape == (4,)
     assert set(identifiers.tolist()) == {0, 1}
     np.testing.assert_array_equal(identifiers, extractor.extract(features.copy()))
+
+
+def test_unit_run_length_roundtrip() -> None:
+    original = np.array([3, 3, 3, 1, 1, 4], dtype=np.int64)
+    identifiers, durations = units.collapse_units(original)
+    assert identifiers.tolist() == [3, 1, 4]
+    assert durations.tolist() == [3, 2, 1]
+    np.testing.assert_array_equal(units.expand_units(identifiers, durations), original)
+
+
+def test_empty_unit_run_roundtrip() -> None:
+    identifiers, durations = units.collapse_units(np.array([], dtype=np.int64))
+    assert units.expand_units(identifiers, durations).size == 0
