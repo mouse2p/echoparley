@@ -115,3 +115,23 @@ def fit_unit_extractor(
     projection = fit_pca(features, dimensions)
     codebook = fit_kmeans(projection.transform(features), clusters, seed=seed)
     return UnitExtractor(projection, codebook)
+
+
+def collapse_units(identifiers: IntArray) -> tuple[IntArray, IntArray]:
+    """Run-length encode unit IDs into IDs and positive frame durations."""
+    values = np.asarray(identifiers, dtype=np.int64)
+    if values.ndim != 1 or np.any(values < 0):
+        raise ValueError("unit identifiers must be a non-negative vector")
+    if len(values) == 0:
+        return values.copy(), values.copy()
+    boundaries = np.flatnonzero(np.concatenate(([True], values[1:] != values[:-1], [True])))
+    return values[boundaries[:-1]], np.diff(boundaries).astype(np.int64)
+
+
+def expand_units(identifiers: IntArray, durations: IntArray) -> IntArray:
+    """Expand run-length encoded units to one ID per frame."""
+    ids = np.asarray(identifiers, dtype=np.int64)
+    counts = np.asarray(durations, dtype=np.int64)
+    if ids.ndim != 1 or counts.ndim != 1 or len(ids) != len(counts) or np.any(counts <= 0):
+        raise ValueError("unit IDs and positive durations must have equal vector lengths")
+    return np.repeat(ids, counts).astype(np.int64)
