@@ -155,3 +155,25 @@ def align_unit_runs(identifiers: IntArray, durations: IntArray) -> tuple[UnitSpa
         UnitSpan(int(identifier), int(start), int(start + count))
         for identifier, start, count in zip(ids, starts, counts, strict=True)
     )
+
+
+@dataclass(frozen=True, slots=True)
+class CodebookUsage:
+    """Observed occupancy and entropy perplexity for a fixed codebook."""
+
+    occupied: int
+    total: int
+    perplexity: float
+
+
+def codebook_usage(identifiers: IntArray, codebook_size: int) -> CodebookUsage:
+    """Measure unit usage without claiming semantic quality."""
+    values = np.asarray(identifiers, dtype=np.int64)
+    if codebook_size <= 0 or values.ndim != 1 or np.any((values < 0) | (values >= codebook_size)):
+        raise ValueError("unit identifiers fall outside the codebook")
+    counts = np.bincount(values, minlength=codebook_size)
+    probabilities = counts[counts > 0] / max(1, len(values))
+    entropy = -float(np.sum(probabilities * np.log(probabilities))) if len(values) else 0.0
+    return CodebookUsage(
+        int(np.count_nonzero(counts)), codebook_size, round(float(np.exp(entropy)), 6)
+    )
