@@ -65,3 +65,9 @@ def test_unit_run_length_roundtrip() -> None:
 def test_empty_unit_run_roundtrip() -> None:
     identifiers, durations = units.collapse_units(np.array([], dtype=np.int64))
     assert units.expand_units(identifiers, durations).size == 0
+
+
+def test_unit_alignment_covers_frames_without_gaps() -> None:
+    spans = units.align_unit_runs(np.array([2, 5]), np.array([3, 2]))
+    assert spans == (units.UnitSpan(2, 0, 3), units.UnitSpan(5, 3, 5))
+    assert spans[0].end_frame == spans[1].start_frame
