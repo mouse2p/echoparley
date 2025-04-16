@@ -51,3 +51,24 @@ def synthesize_formants(
     envelope[-ramp:] = np.linspace(1.0, 0.0, ramp, endpoint=False)
     signal *= envelope * profile.amplitude / max(1.0, np.max(np.abs(signal)))
     return AudioBuffer(signal, sample_rate)
+
+
+TURN_KINDS = frozenset({"turn", "backchannel", "interrupt", "hold"})
+
+
+@dataclass(frozen=True, slots=True)
+class TurnAnnotation:
+    """Ground-truth interval deliberately planted by a scenario template."""
+
+    speaker: str
+    start_ms: int
+    end_ms: int
+    text: str
+    kind: str = "turn"
+    topic: str | None = None
+
+    def __post_init__(self) -> None:
+        if not self.speaker or self.start_ms < 0 or self.end_ms <= self.start_ms:
+            raise ValueError("turn requires a speaker and a positive interval")
+        if self.kind not in TURN_KINDS:
+            raise ValueError(f"unknown turn kind: {self.kind}")
