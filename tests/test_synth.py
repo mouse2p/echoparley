@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import numpy as np
 import pytest
 
 from echoparley import synth
@@ -26,3 +27,20 @@ def test_speaker_profile_rejects_invalid_values(changes: dict[str, object], mess
     values.update(changes)
     with pytest.raises(ValueError, match=message):
         synth.SpeakerProfile(**values)
+
+
+def test_formant_synthesis_is_seeded_and_normalized() -> None:
+    profile = synth.SpeakerProfile("a", 120.0, (500.0, 1_500.0))
+    first = synth.synthesize_formants(profile, 0.05, 8_000, seed=9)
+    second = synth.synthesize_formants(profile, 0.05, 8_000, seed=9)
+    np.testing.assert_array_equal(first.samples, second.samples)
+    assert len(first.samples) == 400
+    assert np.max(np.abs(first.samples)) <= profile.amplitude
+    assert not np.array_equal(
+        first.samples, synth.synthesize_formants(profile, 0.05, 8_000, seed=10).samples
+    )
+
+
+def test_zero_duration_formant_signal_is_empty() -> None:
+    profile = synth.SpeakerProfile("a", 120.0, (500.0,))
+    assert synth.synthesize_formants(profile, 0.0, 8_000).samples.size == 0
