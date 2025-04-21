@@ -101,3 +101,19 @@ class DialogueScenario:
             for right, second in enumerate(self.turns[left + 1 :], left + 1)
             if first.speaker != second.speaker and second.start_ms < first.end_ms
         )
+
+
+def booking_scenario(seed: int = 0) -> DialogueScenario:
+    """Create a short synthetic booking exchange with a floor-holding pause."""
+    cities = ("Harbor", "Summit", "Riverside")
+    city = cities[seed % len(cities)]
+    return DialogueScenario(
+        "booking",
+        seed,
+        (
+            TurnAnnotation("a", 0, 700, f"book a ticket to {city}", topic="booking"),
+            TurnAnnotation("b", 900, 1_300, "which day", topic="booking"),
+            TurnAnnotation("a", 1_500, 1_800, "let me check", "hold", "booking"),
+            TurnAnnotation("a", 2_050, 2_450, "next monday", topic="booking"),
+        ),
+    )
