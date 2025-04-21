@@ -44,3 +44,17 @@ def test_formant_synthesis_is_seeded_and_normalized() -> None:
 def test_zero_duration_formant_signal_is_empty() -> None:
     profile = synth.SpeakerProfile("a", 120.0, (500.0,))
     assert synth.synthesize_formants(profile, 0.0, 8_000).samples.size == 0
+
+
+def test_turn_annotation_accepts_overlap_semantics() -> None:
+    annotation = synth.TurnAnnotation("b", 80, 120, "wait", "interrupt", "booking")
+    assert annotation.end_ms - annotation.start_ms == 40
+    assert annotation.kind in synth.TURN_KINDS
+
+
+@pytest.mark.parametrize(
+    "values", [("", 0, 1, "turn"), ("a", -1, 1, "turn"), ("a", 2, 2, "turn"), ("a", 0, 1, "noise")]
+)
+def test_turn_annotation_rejects_invalid_intervals(values: tuple[str, int, int, str]) -> None:
+    with pytest.raises(ValueError):
+        synth.TurnAnnotation(values[0], values[1], values[2], "text", values[3])
