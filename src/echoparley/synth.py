@@ -72,3 +72,32 @@ class TurnAnnotation:
             raise ValueError("turn requires a speaker and a positive interval")
         if self.kind not in TURN_KINDS:
             raise ValueError(f"unknown turn kind: {self.kind}")
+
+
+@dataclass(frozen=True, slots=True)
+class DialogueScenario:
+    """A reproducible two-party script with explicit planted ground truth."""
+
+    name: str
+    seed: int
+    turns: tuple[TurnAnnotation, ...]
+
+    def __post_init__(self) -> None:
+        if not self.name or self.seed < 0 or not self.turns:
+            raise ValueError("scenario requires a name, non-negative seed, and turns")
+        if len({turn.speaker for turn in self.turns}) > 2:
+            raise ValueError("synthetic dialogue supports at most two speakers")
+        if tuple(sorted(self.turns, key=lambda turn: (turn.start_ms, turn.end_ms))) != self.turns:
+            raise ValueError("scenario turns must be sorted by start time")
+
+    @property
+    def duration_ms(self) -> int:
+        return max(turn.end_ms for turn in self.turns)
+
+    def overlaps(self) -> tuple[tuple[int, int], ...]:
+        return tuple(
+            (left, right)
+            for left, first in enumerate(self.turns)
+            for right, second in enumerate(self.turns[left + 1 :], left + 1)
+            if first.speaker != second.speaker and second.start_ms < first.end_ms
+        )
