@@ -132,3 +132,17 @@ def question_scenario(seed: int = 0) -> DialogueScenario:
             TurnAnnotation("a", 1_720, 2_000, "thanks", topic=topic),
         ),
     )
+
+
+def barge_in_scenario(seed: int = 0) -> DialogueScenario:
+    """Create a deliberate interruption while the other speaker holds the floor."""
+    offset = seed % 40
+    return DialogueScenario(
+        "barge-in",
+        seed,
+        (
+            TurnAnnotation("a", 0, 1_200, "a deliberately long synthetic response", topic="stress"),
+            TurnAnnotation("b", 650 + offset, 950 + offset, "please stop", "interrupt", "stress"),
+            TurnAnnotation("a", 1_250, 1_500, "acknowledged", topic="stress"),
+        ),
+    )
