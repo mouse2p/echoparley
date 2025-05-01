@@ -58,3 +58,11 @@ def test_turn_annotation_accepts_overlap_semantics() -> None:
 def test_turn_annotation_rejects_invalid_intervals(values: tuple[str, int, int, str]) -> None:
     with pytest.raises(ValueError):
         synth.TurnAnnotation(values[0], values[1], values[2], "text", values[3])
+
+
+def test_booking_scenario_is_reproducible_and_sorted() -> None:
+    first = synth.booking_scenario(4)
+    assert first == synth.booking_scenario(4)
+    assert first.name == "booking" and first.duration_ms == 2_450
+    assert [turn.kind for turn in first.turns].count("hold") == 1
+    assert first.overlaps() == ()
