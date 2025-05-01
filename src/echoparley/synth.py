@@ -117,3 +117,18 @@ def booking_scenario(seed: int = 0) -> DialogueScenario:
             TurnAnnotation("a", 2_050, 2_450, "next monday", topic="booking"),
         ),
     )
+
+
+def question_scenario(seed: int = 0) -> DialogueScenario:
+    """Create a synthetic question-and-answer structure with planted topics."""
+    topics = ("music", "weather", "books")
+    topic = topics[seed % len(topics)]
+    return DialogueScenario(
+        "question",
+        seed,
+        (
+            TurnAnnotation("a", 0, 500, f"tell me about {topic}", topic=topic),
+            TurnAnnotation("b", 720, 1_500, f"a scripted answer about {topic}", topic=topic),
+            TurnAnnotation("a", 1_720, 2_000, "thanks", topic=topic),
+        ),
+    )
