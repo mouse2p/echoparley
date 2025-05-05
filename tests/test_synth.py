@@ -66,3 +66,14 @@ def test_booking_scenario_is_reproducible_and_sorted() -> None:
     assert first.name == "booking" and first.duration_ms == 2_450
     assert [turn.kind for turn in first.turns].count("hold") == 1
     assert first.overlaps() == ()
+
+
+def test_overlap_templates_have_planted_event_kinds() -> None:
+    barge = synth.barge_in_scenario(3)
+    backchannels = synth.backchannel_scenario(2)
+    question = synth.question_scenario(1)
+    assert len(barge.overlaps()) == 1
+    assert [turn.kind for turn in barge.turns].count("interrupt") == 1
+    assert len(backchannels.overlaps()) == 2
+    assert [turn.kind for turn in backchannels.turns].count("backchannel") == 2
+    assert {turn.topic for turn in question.turns} == {"weather"}
