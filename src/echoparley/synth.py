@@ -177,3 +177,30 @@ def make_scenario(name: str, seed: int = 0) -> DialogueScenario:
     except KeyError as error:
         choices = ", ".join(sorted(SCENARIO_FACTORIES))
         raise ValueError(f"unknown scenario {name!r}; choose from {choices}") from error
+
+
+def render_dialogue(
+    scenario: DialogueScenario,
+    profiles: dict[str, SpeakerProfile],
+    sample_rate: int = 8_000,
+) -> dict[str, AudioBuffer]:
+    """Render each speaker on an independent channel using planted intervals."""
+    missing = {turn.speaker for turn in scenario.turns} - profiles.keys()
+    if missing:
+        raise ValueError(f"missing speaker profiles: {', '.join(sorted(missing))}")
+    sample_count = round(scenario.duration_ms * sample_rate / 1000)
+    channels = {speaker: np.zeros(sample_count) for speaker in profiles}
+    for index, turn in enumerate(scenario.turns):
+        start = round(turn.start_ms * sample_rate / 1000)
+        end = round(turn.end_ms * sample_rate / 1000)
+        clip = synthesize_formants(
+            profiles[turn.speaker],
+            (end - start) / sample_rate,
+            sample_rate,
+            seed=scenario.seed + index,
+        )
+        channels[turn.speaker][start:end] += clip.samples
+    return {
+        speaker: AudioBuffer(np.clip(values, -1, 1), sample_rate)
+        for speaker, values in channels.items()
+    }
