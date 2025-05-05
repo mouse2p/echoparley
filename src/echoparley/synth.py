@@ -146,3 +146,17 @@ def barge_in_scenario(seed: int = 0) -> DialogueScenario:
             TurnAnnotation("a", 1_250, 1_500, "acknowledged", topic="stress"),
         ),
     )
+
+
+def backchannel_scenario(seed: int = 0) -> DialogueScenario:
+    """Create short listener acknowledgements inside a long planted turn."""
+    word = ("mhm", "okay")[seed % 2]
+    return DialogueScenario(
+        "backchannel",
+        seed,
+        (
+            TurnAnnotation("a", 0, 1_600, "a long scripted explanation", topic="explanation"),
+            TurnAnnotation("b", 400, 520, word, "backchannel", "explanation"),
+            TurnAnnotation("b", 1_050, 1_170, word, "backchannel", "explanation"),
+        ),
+    )
