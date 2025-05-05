@@ -77,3 +77,23 @@ def test_overlap_templates_have_planted_event_kinds() -> None:
     assert len(backchannels.overlaps()) == 2
     assert [turn.kind for turn in backchannels.turns].count("backchannel") == 2
     assert {turn.topic for turn in question.turns} == {"weather"}
+
+
+def test_rendered_dialogue_channels_are_seeded() -> None:
+    scenario = synth.make_scenario("barge-in", 7)
+    profiles = {
+        "a": synth.SpeakerProfile("a", 110.0, (500.0,)),
+        "b": synth.SpeakerProfile("b", 180.0, (700.0,)),
+    }
+    first = synth.render_dialogue(scenario, profiles, 2_000)
+    second = synth.render_dialogue(scenario, profiles, 2_000)
+    assert set(first) == {"a", "b"}
+    np.testing.assert_array_equal(first["a"].samples, second["a"].samples)
+    assert np.count_nonzero(first["a"].samples * first["b"].samples) > 0
+
+
+def test_renderer_requires_every_speaker_profile() -> None:
+    with pytest.raises(ValueError, match="missing speaker profiles: b"):
+        synth.render_dialogue(
+            synth.barge_in_scenario(), {"a": synth.SpeakerProfile("a", 100, (500,))}
+        )
