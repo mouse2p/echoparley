@@ -160,3 +160,20 @@ def backchannel_scenario(seed: int = 0) -> DialogueScenario:
             TurnAnnotation("b", 1_050, 1_170, word, "backchannel", "explanation"),
         ),
     )
+
+
+SCENARIO_FACTORIES = {
+    "backchannel": backchannel_scenario,
+    "barge-in": barge_in_scenario,
+    "booking": booking_scenario,
+    "question": question_scenario,
+}
+
+
+def make_scenario(name: str, seed: int = 0) -> DialogueScenario:
+    """Resolve a built-in scenario by its stable public name."""
+    try:
+        return SCENARIO_FACTORIES[name](seed)
+    except KeyError as error:
+        choices = ", ".join(sorted(SCENARIO_FACTORIES))
+        raise ValueError(f"unknown scenario {name!r}; choose from {choices}") from error
