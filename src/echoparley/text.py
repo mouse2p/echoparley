@@ -59,3 +59,14 @@ def train_bpe(corpus: list[str], merge_count: int, *, end_of_word: str = "</w>")
         merges.append(best)
         words = [_merge_pair(symbols, best) for symbols in words]
     return BPEModel(tuple(merges), end_of_word)
+
+
+def encode_subwords(model: BPEModel, value: str) -> tuple[str, ...]:
+    """Encode normalized words while keeping an explicit word boundary."""
+    encoded: list[str] = []
+    for word in normalize_text(value).split():
+        symbols = (*word, model.end_of_word)
+        for merge in model.merges:
+            symbols = _merge_pair(symbols, merge)
+        encoded.extend(symbols)
+    return tuple(encoded)
