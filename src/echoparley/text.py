@@ -70,3 +70,12 @@ def encode_subwords(model: BPEModel, value: str) -> tuple[str, ...]:
             symbols = _merge_pair(symbols, merge)
         encoded.extend(symbols)
     return tuple(encoded)
+
+
+def decode_subwords(model: BPEModel, tokens: tuple[str, ...]) -> str:
+    """Decode tokens, rejecting streams without complete word markers."""
+    text_value = "".join(tokens)
+    if text_value and not text_value.endswith(model.end_of_word):
+        raise ValueError("subword stream ends inside a word")
+    words = text_value.split(model.end_of_word)
+    return " ".join(words[:-1])
