@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from echoparley import text
 
 
@@ -27,3 +29,16 @@ def test_subword_encoding_applies_merges_in_training_order() -> None:
     model = text.BPEModel((("h", "i"), ("hi", "</w>")))
     assert text.encode_subwords(model, "Hi h") == ("hi</w>", "h", "</w>")
     assert text.encode_subwords(model, "   ") == ()
+
+
+def test_subword_roundtrip_matches_normalized_text() -> None:
+    model = text.train_bpe(["hello harbor", "hello hill"], 8)
+    original = "  HELLO  hill "
+    assert text.decode_subwords(
+        model, text.encode_subwords(model, original)
+    ) == text.normalize_text(original)
+
+
+def test_subword_decoder_rejects_partial_word() -> None:
+    with pytest.raises(ValueError, match="inside a word"):
+        text.decode_subwords(text.BPEModel(()), ("h", "i"))
