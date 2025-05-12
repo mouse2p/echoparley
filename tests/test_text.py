@@ -11,3 +11,13 @@ def test_text_normalization_is_idempotent() -> None:
     assert normalized == "hello world 港大"
     assert text.normalize_text(normalized) == normalized
     assert text.normalize_text("MiXeD", lowercase=False) == "MiXeD"
+
+
+def test_bpe_training_uses_lexical_tie_breaks() -> None:
+    model = text.train_bpe(["ab ac", "ab"], 3)
+    assert model.merges == (("a", "b"), ("ab", "</w>"), ("a", "c"))
+    assert text.train_bpe(["ab ac", "ab"], 3) == model
+
+
+def test_empty_bpe_corpus_has_no_merges() -> None:
+    assert text.train_bpe([], 4).merges == ()
