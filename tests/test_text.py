@@ -42,3 +42,16 @@ def test_subword_roundtrip_matches_normalized_text() -> None:
 def test_subword_decoder_rejects_partial_word() -> None:
     with pytest.raises(ValueError, match="inside a word"):
         text.decode_subwords(text.BPEModel(()), ("h", "i"))
+
+
+def test_vocabulary_reserves_turn_tokens_in_order() -> None:
+    tokens = ("<unk>", *text.TURN_TOKENS, "hello")
+    vocabulary = text.Vocabulary(tokens)
+    assert vocabulary.token_id("<interrupt>") == 4
+    assert vocabulary.token_id("missing") == 0
+    assert vocabulary.token(7) == "hello"
+
+
+def test_vocabulary_rejects_reserved_token_reordering() -> None:
+    with pytest.raises(ValueError, match="reserved-token"):
+        text.Vocabulary(("<unk>", "<turn_end>"))
