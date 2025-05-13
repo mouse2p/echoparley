@@ -114,3 +114,16 @@ class Vocabulary:
         if not 0 <= identifier < len(self.tokens):
             raise IndexError("token identifier outside vocabulary")
         return self.tokens[identifier]
+
+
+def build_vocabulary(model: BPEModel, corpus: list[str], speech_units: int) -> Vocabulary:
+    """Build deterministic reserved, text, then speech-unit namespaces."""
+    if speech_units < 0:
+        raise ValueError("speech unit count must be non-negative")
+    text_tokens = sorted({token for item in corpus for token in encode_subwords(model, item)})
+    reserved = ("<unk>", *TURN_TOKENS)
+    filtered = tuple(
+        token for token in text_tokens if token not in reserved and not token.startswith("<unit:")
+    )
+    unit_tokens = tuple(f"<unit:{index}>" for index in range(speech_units))
+    return Vocabulary((*reserved, *filtered, *unit_tokens))
