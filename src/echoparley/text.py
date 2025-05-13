@@ -79,3 +79,38 @@ def decode_subwords(model: BPEModel, tokens: tuple[str, ...]) -> str:
         raise ValueError("subword stream ends inside a word")
     words = text_value.split(model.end_of_word)
     return " ".join(words[:-1])
+
+
+TURN_TOKENS = (
+    "<turn_start>",
+    "<turn_end>",
+    "<backchannel>",
+    "<interrupt>",
+    "<hold_floor>",
+    "<silence>",
+)
+
+
+@dataclass(frozen=True, slots=True)
+class Vocabulary:
+    """Stable token-to-ID mapping with protected turn and unknown symbols."""
+
+    tokens: tuple[str, ...]
+
+    def __post_init__(self) -> None:
+        if len(set(self.tokens)) != len(self.tokens):
+            raise ValueError("vocabulary tokens must be unique")
+        required = ("<unk>", *TURN_TOKENS)
+        if self.tokens[: len(required)] != required:
+            raise ValueError("vocabulary reserved-token prefix is invalid")
+
+    def token_id(self, token: str) -> int:
+        try:
+            return self.tokens.index(token)
+        except ValueError:
+            return 0
+
+    def token(self, identifier: int) -> str:
+        if not 0 <= identifier < len(self.tokens):
+            raise IndexError("token identifier outside vocabulary")
+        return self.tokens[identifier]
