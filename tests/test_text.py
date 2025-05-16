@@ -63,3 +63,16 @@ def test_built_vocabulary_has_stable_namespaces() -> None:
     assert vocabulary.tokens[:7] == ("<unk>", *text.TURN_TOKENS)
     assert vocabulary.tokens[-3:] == ("<unit:0>", "<unit:1>", "<unit:2>")
     assert len(vocabulary.tokens) == len(set(vocabulary.tokens))
+
+
+def test_bpe_mapping_roundtrip_has_exact_schema() -> None:
+    model = text.BPEModel((("a", "b"), ("ab", "</w>")))
+    mapping = text.bpe_to_mapping(model)
+    assert mapping == {
+        "schema_version": "1.0",
+        "end_of_word": "</w>",
+        "merges": [["a", "b"], ["ab", "</w>"]],
+    }
+    assert text.bpe_from_mapping(mapping) == model
+    with pytest.raises(ValueError, match="unsupported"):
+        text.bpe_from_mapping({"schema_version": "2.0"})
