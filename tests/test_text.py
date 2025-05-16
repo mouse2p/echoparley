@@ -55,3 +55,11 @@ def test_vocabulary_reserves_turn_tokens_in_order() -> None:
 def test_vocabulary_rejects_reserved_token_reordering() -> None:
     with pytest.raises(ValueError, match="reserved-token"):
         text.Vocabulary(("<unk>", "<turn_end>"))
+
+
+def test_built_vocabulary_has_stable_namespaces() -> None:
+    model = text.train_bpe(["ba ab"], 1)
+    vocabulary = text.build_vocabulary(model, ["ba ab", "<turn_start>"], 3)
+    assert vocabulary.tokens[:7] == ("<unk>", *text.TURN_TOKENS)
+    assert vocabulary.tokens[-3:] == ("<unit:0>", "<unit:1>", "<unit:2>")
+    assert len(vocabulary.tokens) == len(set(vocabulary.tokens))
