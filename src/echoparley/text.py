@@ -127,3 +127,23 @@ def build_vocabulary(model: BPEModel, corpus: list[str], speech_units: int) -> V
     )
     unit_tokens = tuple(f"<unit:{index}>" for index in range(speech_units))
     return Vocabulary((*reserved, *filtered, *unit_tokens))
+
+
+def bpe_to_mapping(model: BPEModel) -> dict[str, object]:
+    """Serialize a BPE model under schema version 1.0."""
+    return {
+        "schema_version": "1.0",
+        "end_of_word": model.end_of_word,
+        "merges": [list(pair) for pair in model.merges],
+    }
+
+
+def bpe_from_mapping(value: dict[str, object]) -> BPEModel:
+    """Restore a schema-1.0 BPE model and reject drift."""
+    if (
+        value.keys() != {"schema_version", "end_of_word", "merges"}
+        or value["schema_version"] != "1.0"
+    ):
+        raise ValueError("unsupported BPE schema")
+    merges = tuple((str(pair[0]), str(pair[1])) for pair in value["merges"])  # type: ignore[index,union-attr]
+    return BPEModel(merges, str(value["end_of_word"]))
