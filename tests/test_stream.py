@@ -26,3 +26,18 @@ def test_timed_token_rejects_backwards_interval() -> None:
 def test_token_namespace_rejects_mismatches(kind: stream.TokenKind, value: str) -> None:
     with pytest.raises(ValueError, match="namespace"):
         stream.validate_token_namespace(stream.StreamToken(kind, value, "a", 0, 1))
+
+
+def test_stream_mapping_roundtrip_is_exact() -> None:
+    original = stream.UnifiedStream(
+        (stream.StreamToken(stream.TokenKind.UNIT, "<unit:2>", "a", 1, 2),), "strict-turn"
+    )
+    mapping = stream.stream_to_mapping(original)
+    assert mapping == {
+        "schema_version": "1.0",
+        "policy": "strict-turn",
+        "tokens": [
+            {"kind": "unit", "value": "<unit:2>", "speaker": "a", "start_ms": 1, "end_ms": 2}
+        ],
+    }
+    assert stream.stream_from_mapping(mapping) == original
