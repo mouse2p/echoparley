@@ -84,3 +84,16 @@ def stream_from_mapping(value: dict[str, object]) -> UnifiedStream:
     for token in tokens:
         validate_token_namespace(token)
     return UnifiedStream(tokens, str(value["policy"]), str(value["schema_version"]))
+
+
+def bound_turn(tokens: tuple[StreamToken, ...], speaker: str) -> tuple[StreamToken, ...]:
+    """Wrap content with zero-duration start and end controls."""
+    if not tokens or any(token.speaker != speaker for token in tokens):
+        raise ValueError("bounded turn requires nonempty single-speaker content")
+    start = min(token.start_ms for token in tokens)
+    end = max(token.end_ms for token in tokens)
+    return (
+        StreamToken(TokenKind.CONTROL, "<turn_start>", speaker, start, start),
+        *tokens,
+        StreamToken(TokenKind.CONTROL, "<turn_end>", speaker, end, end),
+    )
