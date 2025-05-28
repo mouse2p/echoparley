@@ -41,3 +41,10 @@ def test_stream_mapping_roundtrip_is_exact() -> None:
         ],
     }
     assert stream.stream_from_mapping(mapping) == original
+
+
+def test_bounded_turn_uses_content_extents() -> None:
+    content = (stream.StreamToken(stream.TokenKind.TEXT, "hello", "a", 20, 40),)
+    bounded = stream.bound_turn(content, "a")
+    assert [token.value for token in bounded] == ["<turn_start>", "hello", "<turn_end>"]
+    assert [(token.start_ms, token.end_ms) for token in bounded] == [(20, 20), (20, 40), (40, 40)]
