@@ -97,3 +97,15 @@ def bound_turn(tokens: tuple[StreamToken, ...], speaker: str) -> tuple[StreamTok
         *tokens,
         StreamToken(TokenKind.CONTROL, "<turn_end>", speaker, end, end),
     )
+
+
+def strict_turn_interleave(turns: tuple[tuple[StreamToken, ...], ...]) -> UnifiedStream:
+    """Order whole turns by their first timestamp without mixing content."""
+    ordered = sorted(
+        turns, key=lambda group: (group[0].start_ms, group[0].speaker) if group else (0, "")
+    )
+    flattened: list[StreamToken] = []
+    for group in ordered:
+        if group:
+            flattened.extend(bound_turn(group, group[0].speaker))
+    return UnifiedStream(tuple(flattened), "strict-turn")
