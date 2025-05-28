@@ -48,3 +48,17 @@ def test_bounded_turn_uses_content_extents() -> None:
     bounded = stream.bound_turn(content, "a")
     assert [token.value for token in bounded] == ["<turn_start>", "hello", "<turn_end>"]
     assert [(token.start_ms, token.end_ms) for token in bounded] == [(20, 20), (20, 40), (40, 40)]
+
+
+def test_strict_turn_interleave_keeps_overlaps_atomic() -> None:
+    late = (stream.StreamToken(stream.TokenKind.TEXT, "late", "b", 5, 9),)
+    early = (stream.StreamToken(stream.TokenKind.TEXT, "early", "a", 0, 10),)
+    result = stream.strict_turn_interleave((late, early))
+    assert [token.value for token in result.tokens] == [
+        "<turn_start>",
+        "early",
+        "<turn_end>",
+        "<turn_start>",
+        "late",
+        "<turn_end>",
+    ]
