@@ -109,3 +109,12 @@ def strict_turn_interleave(turns: tuple[tuple[StreamToken, ...], ...]) -> Unifie
         if group:
             flattened.extend(bound_turn(group, group[0].speaker))
     return UnifiedStream(tuple(flattened), "strict-turn")
+
+
+def time_aligned_interleave(tokens: tuple[StreamToken, ...]) -> UnifiedStream:
+    """Sort individual tokens using deterministic timestamp and namespace ties."""
+    priority = {TokenKind.CONTROL: 0, TokenKind.TEXT: 1, TokenKind.UNIT: 2}
+    ordered = sorted(
+        tokens, key=lambda token: (token.start_ms, priority[token.kind], token.speaker, token.value)
+    )
+    return UnifiedStream(tuple(ordered), "time-aligned")
