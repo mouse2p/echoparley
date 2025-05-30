@@ -62,3 +62,16 @@ def test_strict_turn_interleave_keeps_overlaps_atomic() -> None:
         "late",
         "<turn_end>",
     ]
+
+
+def test_time_aligned_interleave_has_stable_ties() -> None:
+    tokens = (
+        stream.StreamToken(stream.TokenKind.UNIT, "<unit:1>", "a", 0, 2),
+        stream.StreamToken(stream.TokenKind.TEXT, "hi", "b", 0, 3),
+        stream.StreamToken(stream.TokenKind.CONTROL, "<turn_start>", "a", 0, 0),
+    )
+    assert [token.kind for token in stream.time_aligned_interleave(tokens).tokens] == [
+        stream.TokenKind.CONTROL,
+        stream.TokenKind.TEXT,
+        stream.TokenKind.UNIT,
+    ]
