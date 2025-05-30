@@ -118,3 +118,20 @@ def time_aligned_interleave(tokens: tuple[StreamToken, ...]) -> UnifiedStream:
         tokens, key=lambda token: (token.start_ms, priority[token.kind], token.speaker, token.value)
     )
     return UnifiedStream(tuple(ordered), "time-aligned")
+
+
+def dense_interleave(
+    text_tokens: tuple[StreamToken, ...], unit_tokens: tuple[StreamToken, ...], cadence: int = 2
+) -> UnifiedStream:
+    """Emit a text token after each fixed number of units, then drain either side."""
+    if cadence <= 0:
+        raise ValueError("dense cadence must be positive")
+    output: list[StreamToken] = []
+    text_index = 0
+    for unit_index, token in enumerate(unit_tokens, 1):
+        output.append(token)
+        if unit_index % cadence == 0 and text_index < len(text_tokens):
+            output.append(text_tokens[text_index])
+            text_index += 1
+    output.extend(text_tokens[text_index:])
+    return UnifiedStream(tuple(output), f"dense-interleave/v1?cadence={cadence}")
