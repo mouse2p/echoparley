@@ -75,3 +75,23 @@ def test_time_aligned_interleave_has_stable_ties() -> None:
         stream.TokenKind.TEXT,
         stream.TokenKind.UNIT,
     ]
+
+
+def test_dense_interleave_respects_cadence_and_drains_text() -> None:
+    units = tuple(
+        stream.StreamToken(stream.TokenKind.UNIT, f"<unit:{index}>", "a", index, index + 1)
+        for index in range(3)
+    )
+    texts = tuple(
+        stream.StreamToken(stream.TokenKind.TEXT, word, "a", 0, 3) for word in ("one", "two")
+    )
+    result = stream.dense_interleave(texts, units, 2)
+    assert [token.value for token in result.tokens] == [
+        "<unit:0>",
+        "<unit:1>",
+        "one",
+        "<unit:2>",
+        "two",
+    ]
+    with pytest.raises(ValueError, match="cadence"):
+        stream.dense_interleave((), (), 0)
