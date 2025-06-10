@@ -95,3 +95,15 @@ def test_dense_interleave_respects_cadence_and_drains_text() -> None:
     ]
     with pytest.raises(ValueError, match="cadence"):
         stream.dense_interleave((), (), 0)
+
+
+def test_stream_split_preserves_each_namespace() -> None:
+    tokens = (
+        stream.StreamToken(stream.TokenKind.TEXT, "hi", "a", 0, 2),
+        stream.StreamToken(stream.TokenKind.UNIT, "<unit:0>", "a", 0, 1),
+        stream.StreamToken(stream.TokenKind.CONTROL, "<silence>", "a", 2, 3),
+    )
+    split = stream.split_stream(stream.time_aligned_interleave(tokens))
+    assert split[stream.TokenKind.TEXT] == (tokens[0],)
+    assert split[stream.TokenKind.UNIT] == (tokens[1],)
+    assert split[stream.TokenKind.CONTROL] == (tokens[2],)
