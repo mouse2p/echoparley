@@ -135,3 +135,10 @@ def dense_interleave(
             text_index += 1
     output.extend(text_tokens[text_index:])
     return UnifiedStream(tuple(output), f"dense-interleave/v1?cadence={cadence}")
+
+
+def split_stream(value: UnifiedStream) -> dict[TokenKind, tuple[StreamToken, ...]]:
+    """Recover each namespace without changing its within-kind order."""
+    return {
+        kind: tuple(token for token in value.tokens if token.kind is kind) for kind in TokenKind
+    }
