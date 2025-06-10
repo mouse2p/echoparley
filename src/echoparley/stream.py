@@ -34,6 +34,11 @@ class UnifiedStream:
     def __post_init__(self) -> None:
         if not self.policy or self.schema_version != "1.0":
             raise ValueError("unsupported stream policy or schema")
+        if self.policy == "time-aligned" and any(
+            right.start_ms < left.start_ms
+            for left, right in zip(self.tokens, self.tokens[1:], strict=False)
+        ):
+            raise ValueError("time-aligned stream tokens must be ordered")
 
 
 def validate_token_namespace(token: StreamToken) -> None:

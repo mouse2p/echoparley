@@ -107,3 +107,12 @@ def test_stream_split_preserves_each_namespace() -> None:
     assert split[stream.TokenKind.TEXT] == (tokens[0],)
     assert split[stream.TokenKind.UNIT] == (tokens[1],)
     assert split[stream.TokenKind.CONTROL] == (tokens[2],)
+
+
+def test_time_aligned_stream_rejects_timestamp_regression() -> None:
+    tokens = (
+        stream.StreamToken(stream.TokenKind.TEXT, "late", "a", 5, 6),
+        stream.StreamToken(stream.TokenKind.TEXT, "early", "a", 1, 2),
+    )
+    with pytest.raises(ValueError, match="must be ordered"):
+        stream.UnifiedStream(tokens, "time-aligned")
