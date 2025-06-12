@@ -34,3 +34,17 @@ class ConversationState:
         if self.turns and turn.start_ms < self.turns[-1].start_ms:
             raise ValueError("turn history must be chronological")
         return replace(self, turns=(*self.turns, turn))
+
+    def push_topic(self, topic: str) -> ConversationState:
+        if not topic.strip():
+            raise ValueError("topic cannot be blank")
+        return replace(self, topic_stack=(*self.topic_stack, topic.strip()))
+
+    def pop_topic(self) -> tuple[ConversationState, str]:
+        if not self.topic_stack:
+            raise IndexError("topic stack is empty")
+        return replace(self, topic_stack=self.topic_stack[:-1]), self.topic_stack[-1]
+
+    @property
+    def current_topic(self) -> str | None:
+        return self.topic_stack[-1] if self.topic_stack else None
