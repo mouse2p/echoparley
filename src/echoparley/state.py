@@ -48,3 +48,13 @@ class ConversationState:
     @property
     def current_topic(self) -> str | None:
         return self.topic_stack[-1] if self.topic_stack else None
+
+    def enqueue_act(self, act: str) -> ConversationState:
+        if not act.strip():
+            raise ValueError("dialogue act cannot be blank")
+        return replace(self, pending_acts=(*self.pending_acts, act.strip()))
+
+    def dequeue_act(self) -> tuple[ConversationState, str]:
+        if not self.pending_acts:
+            raise IndexError("pending-act queue is empty")
+        return replace(self, pending_acts=self.pending_acts[1:]), self.pending_acts[0]

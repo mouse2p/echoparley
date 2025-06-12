@@ -20,3 +20,9 @@ def test_topic_stack_is_last_in_first_out() -> None:
     assert topic == "date" and popped.current_topic == "booking"
     with pytest.raises(IndexError, match="empty"):
         state.ConversationState().pop_topic()
+
+
+def test_pending_acts_are_first_in_first_out() -> None:
+    queued = state.ConversationState().enqueue_act("answer").enqueue_act("confirm")
+    remaining, first = queued.dequeue_act()
+    assert first == "answer" and remaining.pending_acts == ("confirm",)
