@@ -14,3 +14,11 @@ def test_context_keeps_newest_complete_suffix() -> None:
 def test_oversized_newest_turn_evicts_everything() -> None:
     turns = (ConversationTurn("a", "large", 9, 0, 1),)
     assert select_context(turns, 8) == ContextWindow((), 0, 1)
+
+
+def test_response_reserve_reduces_history_budget() -> None:
+    from echoparley.context import select_context_with_reserve
+
+    turns = (ConversationTurn("a", "one", 4, 0, 1), ConversationTurn("b", "two", 4, 2, 3))
+    assert select_context_with_reserve(turns, 10, 2).turns == turns
+    assert select_context_with_reserve(turns, 10, 3).turns == (turns[-1],)

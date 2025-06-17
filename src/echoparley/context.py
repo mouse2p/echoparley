@@ -27,3 +27,12 @@ def select_context(turns: tuple[ConversationTurn, ...], budget: int) -> ContextW
         used += turn.token_count
     selected.reverse()
     return ContextWindow(tuple(selected), used, len(turns) - len(selected))
+
+
+def select_context_with_reserve(
+    turns: tuple[ConversationTurn, ...], total_budget: int, response_reserve: int
+) -> ContextWindow:
+    """Select history after reserving capacity for a future response."""
+    if response_reserve < 0 or response_reserve > total_budget:
+        raise ValueError("response reserve must fit the total budget")
+    return select_context(turns, total_budget - response_reserve)
