@@ -26,3 +26,14 @@ def test_pending_acts_are_first_in_first_out() -> None:
     queued = state.ConversationState().enqueue_act("answer").enqueue_act("confirm")
     remaining, first = queued.dequeue_act()
     assert first == "answer" and remaining.pending_acts == ("confirm",)
+
+
+def test_state_summary_uses_stable_fields() -> None:
+    turn = state.ConversationTurn("a", "two tokens", 2, 0, 1)
+    value = state.ConversationState().append(turn).push_topic("test").enqueue_act("reply")
+    assert value.summary() == {
+        "turn_count": 1,
+        "token_count": 2,
+        "current_topic": "test",
+        "pending_act_count": 1,
+    }
