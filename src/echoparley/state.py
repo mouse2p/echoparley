@@ -58,3 +58,12 @@ class ConversationState:
         if not self.pending_acts:
             raise IndexError("pending-act queue is empty")
         return replace(self, pending_acts=self.pending_acts[1:]), self.pending_acts[0]
+
+    def summary(self) -> dict[str, object]:
+        """Return compact deterministic state counts for run metadata."""
+        return {
+            "turn_count": len(self.turns),
+            "token_count": sum(turn.token_count for turn in self.turns),
+            "current_topic": self.current_topic,
+            "pending_act_count": len(self.pending_acts),
+        }
