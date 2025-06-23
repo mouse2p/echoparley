@@ -31,7 +31,10 @@ class ConversationState:
     pending_acts: tuple[str, ...] = ()
 
     def append(self, turn: ConversationTurn) -> ConversationState:
-        if self.turns and turn.start_ms < self.turns[-1].start_ms:
+        if self.turns and (turn.start_ms, turn.end_ms) < (
+            self.turns[-1].start_ms,
+            self.turns[-1].end_ms,
+        ):
             raise ValueError("turn history must be chronological")
         return replace(self, turns=(*self.turns, turn))
 

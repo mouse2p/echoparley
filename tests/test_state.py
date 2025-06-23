@@ -37,3 +37,9 @@ def test_state_summary_uses_stable_fields() -> None:
         "current_topic": "test",
         "pending_act_count": 1,
     }
+
+
+def test_equal_start_turns_order_by_end_time() -> None:
+    value = state.ConversationState().append(state.ConversationTurn("a", "long", 1, 0, 10))
+    with pytest.raises(ValueError, match="chronological"):
+        value.append(state.ConversationTurn("b", "short", 1, 0, 5))
