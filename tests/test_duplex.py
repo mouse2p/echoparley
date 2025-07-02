@@ -22,3 +22,14 @@ def test_duplex_engine_starts_cleanly_in_listen() -> None:
     engine = DuplexEngine()
     assert engine.state is DuplexState.LISTEN
     assert engine.transitions == [] and engine.partial_units == []
+
+
+def test_endpoint_patience_controls_floor_take() -> None:
+    from echoparley.duplex import DuplexEngine, DuplexState
+    from echoparley.events import EndpointEvent, EventKind
+
+    engine = DuplexEngine(TurnPolicy(patience_ms=50))
+    engine.handle(EndpointEvent(EventKind.SPEECH_END, 100))
+    assert engine.handle(EndpointEvent(EventKind.DECISION_TICK, 149)) is None
+    transition = engine.handle(EndpointEvent(EventKind.DECISION_TICK, 150))
+    assert transition is not None and engine.state is DuplexState.TAKE_FLOOR
