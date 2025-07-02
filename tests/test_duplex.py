@@ -14,3 +14,11 @@ def test_default_turn_policy_is_valid() -> None:
 def test_turn_policy_rejects_invalid_parameters(changes: dict[str, int | float]) -> None:
     with pytest.raises(ValueError):
         TurnPolicy(**changes)
+
+
+def test_duplex_engine_starts_cleanly_in_listen() -> None:
+    from echoparley.duplex import DuplexEngine, DuplexState
+
+    engine = DuplexEngine()
+    assert engine.state is DuplexState.LISTEN
+    assert engine.transitions == [] and engine.partial_units == []
