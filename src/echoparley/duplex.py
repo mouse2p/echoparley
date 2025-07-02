@@ -59,3 +59,20 @@ class DuplexEngine:
         self.state = current
         self.transitions.append(transition)
         return transition
+
+    def handle(self, event: EndpointEvent) -> Transition | None:
+        """Consume one event and perform at most one state transition."""
+        if self.transitions and event.time_ms < self.transitions[-1].time_ms:
+            raise ValueError("duplex events must be chronological")
+        if self.state is DuplexState.LISTEN:
+            if event.kind is EventKind.SPEECH_START:
+                self.remote_end_ms = None
+            elif event.kind is EventKind.SPEECH_END:
+                self.remote_end_ms = event.time_ms
+            elif (
+                event.kind is EventKind.DECISION_TICK
+                and self.remote_end_ms is not None
+                and event.time_ms - self.remote_end_ms >= self.policy.patience_ms
+            ):
+                return self._move(DuplexState.TAKE_FLOOR, event, "endpoint patience elapsed")
+        return None
