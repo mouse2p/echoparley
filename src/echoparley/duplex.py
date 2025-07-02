@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import StrEnum
+
+from echoparley.events import EndpointEvent, EventKind
 
 
 @dataclass(frozen=True, slots=True)
@@ -30,3 +32,30 @@ class DuplexState(StrEnum):
     YIELD = "YIELD"
     BARGE_IN = "BARGE_IN"
     RECOVER = "RECOVER"
+
+
+@dataclass(frozen=True, slots=True)
+class Transition:
+    previous: DuplexState
+    current: DuplexState
+    event: EventKind
+    time_ms: int
+    reason: str
+
+
+@dataclass(slots=True)
+class DuplexEngine:
+    """Deterministic state machine with explicit partial-generation state."""
+
+    policy: TurnPolicy = field(default_factory=TurnPolicy)
+    state: DuplexState = DuplexState.LISTEN
+    transitions: list[Transition] = field(default_factory=list)
+    partial_units: list[int] = field(default_factory=list)
+    remote_end_ms: int | None = None
+    speaking_since_ms: int | None = None
+
+    def _move(self, current: DuplexState, event: EndpointEvent, reason: str) -> Transition:
+        transition = Transition(self.state, current, event.kind, event.time_ms, reason)
+        self.state = current
+        self.transitions.append(transition)
+        return transition
