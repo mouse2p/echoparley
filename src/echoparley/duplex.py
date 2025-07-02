@@ -75,4 +75,7 @@ class DuplexEngine:
                 and event.time_ms - self.remote_end_ms >= self.policy.patience_ms
             ):
                 return self._move(DuplexState.TAKE_FLOOR, event, "endpoint patience elapsed")
+        elif self.state is DuplexState.TAKE_FLOOR and event.kind is EventKind.GENERATION_READY:
+            self.speaking_since_ms = event.time_ms
+            return self._move(DuplexState.SPEAK, event, "first unit ready")
         return None
