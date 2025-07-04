@@ -46,3 +46,18 @@ def test_generation_ready_cannot_skip_take_floor() -> None:
     engine.handle(EndpointEvent(EventKind.DECISION_TICK, 201))
     transition = engine.handle(EndpointEvent(EventKind.GENERATION_READY, 220))
     assert transition is not None and transition.previous is DuplexState.TAKE_FLOOR
+
+
+def test_speaking_engine_collects_partial_units() -> None:
+    from echoparley.duplex import DuplexEngine
+    from echoparley.events import EndpointEvent, EventKind
+
+    engine = DuplexEngine()
+    for event in (
+        EndpointEvent(EventKind.SPEECH_END, 0),
+        EndpointEvent(EventKind.DECISION_TICK, 200),
+        EndpointEvent(EventKind.GENERATION_READY, 210),
+        EndpointEvent(EventKind.UNIT_EMITTED, 220, 0.123),
+    ):
+        engine.handle(event)
+    assert engine.partial_units == [123]
