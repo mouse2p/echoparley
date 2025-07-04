@@ -33,3 +33,16 @@ def test_endpoint_patience_controls_floor_take() -> None:
     assert engine.handle(EndpointEvent(EventKind.DECISION_TICK, 149)) is None
     transition = engine.handle(EndpointEvent(EventKind.DECISION_TICK, 150))
     assert transition is not None and engine.state is DuplexState.TAKE_FLOOR
+
+
+def test_generation_ready_cannot_skip_take_floor() -> None:
+    from echoparley.duplex import DuplexEngine, DuplexState
+    from echoparley.events import EndpointEvent, EventKind
+
+    engine = DuplexEngine()
+    assert engine.handle(EndpointEvent(EventKind.GENERATION_READY, 0)) is None
+    assert engine.state is DuplexState.LISTEN
+    engine.handle(EndpointEvent(EventKind.SPEECH_END, 1))
+    engine.handle(EndpointEvent(EventKind.DECISION_TICK, 201))
+    transition = engine.handle(EndpointEvent(EventKind.GENERATION_READY, 220))
+    assert transition is not None and transition.previous is DuplexState.TAKE_FLOOR
