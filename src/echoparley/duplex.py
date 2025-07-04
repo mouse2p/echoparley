@@ -80,4 +80,17 @@ class DuplexEngine:
             return self._move(DuplexState.SPEAK, event, "first unit ready")
         elif self.state is DuplexState.SPEAK and event.kind is EventKind.UNIT_EMITTED:
             self.partial_units.append(round(event.posterior * 1000))
+        elif self.state is DuplexState.SPEAK and (
+            event.kind is EventKind.TURN_COMPLETE
+            or (
+                event.kind is EventKind.DECISION_TICK
+                and self.speaking_since_ms is not None
+                and event.time_ms - self.speaking_since_ms >= self.policy.max_turn_ms
+            )
+        ):
+            return self._move(DuplexState.YIELD, event, "turn complete or maximum reached")
+        elif self.state is DuplexState.YIELD and event.kind is EventKind.DECISION_TICK:
+            self.partial_units.clear()
+            self.speaking_since_ms = None
+            return self._move(DuplexState.LISTEN, event, "yield completed")
         return None
