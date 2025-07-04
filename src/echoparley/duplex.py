@@ -78,4 +78,6 @@ class DuplexEngine:
         elif self.state is DuplexState.TAKE_FLOOR and event.kind is EventKind.GENERATION_READY:
             self.speaking_since_ms = event.time_ms
             return self._move(DuplexState.SPEAK, event, "first unit ready")
+        elif self.state is DuplexState.SPEAK and event.kind is EventKind.UNIT_EMITTED:
+            self.partial_units.append(round(event.posterior * 1000))
         return None
