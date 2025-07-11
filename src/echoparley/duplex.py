@@ -99,4 +99,11 @@ class DuplexEngine:
             self.partial_units.clear()
             self.speaking_since_ms = None
             return self._move(DuplexState.LISTEN, event, "yield completed")
+        elif self.state is DuplexState.BARGE_IN and event.kind is EventKind.DECISION_TICK:
+            self.partial_units.clear()
+            self.speaking_since_ms = None
+            return self._move(DuplexState.RECOVER, event, "partial generation flushed")
+        elif self.state is DuplexState.RECOVER and event.kind is EventKind.RECOVERY_COMPLETE:
+            self.remote_end_ms = None
+            return self._move(DuplexState.LISTEN, event, "recovery completed")
         return None

@@ -97,3 +97,14 @@ def test_interrupt_threshold_controls_barge_in() -> None:
     assert engine.handle(EndpointEvent(EventKind.INTERRUPT, 220, 0.7)) is None
     engine.handle(EndpointEvent(EventKind.INTERRUPT, 221, 0.8))
     assert engine.state is DuplexState.BARGE_IN
+
+
+def test_barge_in_recovery_flushes_partials_and_listens() -> None:
+    from echoparley.duplex import DuplexEngine, DuplexState
+    from echoparley.events import EndpointEvent, EventKind
+
+    engine = DuplexEngine(state=DuplexState.BARGE_IN, partial_units=[1, 2])
+    engine.handle(EndpointEvent(EventKind.DECISION_TICK, 1))
+    assert engine.state is DuplexState.RECOVER and engine.partial_units == []
+    engine.handle(EndpointEvent(EventKind.RECOVERY_COMPLETE, 2))
+    assert engine.state is DuplexState.LISTEN
