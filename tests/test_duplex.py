@@ -61,3 +61,23 @@ def test_speaking_engine_collects_partial_units() -> None:
     ):
         engine.handle(event)
     assert engine.partial_units == [123]
+
+
+def test_turn_completion_yields_then_listens() -> None:
+    from echoparley.duplex import DuplexEngine, DuplexState
+    from echoparley.events import EndpointEvent, EventKind
+
+    engine = DuplexEngine()
+    for kind, time in (
+        (EventKind.SPEECH_END, 0),
+        (EventKind.DECISION_TICK, 200),
+        (EventKind.GENERATION_READY, 210),
+        (EventKind.TURN_COMPLETE, 300),
+        (EventKind.DECISION_TICK, 301),
+    ):
+        engine.handle(EndpointEvent(kind, time))
+    assert engine.state is DuplexState.LISTEN
+    assert [item.current for item in engine.transitions][-2:] == [
+        DuplexState.YIELD,
+        DuplexState.LISTEN,
+    ]
