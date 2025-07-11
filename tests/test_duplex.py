@@ -81,3 +81,19 @@ def test_turn_completion_yields_then_listens() -> None:
         DuplexState.YIELD,
         DuplexState.LISTEN,
     ]
+
+
+def test_interrupt_threshold_controls_barge_in() -> None:
+    from echoparley.duplex import DuplexEngine, DuplexState
+    from echoparley.events import EndpointEvent, EventKind
+
+    engine = DuplexEngine()
+    for event in (
+        EndpointEvent(EventKind.SPEECH_END, 0),
+        EndpointEvent(EventKind.DECISION_TICK, 200),
+        EndpointEvent(EventKind.GENERATION_READY, 210),
+    ):
+        engine.handle(event)
+    assert engine.handle(EndpointEvent(EventKind.INTERRUPT, 220, 0.7)) is None
+    engine.handle(EndpointEvent(EventKind.INTERRUPT, 221, 0.8))
+    assert engine.state is DuplexState.BARGE_IN
