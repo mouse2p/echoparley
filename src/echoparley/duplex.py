@@ -80,6 +80,12 @@ class DuplexEngine:
             return self._move(DuplexState.SPEAK, event, "first unit ready")
         elif self.state is DuplexState.SPEAK and event.kind is EventKind.UNIT_EMITTED:
             self.partial_units.append(round(event.posterior * 1000))
+        elif (
+            self.state is DuplexState.SPEAK
+            and event.kind in {EventKind.INTERRUPT, EventKind.SPEECH_START}
+            and event.posterior >= self.policy.interrupt_threshold
+        ):
+            return self._move(DuplexState.BARGE_IN, event, "confident remote interruption")
         elif self.state is DuplexState.SPEAK and (
             event.kind is EventKind.TURN_COMPLETE
             or (
