@@ -108,3 +108,21 @@ def test_barge_in_recovery_flushes_partials_and_listens() -> None:
     assert engine.state is DuplexState.RECOVER and engine.partial_units == []
     engine.handle(EndpointEvent(EventKind.RECOVERY_COMPLETE, 2))
     assert engine.state is DuplexState.LISTEN
+
+
+def test_random_event_sequences_never_jump_into_speak() -> None:
+    import random
+
+    from echoparley.duplex import DuplexEngine, DuplexState
+    from echoparley.events import EndpointEvent, EventKind
+
+    kinds = list(EventKind)
+    for seed in range(25):
+        rng = random.Random(seed)
+        engine = DuplexEngine()
+        for time in range(40):
+            previous = engine.state
+            engine.handle(EndpointEvent(rng.choice(kinds), time, rng.random()))
+            if engine.state is DuplexState.SPEAK:
+                assert previous is DuplexState.TAKE_FLOOR or previous is DuplexState.SPEAK
+            assert engine.state in set(DuplexState)
