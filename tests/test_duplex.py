@@ -126,3 +126,13 @@ def test_random_event_sequences_never_jump_into_speak() -> None:
             if engine.state is DuplexState.SPEAK:
                 assert previous is DuplexState.TAKE_FLOOR or previous is DuplexState.SPEAK
             assert engine.state in set(DuplexState)
+
+
+def test_engine_rejects_regression_without_prior_transition() -> None:
+    from echoparley.duplex import DuplexEngine
+    from echoparley.events import EndpointEvent, EventKind
+
+    engine = DuplexEngine()
+    engine.handle(EndpointEvent(EventKind.SPEECH_START, 10))
+    with pytest.raises(ValueError, match="chronological"):
+        engine.handle(EndpointEvent(EventKind.SPEECH_END, 9))

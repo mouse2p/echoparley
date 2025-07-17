@@ -53,6 +53,7 @@ class DuplexEngine:
     partial_units: list[int] = field(default_factory=list)
     remote_end_ms: int | None = None
     speaking_since_ms: int | None = None
+    last_event_ms: int = -1
 
     def _move(self, current: DuplexState, event: EndpointEvent, reason: str) -> Transition:
         transition = Transition(self.state, current, event.kind, event.time_ms, reason)
@@ -62,8 +63,9 @@ class DuplexEngine:
 
     def handle(self, event: EndpointEvent) -> Transition | None:
         """Consume one event and perform at most one state transition."""
-        if self.transitions and event.time_ms < self.transitions[-1].time_ms:
+        if event.time_ms < self.last_event_ms:
             raise ValueError("duplex events must be chronological")
+        self.last_event_ms = event.time_ms
         if self.state is DuplexState.LISTEN:
             if event.kind is EventKind.SPEECH_START:
                 self.remote_end_ms = None
