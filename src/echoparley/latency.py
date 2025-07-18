@@ -25,3 +25,19 @@ class TurnLatency:
     @property
     def first_unit_delay_ms(self) -> int:
         return self.first_unit_ms - self.perception_ms
+
+
+@dataclass(frozen=True, slots=True)
+class LatencyBudget:
+    decision_ms: int
+    first_unit_ms: int
+
+    def __post_init__(self) -> None:
+        if self.decision_ms < 0 or self.first_unit_ms < self.decision_ms:
+            raise ValueError("latency budget must be non-negative and ordered")
+
+    def assert_within(self, latency: TurnLatency) -> None:
+        if latency.decision_delay_ms > self.decision_ms:
+            raise AssertionError("decision latency budget exceeded")
+        if latency.first_unit_delay_ms > self.first_unit_ms:
+            raise AssertionError("first-unit latency budget exceeded")
