@@ -41,3 +41,20 @@ class LatencyBudget:
             raise AssertionError("decision latency budget exceeded")
         if latency.first_unit_delay_ms > self.first_unit_ms:
             raise AssertionError("first-unit latency budget exceeded")
+
+
+def latency_summary(values: tuple[TurnLatency, ...]) -> dict[str, float | int]:
+    """Return rounded min, median, p95, and maximum first-unit delays."""
+    if not values:
+        return {"count": 0, "min_ms": 0, "median_ms": 0.0, "p95_ms": 0.0, "max_ms": 0}
+    delays = sorted(item.first_unit_delay_ms for item in values)
+    midpoint = len(delays) // 2
+    median = delays[midpoint] if len(delays) % 2 else (delays[midpoint - 1] + delays[midpoint]) / 2
+    p95_index = max(0, (95 * len(delays) + 99) // 100 - 1)
+    return {
+        "count": len(delays),
+        "min_ms": delays[0],
+        "median_ms": round(float(median), 6),
+        "p95_ms": round(float(delays[p95_index]), 6),
+        "max_ms": delays[-1],
+    }
