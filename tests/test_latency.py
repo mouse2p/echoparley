@@ -22,3 +22,17 @@ def test_latency_budget_reports_failing_stage() -> None:
         budget.assert_within(TurnLatency(0, 51, 80))
     with pytest.raises(AssertionError, match="first-unit"):
         budget.assert_within(TurnLatency(0, 40, 101))
+
+
+def test_latency_summary_uses_nearest_rank_p95() -> None:
+    from echoparley.latency import latency_summary
+
+    values = tuple(TurnLatency(0, delay // 2, delay) for delay in (10, 20, 30, 40))
+    assert latency_summary(values) == {
+        "count": 4,
+        "min_ms": 10,
+        "median_ms": 25.0,
+        "p95_ms": 40.0,
+        "max_ms": 40,
+    }
+    assert latency_summary(())["count"] == 0
