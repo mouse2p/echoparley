@@ -4,9 +4,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from echoparley.duplex import DuplexState
+from echoparley.duplex import DuplexEngine, DuplexState, TurnPolicy
 from echoparley.events import EndpointEvent, EventKind
-from echoparley.latency import TurnLatency
+from echoparley.latency import LatencyBudget, TurnLatency
 from echoparley.synth import DialogueScenario
 
 
@@ -40,3 +40,44 @@ def planted_events(scenario: DialogueScenario) -> tuple[EndpointEvent, ...]:
         )
     ]
     return tuple(sorted(events, key=lambda item: (item.time_ms, item.kind.value, item.speaker)))
+
+
+def simulate_dialogue(
+    scenario: DialogueScenario,
+    policy: TurnPolicy | None = None,
+    budget: LatencyBudget | None = None,
+) -> SimulationResult:
+    """Replay planted endpoints into two deterministic turn engines."""
+    policy = policy or TurnPolicy()
+    budget = budget or LatencyBudget(300, 500)
+    engines = {
+        speaker: DuplexEngine(policy) for speaker in {turn.speaker for turn in scenario.turns}
+    }
+    trace: list[TraceEvent] = []
+    latencies: list[TurnLatency] = []
+    for turn in scenario.turns:
+        agent = next(speaker for speaker in sorted(engines) if speaker != turn.speaker)
+        engine = engines[agent]
+        engine.handle(EndpointEvent(EventKind.SPEECH_END, turn.end_ms, speaker=turn.speaker))
+        decision = turn.end_ms + policy.patience_ms
+        engine.handle(EndpointEvent(EventKind.DECISION_TICK, decision, speaker=agent))
+        first_unit = decision + 20
+        transition = engine.handle(
+            EndpointEvent(EventKind.GENERATION_READY, first_unit, speaker=agent)
+        )
+        latency = TurnLatency(turn.end_ms, decision, first_unit)
+        budget.assert_within(latency)
+        latencies.append(latency)
+        if transition:
+            trace.append(TraceEvent(first_unit, agent, engine.state, "response"))
+        engine.handle(
+            EndpointEvent(EventKind.TURN_COMPLETE, first_unit + policy.min_turn_ms, speaker=agent)
+        )
+        engine.handle(
+            EndpointEvent(
+                EventKind.DECISION_TICK, first_unit + policy.min_turn_ms + 1, speaker=agent
+            )
+        )
+    return SimulationResult(
+        tuple(trace), tuple(latencies), tuple(turn.end_ms for turn in scenario.turns)
+    )
