@@ -20,3 +20,16 @@ def test_planted_events_are_time_sorted() -> None:
     events = planted_events(barge_in_scenario(0))
     assert [event.time_ms for event in events] == sorted(event.time_ms for event in events)
     assert any(event.kind.value == "interrupt" for event in events)
+
+
+def test_simulation_is_deterministic_and_budgeted() -> None:
+    from echoparley.latency import LatencyBudget
+    from echoparley.simulator import simulate_dialogue
+    from echoparley.synth import booking_scenario
+
+    scenario = booking_scenario(2)
+    result = simulate_dialogue(scenario)
+    assert result == simulate_dialogue(scenario)
+    assert len(result.latencies) == len(scenario.turns)
+    with pytest.raises(AssertionError, match="decision"):
+        simulate_dialogue(scenario, budget=LatencyBudget(100, 500))
