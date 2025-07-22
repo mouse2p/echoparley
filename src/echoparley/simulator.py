@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from echoparley.artifacts import canonical_json
 from echoparley.duplex import DuplexEngine, DuplexState, TurnPolicy
 from echoparley.events import EndpointEvent, EventKind
 from echoparley.latency import LatencyBudget, TurnLatency
@@ -23,6 +24,18 @@ class SimulationResult:
     trace: tuple[TraceEvent, ...]
     latencies: tuple[TurnLatency, ...]
     planted_boundaries_ms: tuple[int, ...]
+
+    def trace_bytes(self) -> bytes:
+        payload = [
+            {
+                "agent": event.agent,
+                "source": event.source,
+                "state": event.state.value,
+                "time_ms": event.time_ms,
+            }
+            for event in self.trace
+        ]
+        return (canonical_json(payload) + "\n").encode()
 
 
 def planted_events(scenario: DialogueScenario) -> tuple[EndpointEvent, ...]:
