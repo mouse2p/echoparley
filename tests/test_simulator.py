@@ -33,3 +33,12 @@ def test_simulation_is_deterministic_and_budgeted() -> None:
     assert len(result.latencies) == len(scenario.turns)
     with pytest.raises(AssertionError, match="decision"):
         simulate_dialogue(scenario, budget=LatencyBudget(100, 500))
+
+
+def test_simulation_trace_bytes_are_replay_stable() -> None:
+    from echoparley.simulator import simulate_dialogue
+    from echoparley.synth import question_scenario
+
+    first = simulate_dialogue(question_scenario(4)).trace_bytes()
+    second = simulate_dialogue(question_scenario(4)).trace_bytes()
+    assert first == second and first.endswith(b"\n")
