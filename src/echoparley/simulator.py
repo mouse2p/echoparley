@@ -94,3 +94,16 @@ def simulate_dialogue(
     return SimulationResult(
         tuple(trace), tuple(latencies), tuple(turn.end_ms for turn in scenario.turns)
     )
+
+
+def boundary_agreement(result: SimulationResult, tolerance_ms: int = 250) -> float:
+    """Measure response transitions near planted turn endpoints."""
+    if tolerance_ms < 0:
+        raise ValueError("boundary tolerance must be non-negative")
+    if not result.planted_boundaries_ms:
+        return 1.0
+    matched = sum(
+        any(abs(event.time_ms - boundary) <= tolerance_ms for event in result.trace)
+        for boundary in result.planted_boundaries_ms
+    )
+    return round(matched / len(result.planted_boundaries_ms), 6)
