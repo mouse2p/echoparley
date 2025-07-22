@@ -42,3 +42,13 @@ def test_simulation_trace_bytes_are_replay_stable() -> None:
     first = simulate_dialogue(question_scenario(4)).trace_bytes()
     second = simulate_dialogue(question_scenario(4)).trace_bytes()
     assert first == second and first.endswith(b"\n")
+
+
+def test_boundary_agreement_has_known_extremes() -> None:
+    from echoparley.simulator import boundary_agreement
+
+    event = TraceEvent(100, "a", DuplexState.SPEAK, "response")
+    assert boundary_agreement(SimulationResult((event,), (), (100,)), 0) == 1.0
+    assert boundary_agreement(SimulationResult((event,), (), (500,)), 0) == 0.0
+    with pytest.raises(ValueError, match="non-negative"):
+        boundary_agreement(SimulationResult((), (), ()), -1)
