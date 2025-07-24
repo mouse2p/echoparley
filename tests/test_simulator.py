@@ -52,3 +52,13 @@ def test_boundary_agreement_has_known_extremes() -> None:
     assert boundary_agreement(SimulationResult((event,), (), (500,)), 0) == 0.0
     with pytest.raises(ValueError, match="non-negative"):
         boundary_agreement(SimulationResult((), (), ()), -1)
+
+
+def test_simulation_metadata_is_honestly_labeled() -> None:
+    from echoparley.simulator import simulate_dialogue, simulation_metadata
+    from echoparley.synth import backchannel_scenario
+
+    scenario = backchannel_scenario(3)
+    metadata = simulation_metadata(scenario, simulate_dialogue(scenario))
+    assert metadata["data_origin"] == "synthetic-planted"
+    assert metadata["seed"] == 3
