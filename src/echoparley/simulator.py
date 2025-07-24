@@ -107,3 +107,14 @@ def boundary_agreement(result: SimulationResult, tolerance_ms: int = 250) -> flo
         for boundary in result.planted_boundaries_ms
     )
     return round(matched / len(result.planted_boundaries_ms), 6)
+
+
+def simulation_metadata(scenario: DialogueScenario, result: SimulationResult) -> dict[str, object]:
+    """Describe a synthetic run without implying model-quality evaluation."""
+    return {
+        "data_origin": "synthetic-planted",
+        "scenario": scenario.name,
+        "seed": scenario.seed,
+        "turns": len(scenario.turns),
+        "trace_events": len(result.trace),
+    }
