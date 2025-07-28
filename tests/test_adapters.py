@@ -17,3 +17,12 @@ def test_scripted_adapter_preserves_action_order() -> None:
     assert adapter.act(()).tokens == ("two",)
     with pytest.raises(StopIteration, match="exhausted"):
         adapter.act(())
+
+
+def test_scripted_adapter_reset_replays_from_start() -> None:
+    from echoparley.adapters import ScriptedAdapter
+
+    adapter = ScriptedAdapter((AdapterAction(("again",)),))
+    adapter.act(())
+    adapter.reset()
+    assert adapter.act(()).tokens == ("again",)

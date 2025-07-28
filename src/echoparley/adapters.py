@@ -44,3 +44,8 @@ class ScriptedAdapter:
         action = self.actions[self.cursor]
         self.cursor += 1
         return action
+
+    def reset(self) -> None:
+        """Rewind actions and clear observations for a fresh replay."""
+        self.cursor = 0
+        self.observations = ()
