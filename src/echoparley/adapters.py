@@ -49,3 +49,28 @@ class ScriptedAdapter:
         """Rewind actions and clear observations for a fresh replay."""
         self.cursor = 0
         self.observations = ()
+
+
+@dataclass(slots=True)
+class ReplayAdapter:
+    """Replay validated action mappings without generating new content."""
+
+    records: tuple[dict[str, object], ...]
+    cursor: int = 0
+
+    def observe(self, value: UnifiedStream) -> None:
+        del value
+
+    def act(self, events: tuple[EndpointEvent, ...]) -> AdapterAction:
+        del events
+        if self.cursor >= len(self.records):
+            raise StopIteration("replay adapter exhausted")
+        record = self.records[self.cursor]
+        self.cursor += 1
+        if record.keys() != {"tokens", "delay_ms", "finished"}:
+            raise ValueError("replay action fields do not match schema")
+        return AdapterAction(
+            tuple(str(token) for token in record["tokens"]),
+            int(record["delay_ms"]),
+            bool(record["finished"]),
+        )  # type: ignore[union-attr]
