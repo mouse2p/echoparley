@@ -24,3 +24,23 @@ class DialogueAdapter(Protocol):
     def observe(self, value: UnifiedStream) -> None: ...
 
     def act(self, events: tuple[EndpointEvent, ...]) -> AdapterAction: ...
+
+
+@dataclass(slots=True)
+class ScriptedAdapter:
+    """Return declared actions in order for deterministic offline tests."""
+
+    actions: tuple[AdapterAction, ...]
+    cursor: int = 0
+    observations: tuple[UnifiedStream, ...] = ()
+
+    def observe(self, value: UnifiedStream) -> None:
+        self.observations = (*self.observations, value)
+
+    def act(self, events: tuple[EndpointEvent, ...]) -> AdapterAction:
+        del events
+        if self.cursor >= len(self.actions):
+            raise StopIteration("scripted adapter exhausted")
+        action = self.actions[self.cursor]
+        self.cursor += 1
+        return action
