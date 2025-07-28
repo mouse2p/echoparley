@@ -26,3 +26,12 @@ def test_scripted_adapter_reset_replays_from_start() -> None:
     adapter.act(())
     adapter.reset()
     assert adapter.act(()).tokens == ("again",)
+
+
+def test_replay_adapter_validates_record_shape() -> None:
+    from echoparley.adapters import ReplayAdapter
+
+    valid = ReplayAdapter(({"tokens": ["ok"], "delay_ms": 2, "finished": True},))
+    assert valid.act(()) == AdapterAction(("ok",), 2, True)
+    with pytest.raises(ValueError, match="fields"):
+        ReplayAdapter(({"tokens": []},)).act(())
