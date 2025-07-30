@@ -43,3 +43,25 @@ class ScriptedCascade:
     def __post_init__(self) -> None:
         if any(delay < 0 for delay in self.stage_delays_ms):
             raise ValueError("cascade stage delays must be non-negative")
+
+
+def compare_paths(
+    cascade: CascadeResult, direct_delay_ms: int, direct_units: tuple[int, ...]
+) -> dict[str, int | str]:
+    """Compare measured synthetic path latency and unit counts."""
+    if direct_delay_ms < 0:
+        raise ValueError("direct delay must be non-negative")
+    winner = (
+        "direct"
+        if direct_delay_ms < cascade.total_delay_ms
+        else "cascade"
+        if cascade.total_delay_ms < direct_delay_ms
+        else "tie"
+    )
+    return {
+        "cascade_ms": cascade.total_delay_ms,
+        "direct_ms": direct_delay_ms,
+        "latency_winner": winner,
+        "cascade_units": len(cascade.units),
+        "direct_units": len(direct_units),
+    }
