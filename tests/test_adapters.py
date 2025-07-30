@@ -35,3 +35,11 @@ def test_replay_adapter_validates_record_shape() -> None:
     assert valid.act(()) == AdapterAction(("ok",), 2, True)
     with pytest.raises(ValueError, match="fields"):
         ReplayAdapter(({"tokens": []},)).act(())
+
+
+def test_loopback_adapter_rejects_remote_urls() -> None:
+    from echoparley.adapters import LoopbackHTTPAdapter
+
+    with pytest.raises(ValueError, match="local mock"):
+        LoopbackHTTPAdapter("https://example.invalid/api")
+    assert LoopbackHTTPAdapter("http://127.0.0.1:8080/").observed_tokens == 0
