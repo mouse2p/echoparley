@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import json
+import urllib.request
 from dataclasses import dataclass
 from typing import Protocol
 
@@ -74,3 +76,34 @@ class ReplayAdapter:
             int(record["delay_ms"]),
             bool(record["finished"]),
         )  # type: ignore[union-attr]
+
+
+@dataclass(slots=True)
+class LoopbackHTTPAdapter:
+    """HTTP adapter restricted to an explicit local mock endpoint."""
+
+    url: str
+    timeout_seconds: float = 1.0
+    observed_tokens: int = 0
+
+    def __post_init__(self) -> None:
+        if not (
+            self.url.startswith("http://127.0.0.1:") or self.url.startswith("http://localhost:")
+        ):
+            raise ValueError("loopback adapter only permits local mock HTTP endpoints")
+
+    def observe(self, value: UnifiedStream) -> None:
+        self.observed_tokens += len(value.tokens)
+
+    def act(self, events: tuple[EndpointEvent, ...]) -> AdapterAction:
+        payload = json.dumps(
+            {"event_count": len(events), "observed_tokens": self.observed_tokens}
+        ).encode()
+        request = urllib.request.Request(self.url, payload, {"Content-Type": "application/json"})
+        with urllib.request.urlopen(request, timeout=self.timeout_seconds) as response:
+            result = json.loads(response.read())
+        return AdapterAction(
+            tuple(result["tokens"]),
+            int(result.get("delay_ms", 0)),
+            bool(result.get("finished", True)),
+        )
