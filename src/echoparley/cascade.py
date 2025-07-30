@@ -39,3 +39,7 @@ class ScriptedCascade:
             tuple(ord(character) % 32 for character in encoded),
             self.stage_delays_ms,
         )
+
+    def __post_init__(self) -> None:
+        if any(delay < 0 for delay in self.stage_delays_ms):
+            raise ValueError("cascade stage delays must be non-negative")
