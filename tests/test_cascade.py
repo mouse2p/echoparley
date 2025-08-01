@@ -22,3 +22,12 @@ def test_path_comparison_uses_measured_delays() -> None:
     comparison = compare_paths(result, 100, (1, 2))
     assert comparison["latency_winner"] == "direct"
     assert comparison["cascade_ms"] == result.total_delay_ms
+
+
+def test_cascade_adapter_returns_unit_tokens() -> None:
+    from echoparley.cascade import CascadeAdapter
+
+    adapter = CascadeAdapter(ScriptedCascade(str, str, lambda _: "ab"))
+    action = adapter.act(())
+    assert action.tokens == ("<unit:1>", "<unit:2>")
+    assert action.delay_ms == 230
