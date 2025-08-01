@@ -74,3 +74,13 @@ def test_loopback_adapter_calls_only_local_mock() -> None:
         thread.join(timeout=2)
         server.server_close()
     assert action == AdapterAction(("0",), 3, True)
+
+
+def test_adapter_capabilities_distinguish_loopback() -> None:
+    from echoparley.adapters import ScriptedAdapter, adapter_capabilities
+
+    assert adapter_capabilities(ScriptedAdapter(())) == {
+        "adapter_type": "ScriptedAdapter",
+        "offline": True,
+        "protocol": "observe-act/v1",
+    }

@@ -107,3 +107,12 @@ class LoopbackHTTPAdapter:
             int(result.get("delay_ms", 0)),
             bool(result.get("finished", True)),
         )
+
+
+def adapter_capabilities(adapter: DialogueAdapter) -> dict[str, object]:
+    """Expose stable capability metadata without invoking the adapter."""
+    return {
+        "adapter_type": type(adapter).__name__,
+        "offline": not isinstance(adapter, LoopbackHTTPAdapter),
+        "protocol": "observe-act/v1",
+    }
