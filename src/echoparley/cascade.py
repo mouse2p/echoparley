@@ -5,6 +5,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Protocol
 
+from echoparley.adapters import AdapterAction
+from echoparley.events import EndpointEvent
+from echoparley.stream import UnifiedStream
+
 
 class TextStage(Protocol):
     def __call__(self, value: str) -> str: ...
@@ -65,3 +69,19 @@ def compare_paths(
         "cascade_units": len(cascade.units),
         "direct_units": len(direct_units),
     }
+
+
+@dataclass(slots=True)
+class CascadeAdapter:
+    cascade: ScriptedCascade
+    latest_label: str = "silence"
+
+    def observe(self, value: UnifiedStream) -> None:
+        self.latest_label = " ".join(token.value for token in value.tokens)
+
+    def act(self, events: tuple[EndpointEvent, ...]) -> AdapterAction:
+        del events
+        result = self.cascade.run(self.latest_label)
+        return AdapterAction(
+            tuple(f"<unit:{unit}>" for unit in result.units), result.total_delay_ms
+        )
