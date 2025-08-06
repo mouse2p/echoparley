@@ -21,3 +21,12 @@ def test_recorder_assigns_sequences_and_closes() -> None:
     assert len(recorder.close()) == 2
     with pytest.raises(RuntimeError, match="closed"):
         recorder.append(3, "late")
+
+
+def test_session_serialization_is_byte_stable() -> None:
+    from echoparley.session import decode_session, encode_session
+
+    events = (SessionEvent(0, 4, "unit", {"id": 3}),)
+    encoded = encode_session(events)
+    assert decode_session(encoded) == events
+    assert encode_session(decode_session(encoded)) == encoded
