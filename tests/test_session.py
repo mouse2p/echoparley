@@ -41,3 +41,13 @@ def test_session_replayer_supports_exact_seek() -> None:
     assert replay.next() == events[1]
     with pytest.raises(StopIteration, match="exhausted"):
         replay.next()
+
+
+def test_session_diff_reports_changes_and_missing_tails() -> None:
+    from echoparley.session import diff_sessions
+
+    left = (SessionEvent(0, 0, "a", {}), SessionEvent(1, 1, "b", {}))
+    right = (SessionEvent(0, 0, "changed", {}),)
+    differences = diff_sessions(left, right)
+    assert [item.sequence for item in differences] == [0, 1]
+    assert differences[1].right is None
