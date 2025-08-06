@@ -75,3 +75,21 @@ def decode_session(data: bytes) -> tuple[SessionEvent, ...]:
     ):
         raise ValueError("session requires contiguous session-event sequences")
     return events
+
+
+@dataclass(slots=True)
+class SessionReplayer:
+    events: tuple[SessionEvent, ...]
+    cursor: int = 0
+
+    def next(self) -> SessionEvent:
+        if self.cursor >= len(self.events):
+            raise StopIteration("session replay exhausted")
+        event = self.events[self.cursor]
+        self.cursor += 1
+        return event
+
+    def seek(self, sequence: int) -> None:
+        if not 0 <= sequence <= len(self.events):
+            raise IndexError("replay sequence outside session")
+        self.cursor = sequence
