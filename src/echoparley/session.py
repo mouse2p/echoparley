@@ -5,6 +5,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
+from echoparley.artifacts import ArtifactEnvelope, decode_jsonl, encode_jsonl
+
 
 @dataclass(frozen=True, slots=True)
 class SessionEvent:
@@ -43,3 +45,33 @@ class SessionRecorder:
     def close(self) -> tuple[SessionEvent, ...]:
         self.closed = True
         return tuple(self.events)
+
+
+def encode_session(events: tuple[SessionEvent, ...]) -> bytes:
+    envelopes = [
+        ArtifactEnvelope.create(
+            "session-event",
+            {
+                "sequence": event.sequence,
+                "time_ms": event.time_ms,
+                "kind": event.kind,
+                "payload": event.payload,
+            },
+        )
+        for event in events
+    ]
+    return encode_jsonl(envelopes)
+
+
+def decode_session(data: bytes) -> tuple[SessionEvent, ...]:
+    envelopes = decode_jsonl(data)
+    events = tuple(
+        SessionEvent(**envelope.payload)
+        for envelope in envelopes
+        if envelope.kind == "session-event"
+    )
+    if len(events) != len(envelopes) or any(
+        event.sequence != index for index, event in enumerate(events)
+    ):
+        raise ValueError("session requires contiguous session-event sequences")
+    return events
