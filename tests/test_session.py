@@ -30,3 +30,14 @@ def test_session_serialization_is_byte_stable() -> None:
     encoded = encode_session(events)
     assert decode_session(encoded) == events
     assert encode_session(decode_session(encoded)) == encoded
+
+
+def test_session_replayer_supports_exact_seek() -> None:
+    from echoparley.session import SessionReplayer
+
+    events = (SessionEvent(0, 0, "a", {}), SessionEvent(1, 1, "b", {}))
+    replay = SessionReplayer(events)
+    replay.seek(1)
+    assert replay.next() == events[1]
+    with pytest.raises(StopIteration, match="exhausted"):
+        replay.next()
