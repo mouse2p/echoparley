@@ -93,3 +93,23 @@ class SessionReplayer:
         if not 0 <= sequence <= len(self.events):
             raise IndexError("replay sequence outside session")
         self.cursor = sequence
+
+
+@dataclass(frozen=True, slots=True)
+class SessionDifference:
+    sequence: int
+    left: SessionEvent | None
+    right: SessionEvent | None
+
+
+def diff_sessions(
+    left: tuple[SessionEvent, ...], right: tuple[SessionEvent, ...]
+) -> tuple[SessionDifference, ...]:
+    """Return event-exact differences including missing tails."""
+    differences: list[SessionDifference] = []
+    for index in range(max(len(left), len(right))):
+        left_event = left[index] if index < len(left) else None
+        right_event = right[index] if index < len(right) else None
+        if left_event != right_event:
+            differences.append(SessionDifference(index, left_event, right_event))
+    return tuple(differences)
