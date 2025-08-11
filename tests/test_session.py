@@ -51,3 +51,11 @@ def test_session_diff_reports_changes_and_missing_tails() -> None:
     differences = diff_sessions(left, right)
     assert [item.sequence for item in differences] == [0, 1]
     assert differences[1].right is None
+
+
+def test_session_digest_changes_with_payload() -> None:
+    from echoparley.session import session_digest
+
+    first = (SessionEvent(0, 0, "unit", {"id": 1}),)
+    second = (SessionEvent(0, 0, "unit", {"id": 2}),)
+    assert session_digest(first) != session_digest(second)

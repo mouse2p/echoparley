@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from echoparley.artifacts import ArtifactEnvelope, decode_jsonl, encode_jsonl
+from echoparley.artifacts import ArtifactEnvelope, bytes_checksum, decode_jsonl, encode_jsonl
 
 
 @dataclass(frozen=True, slots=True)
@@ -75,6 +75,11 @@ def decode_session(data: bytes) -> tuple[SessionEvent, ...]:
     ):
         raise ValueError("session requires contiguous session-event sequences")
     return events
+
+
+def session_digest(events: tuple[SessionEvent, ...]) -> str:
+    """Hash the exact canonical replay bytes."""
+    return bytes_checksum(encode_session(events))
 
 
 @dataclass(slots=True)
