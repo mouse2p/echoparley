@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import time
+from collections.abc import Callable
 from dataclasses import dataclass
 
 
@@ -23,3 +25,26 @@ class CancellationToken:
     def cancel(self, reason: str = "cancelled") -> None:
         self.cancelled = True
         self.reason = reason
+
+
+def run_ticks(
+    count: int,
+    callback: Callable[[int], None],
+    config: TickConfig | None = None,
+    cancellation: CancellationToken | None = None,
+) -> tuple[int, ...]:
+    """Run ticks and return executed logical times, retaining partial progress."""
+    config = config or TickConfig()
+    if count < 0:
+        raise ValueError("tick count must be non-negative")
+    cancellation = cancellation or CancellationToken()
+    executed: list[int] = []
+    for index in range(count):
+        if cancellation.cancelled:
+            break
+        logical_time = index * config.interval_ms
+        callback(logical_time)
+        executed.append(logical_time)
+        if not config.accelerated:
+            time.sleep(config.interval_ms / 1000)
+    return tuple(executed)
