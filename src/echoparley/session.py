@@ -48,6 +48,8 @@ class SessionRecorder:
 
 
 def encode_session(events: tuple[SessionEvent, ...]) -> bytes:
+    if any(event.sequence != index for index, event in enumerate(events)):
+        raise ValueError("session sequences must be contiguous before encoding")
     envelopes = [
         ArtifactEnvelope.create(
             "session-event",

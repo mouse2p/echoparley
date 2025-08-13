@@ -59,3 +59,10 @@ def test_session_digest_changes_with_payload() -> None:
     first = (SessionEvent(0, 0, "unit", {"id": 1}),)
     second = (SessionEvent(0, 0, "unit", {"id": 2}),)
     assert session_digest(first) != session_digest(second)
+
+
+def test_session_encoder_rejects_sequence_gaps() -> None:
+    from echoparley.session import encode_session
+
+    with pytest.raises(ValueError, match="contiguous"):
+        encode_session((SessionEvent(1, 0, "gap", {}),))
