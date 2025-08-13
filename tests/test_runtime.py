@@ -30,3 +30,10 @@ def test_tick_loop_stops_after_callback_cancellation() -> None:
 
     assert run_ticks(10, callback, cancellation=token) == (0, 20)
     assert observed == [0, 20]
+
+
+def test_recorded_ticks_have_contiguous_sequences() -> None:
+    from echoparley.runtime import TickConfig, record_ticks
+
+    events = record_ticks(3, TickConfig(5))
+    assert [(event.sequence, event.time_ms) for event in events] == [(0, 0), (1, 5), (2, 10)]

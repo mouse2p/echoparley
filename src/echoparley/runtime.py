@@ -48,3 +48,13 @@ def run_ticks(
         if not config.accelerated:
             time.sleep(config.interval_ms / 1000)
     return tuple(executed)
+
+
+def record_ticks(count: int, config: TickConfig | None = None) -> tuple[object, ...]:
+    """Run accelerated ticks into a closed session event tuple."""
+    from echoparley.session import SessionRecorder
+
+    config = config or TickConfig()
+    recorder = SessionRecorder()
+    run_ticks(count, lambda time_ms: recorder.append(time_ms, "tick"), config)
+    return recorder.close()
