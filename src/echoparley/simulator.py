@@ -71,14 +71,15 @@ def simulate_dialogue(
     for turn in scenario.turns:
         agent = next(speaker for speaker in sorted(engines) if speaker != turn.speaker)
         engine = engines[agent]
-        engine.handle(EndpointEvent(EventKind.SPEECH_END, turn.end_ms, speaker=turn.speaker))
-        decision = turn.end_ms + policy.patience_ms
+        perception = max(turn.end_ms, engine.last_event_ms)
+        engine.handle(EndpointEvent(EventKind.SPEECH_END, perception, speaker=turn.speaker))
+        decision = perception + policy.patience_ms
         engine.handle(EndpointEvent(EventKind.DECISION_TICK, decision, speaker=agent))
         first_unit = decision + 20
         transition = engine.handle(
             EndpointEvent(EventKind.GENERATION_READY, first_unit, speaker=agent)
         )
-        latency = TurnLatency(turn.end_ms, decision, first_unit)
+        latency = TurnLatency(perception, decision, first_unit)
         budget.assert_within(latency)
         latencies.append(latency)
         if transition:
