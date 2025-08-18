@@ -1,0 +1,14 @@
+name: Bug report
+description: Report a reproducible mechanics defect
+body:
+  - type: textarea
+    attributes:
+      label: Reproduction
+      description: Include seed, synthetic scenario, config, and command.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true

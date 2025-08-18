@@ -1,0 +1,19 @@
+name: Release artifacts
+on:
+  release:
+    types: [published]
+jobs:
+  wheel:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install build hatchling
+      - run: python -m build
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
