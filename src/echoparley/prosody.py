@@ -19,6 +19,20 @@ class PitchTrack:
     strengths: FloatArray
 
 
+def _validate_pitch_parameters(
+    sample_rate: int,
+    frame_size: int,
+    hop_size: int,
+    min_hz: float,
+    max_hz: float,
+    voicing_threshold: float,
+) -> None:
+    if sample_rate <= 0 or frame_size <= 1 or hop_size <= 0:
+        raise ValueError("pitch framing parameters are invalid")
+    if not 0 < min_hz < max_hz < sample_rate / 2 or not 0 <= voicing_threshold <= 1:
+        raise ValueError("pitch range or voicing threshold is invalid")
+
+
 def autocorrelation_f0(
     samples: FloatArray,
     sample_rate: int,
@@ -31,10 +45,9 @@ def autocorrelation_f0(
 ) -> PitchTrack:
     """Estimate frame-level F0 without external models or downloaded weights."""
     signal = np.asarray(samples, dtype=np.float64)
-    if signal.ndim != 1 or sample_rate <= 0 or frame_size <= 1 or hop_size <= 0:
-        raise ValueError("pitch input and framing parameters are invalid")
-    if not 0 < min_hz < max_hz < sample_rate / 2 or not 0 <= voicing_threshold <= 1:
-        raise ValueError("pitch range or voicing threshold is invalid")
+    if signal.ndim != 1:
+        raise ValueError("pitch input must be one-dimensional")
+    _validate_pitch_parameters(sample_rate, frame_size, hop_size, min_hz, max_hz, voicing_threshold)
     if len(signal) < frame_size:
         empty = np.array([], dtype=np.float64)
         return PitchTrack(empty, empty.copy(), empty.copy())
