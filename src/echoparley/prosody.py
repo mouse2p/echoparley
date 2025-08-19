@@ -76,3 +76,21 @@ def autocorrelation_f0(
         frequencies.append(round(sample_rate / lag, 6) if strength >= voicing_threshold else 0.0)
         strengths.append(round(strength, 6))
     return PitchTrack(np.asarray(times), np.asarray(frequencies), np.asarray(strengths))
+
+
+def moving_average_contour(values: FloatArray, width: int = 3) -> FloatArray:
+    """Smooth voiced F0 values while leaving unvoiced frames at zero."""
+    contour = np.asarray(values, dtype=np.float64)
+    if contour.ndim != 1 or width <= 0 or width % 2 == 0:
+        raise ValueError("moving-average width must be a positive odd integer")
+    if len(contour) == 0:
+        return contour.copy()
+    radius = width // 2
+    output = np.zeros_like(contour)
+    for index, value in enumerate(contour):
+        if value == 0:
+            continue
+        neighborhood = contour[max(0, index - radius) : min(len(contour), index + radius + 1)]
+        voiced = neighborhood[neighborhood > 0]
+        output[index] = np.mean(voiced) if len(voiced) else 0.0
+    return np.round(output, 6)

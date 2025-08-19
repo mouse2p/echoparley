@@ -18,3 +18,10 @@ def test_pitch_marks_silence_unvoiced_and_short_inputs_empty() -> None:
     assert silent.strengths.tolist() == [0.0, 0.0, 0.0]
     short = autocorrelation_f0(np.zeros(319), 8_000)
     assert short.times_seconds.size == short.frequencies_hz.size == 0
+
+
+def test_moving_average_smooths_voiced_values_without_bridging_silence() -> None:
+    from echoparley.prosody import moving_average_contour
+
+    values = np.array([100.0, 130.0, 0.0, 110.0, 120.0])
+    assert moving_average_contour(values).tolist() == [115.0, 115.0, 0.0, 115.0, 115.0]
