@@ -94,3 +94,37 @@ def moving_average_contour(values: FloatArray, width: int = 3) -> FloatArray:
         voiced = neighborhood[neighborhood > 0]
         output[index] = np.mean(voiced) if len(voiced) else 0.0
     return np.round(output, 6)
+
+
+@dataclass(frozen=True, slots=True)
+class ToneEvent:
+    """A local synthetic pitch movement at a frame time."""
+
+    kind: str
+    time_seconds: float
+    change_hz: float
+
+
+def annotate_tone_events(
+    track: PitchTrack, *, rise_threshold_hz: float = 20.0
+) -> tuple[ToneEvent, ...]:
+    """Label adjacent voiced rises and falls in a synthetic pitch track."""
+    if rise_threshold_hz <= 0:
+        raise ValueError("tone threshold must be positive")
+    if not (len(track.times_seconds) == len(track.frequencies_hz) == len(track.strengths)):
+        raise ValueError("pitch track arrays must have equal lengths")
+    events: list[ToneEvent] = []
+    for index in range(1, len(track.frequencies_hz)):
+        before, after = track.frequencies_hz[index - 1 : index + 1]
+        if before <= 0 or after <= 0:
+            continue
+        change = float(after - before)
+        if abs(change) >= rise_threshold_hz:
+            events.append(
+                ToneEvent(
+                    "rise" if change > 0 else "fall",
+                    round(float(track.times_seconds[index]), 6),
+                    round(change, 6),
+                )
+            )
+    return tuple(events)

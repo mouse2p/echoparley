@@ -36,3 +36,17 @@ def test_pitch_rejects_invalid_search_and_smoothing_parameters() -> None:
         autocorrelation_f0(np.ones(400), 8_000, min_hz=400, max_hz=200)
     with pytest.raises(ValueError, match="odd"):
         moving_average_contour(np.ones(4), 2)
+
+
+def test_tone_events_label_rises_and_falls() -> None:
+    from echoparley.prosody import PitchTrack, annotate_tone_events
+
+    track = PitchTrack(
+        np.array([0.01, 0.02, 0.03, 0.04]),
+        np.array([100.0, 130.0, 95.0, 0.0]),
+        np.ones(4),
+    )
+    assert [(event.kind, event.change_hz) for event in annotate_tone_events(track)] == [
+        ("rise", 30.0),
+        ("fall", -35.0),
+    ]
