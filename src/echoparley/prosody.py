@@ -45,8 +45,8 @@ def autocorrelation_f0(
 ) -> PitchTrack:
     """Estimate frame-level F0 without external models or downloaded weights."""
     signal = np.asarray(samples, dtype=np.float64)
-    if signal.ndim != 1:
-        raise ValueError("pitch input must be one-dimensional")
+    if signal.ndim != 1 or not np.all(np.isfinite(signal)):
+        raise ValueError("pitch input must be a finite one-dimensional signal")
     _validate_pitch_parameters(sample_rate, frame_size, hop_size, min_hz, max_hz, voicing_threshold)
     if len(signal) < frame_size:
         empty = np.array([], dtype=np.float64)

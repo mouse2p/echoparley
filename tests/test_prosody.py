@@ -36,6 +36,8 @@ def test_pitch_rejects_invalid_search_and_smoothing_parameters() -> None:
         autocorrelation_f0(np.ones(400), 8_000, min_hz=400, max_hz=200)
     with pytest.raises(ValueError, match="odd"):
         moving_average_contour(np.ones(4), 2)
+    with pytest.raises(ValueError, match="finite"):
+        autocorrelation_f0(np.array([np.nan] * 400), 8_000)
 
 
 def test_tone_events_label_rises_and_falls() -> None:
