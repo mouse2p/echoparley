@@ -22,3 +22,13 @@ def test_response_reserve_reduces_history_budget() -> None:
     turns = (ConversationTurn("a", "one", 4, 0, 1), ConversationTurn("b", "two", 4, 2, 3))
     assert select_context_with_reserve(turns, 10, 2).turns == turns
     assert select_context_with_reserve(turns, 10, 3).turns == (turns[-1],)
+
+
+def test_context_policy_names_are_stable_and_validated() -> None:
+    import pytest
+
+    from echoparley.context import EvictionPolicy, parse_eviction_policy
+
+    assert parse_eviction_policy("salience") is EvictionPolicy.SALIENCE
+    with pytest.raises(ValueError, match="recency, turn-boundary, salience"):
+        parse_eviction_policy("oldest")
