@@ -68,3 +68,15 @@ def test_prosodic_vector_measures_rate_pauses_and_declination() -> None:
     assert prosodic_features(
         track, duration_seconds=4, word_count=8, pauses_seconds=(0.25, 0.75)
     ) == ProsodicFeatures(2.0, 0.5, 0.25, 40.0, -20.0)
+
+
+def test_prosodic_vector_rejects_impossible_pause_timings() -> None:
+    import pytest
+
+    from echoparley.prosody import PitchTrack, prosodic_features
+
+    empty = np.array([], dtype=np.float64)
+    track = PitchTrack(empty, empty, empty)
+    assert prosodic_features(track, duration_seconds=1, word_count=0).pitch_range_hz == 0
+    with pytest.raises(ValueError, match="exceed"):
+        prosodic_features(track, duration_seconds=1, word_count=0, pauses_seconds=(1.1,))
