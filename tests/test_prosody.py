@@ -59,3 +59,12 @@ def test_median_contour_removes_an_isolated_pitch_spike() -> None:
 
     values = np.array([100.0, 102.0, 300.0, 101.0, 99.0])
     assert median_contour(values).tolist() == [101.0, 102.0, 102.0, 101.0, 100.0]
+
+
+def test_prosodic_vector_measures_rate_pauses_and_declination() -> None:
+    from echoparley.prosody import PitchTrack, ProsodicFeatures, prosodic_features
+
+    track = PitchTrack(np.array([0.0, 1.0, 2.0]), np.array([140.0, 120.0, 100.0]), np.ones(3))
+    assert prosodic_features(
+        track, duration_seconds=4, word_count=8, pauses_seconds=(0.25, 0.75)
+    ) == ProsodicFeatures(2.0, 0.5, 0.25, 40.0, -20.0)

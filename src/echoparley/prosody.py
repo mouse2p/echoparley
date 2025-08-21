@@ -144,3 +144,43 @@ def median_contour(values: FloatArray, width: int = 3) -> FloatArray:
         voiced = neighborhood[neighborhood > 0]
         output[index] = np.median(voiced)
     return np.round(output, 6)
+
+
+@dataclass(frozen=True, slots=True)
+class ProsodicFeatures:
+    """Transparent measurements derived from synthetic timing and pitch."""
+
+    speech_rate_hz: float
+    pause_mean_seconds: float
+    pause_fraction: float
+    pitch_range_hz: float
+    pitch_declination_hz_per_second: float
+
+
+def prosodic_features(
+    track: PitchTrack,
+    *,
+    duration_seconds: float,
+    word_count: int,
+    pauses_seconds: tuple[float, ...] = (),
+) -> ProsodicFeatures:
+    """Combine timing, pause, and voiced-pitch measurements into one vector."""
+    if duration_seconds <= 0 or word_count < 0 or any(pause < 0 for pause in pauses_seconds):
+        raise ValueError("prosodic timing values are invalid")
+    if sum(pauses_seconds) > duration_seconds:
+        raise ValueError("pauses cannot exceed the measured duration")
+    voiced = track.frequencies_hz[track.frequencies_hz > 0]
+    voiced_times = track.times_seconds[track.frequencies_hz > 0]
+    pitch_range = float(np.ptp(voiced)) if len(voiced) else 0.0
+    if len(voiced) >= 2 and voiced_times[-1] > voiced_times[0]:
+        centered = voiced_times - np.mean(voiced_times)
+        slope = float(np.dot(centered, voiced - np.mean(voiced)) / np.dot(centered, centered))
+    else:
+        slope = 0.0
+    return ProsodicFeatures(
+        round(word_count / duration_seconds, 6),
+        round(float(np.mean(pauses_seconds)), 6) if pauses_seconds else 0.0,
+        round(sum(pauses_seconds) / duration_seconds, 6),
+        round(pitch_range, 6),
+        round(slope, 6),
+    )
