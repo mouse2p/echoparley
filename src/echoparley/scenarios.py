@@ -2,7 +2,32 @@
 
 from __future__ import annotations
 
+from enum import StrEnum
+
 from echoparley.synth import DialogueScenario, TurnAnnotation
+
+
+class BackchannelKind(StrEnum):
+    """Planted listener-response functions, not inferred pragmatics."""
+
+    ACKNOWLEDGE = "acknowledge"
+    CONTINUER = "continuer"
+    REPAIR = "repair"
+
+
+_BACKCHANNEL_WORDS = {
+    "okay": BackchannelKind.ACKNOWLEDGE,
+    "mhm": BackchannelKind.CONTINUER,
+    "what": BackchannelKind.REPAIR,
+}
+
+
+def classify_planted_backchannel(text: str) -> BackchannelKind:
+    """Look up a deliberately scripted backchannel label."""
+    try:
+        return _BACKCHANNEL_WORDS[text.strip().lower()]
+    except KeyError as error:
+        raise ValueError(f"unrecognized planted backchannel: {text!r}") from error
 
 
 def tutorial_scenario(seed: int = 0) -> DialogueScenario:

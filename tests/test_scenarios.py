@@ -1,4 +1,4 @@
-from echoparley.scenarios import tutorial_scenario
+from echoparley.scenarios import BackchannelKind, classify_planted_backchannel, tutorial_scenario
 
 
 def test_tutorial_scenario_plants_reproducible_topic_turns() -> None:
@@ -7,6 +7,11 @@ def test_tutorial_scenario_plants_reproducible_topic_turns() -> None:
     assert scenario.name == "tutorial"
     assert {turn.topic for turn in scenario.turns} == {"loops"}
     assert [turn.speaker for turn in scenario.turns] == ["learner", "tutor", "learner", "tutor"]
+
+
+def test_backchannel_taxonomy_is_explicit_not_inferred() -> None:
+    assert classify_planted_backchannel(" MHM ") is BackchannelKind.CONTINUER
+    assert classify_planted_backchannel("what") is BackchannelKind.REPAIR
 
 
 def test_negotiation_scenario_contains_a_contested_floor() -> None:
