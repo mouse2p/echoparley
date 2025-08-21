@@ -128,3 +128,19 @@ def annotate_tone_events(
                 )
             )
     return tuple(events)
+
+
+def median_contour(values: FloatArray, width: int = 3) -> FloatArray:
+    """Suppress isolated voiced pitch outliers using an odd-width median."""
+    contour = np.asarray(values, dtype=np.float64)
+    if contour.ndim != 1 or width <= 0 or width % 2 == 0:
+        raise ValueError("median width must be a positive odd integer")
+    radius = width // 2
+    output = contour.copy()
+    for index, value in enumerate(contour):
+        if value <= 0:
+            continue
+        neighborhood = contour[max(0, index - radius) : min(len(contour), index + radius + 1)]
+        voiced = neighborhood[neighborhood > 0]
+        output[index] = np.median(voiced)
+    return np.round(output, 6)

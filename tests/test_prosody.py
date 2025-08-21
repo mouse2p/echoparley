@@ -52,3 +52,10 @@ def test_tone_events_label_rises_and_falls() -> None:
         ("rise", 30.0),
         ("fall", -35.0),
     ]
+
+
+def test_median_contour_removes_an_isolated_pitch_spike() -> None:
+    from echoparley.prosody import median_contour
+
+    values = np.array([100.0, 102.0, 300.0, 101.0, 99.0])
+    assert median_contour(values).tolist() == [101.0, 102.0, 102.0, 101.0, 100.0]
