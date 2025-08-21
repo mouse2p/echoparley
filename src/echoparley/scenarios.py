@@ -36,3 +36,18 @@ def negotiation_scenario(seed: int = 0) -> DialogueScenario:
             TurnAnnotation("seller", 1_900, 2_350, "counter offer", topic="price"),
         ),
     )
+
+
+EXPANDED_SCENARIOS = {
+    "negotiation": negotiation_scenario,
+    "tutorial": tutorial_scenario,
+}
+
+
+def make_expanded_scenario(name: str, seed: int = 0) -> DialogueScenario:
+    """Resolve an expanded planted scenario by its stable catalog name."""
+    try:
+        return EXPANDED_SCENARIOS[name](seed)
+    except KeyError as error:
+        choices = ", ".join(sorted(EXPANDED_SCENARIOS))
+        raise ValueError(f"unknown expanded scenario {name!r}; choose from {choices}") from error

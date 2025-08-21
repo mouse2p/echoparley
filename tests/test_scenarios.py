@@ -34,3 +34,13 @@ def test_expanded_scenarios_vary_content_without_moving_boundaries() -> None:
     )
     negotiations = [negotiation_scenario(seed) for seed in range(4)]
     assert len({scenario.turns[0].text for scenario in negotiations}) == 4
+
+
+def test_expanded_scenario_catalog_reports_stable_choices() -> None:
+    import pytest
+
+    from echoparley.scenarios import make_expanded_scenario
+
+    assert make_expanded_scenario("tutorial", 2).name == "tutorial"
+    with pytest.raises(ValueError, match="negotiation, tutorial"):
+        make_expanded_scenario("missing")
