@@ -49,3 +49,12 @@ def test_expanded_scenario_catalog_reports_stable_choices() -> None:
     assert make_expanded_scenario("tutorial", 2).name == "tutorial"
     with pytest.raises(ValueError, match="negotiation, tutorial"):
         make_expanded_scenario("missing")
+
+
+def test_noisy_channel_scenario_exposes_planted_mishearing() -> None:
+    from echoparley.scenarios import noisy_channel_scenario
+
+    fixture = noisy_channel_scenario(1)
+    assert fixture.dialogue.name == "noisy-channel"
+    assert fixture.mishearings[0].expected == "monday"
+    assert fixture.mishearings[0].observed in fixture.dialogue.turns[1].text

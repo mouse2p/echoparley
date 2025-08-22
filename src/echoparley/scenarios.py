@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from enum import StrEnum
 
 from echoparley.synth import DialogueScenario, TurnAnnotation
@@ -76,3 +77,33 @@ def make_expanded_scenario(name: str, seed: int = 0) -> DialogueScenario:
     except KeyError as error:
         choices = ", ".join(sorted(EXPANDED_SCENARIOS))
         raise ValueError(f"unknown expanded scenario {name!r}; choose from {choices}") from error
+
+
+@dataclass(frozen=True, slots=True)
+class PlantedMishearing:
+    """Known substitution attached to a synthetic noisy-channel turn."""
+
+    turn_index: int
+    expected: str
+    observed: str
+
+
+@dataclass(frozen=True, slots=True)
+class NoisyChannelScenario:
+    dialogue: DialogueScenario
+    mishearings: tuple[PlantedMishearing, ...]
+
+
+def noisy_channel_scenario(seed: int = 0) -> NoisyChannelScenario:
+    """Build a repair exchange with an explicit planted transcription error."""
+    expected, observed = (("fifteen", "fifty"), ("monday", "sunday"))[seed % 2]
+    dialogue = DialogueScenario(
+        "noisy-channel",
+        seed,
+        (
+            TurnAnnotation("a", 0, 600, f"I said {expected}", topic="repair"),
+            TurnAnnotation("b", 800, 1_260, f"did you say {observed}", topic="repair"),
+            TurnAnnotation("a", 1_470, 1_850, f"no {expected}", topic="repair"),
+        ),
+    )
+    return NoisyChannelScenario(dialogue, (PlantedMishearing(1, expected, observed),))
