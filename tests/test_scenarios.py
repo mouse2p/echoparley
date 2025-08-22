@@ -75,3 +75,12 @@ def test_topic_drift_scenario_plants_ordered_topic_changes() -> None:
     scenario = topic_drift_scenario(0)
     assert [turn.topic for turn in scenario.turns] == ["travel", "food", "music", "music"]
     assert scenario.overlaps() == ()
+
+
+def test_casual_scenario_covers_backchannel_taxonomy() -> None:
+    from echoparley.scenarios import casual_backchannel_scenario
+
+    scenario = casual_backchannel_scenario(5)
+    labels = {classify_planted_backchannel(turn.text) for turn in scenario.turns[1:]}
+    assert labels == set(BackchannelKind)
+    assert len(scenario.overlaps()) == 3

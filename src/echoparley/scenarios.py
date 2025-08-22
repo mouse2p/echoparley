@@ -133,3 +133,18 @@ def topic_drift_scenario(seed: int = 0) -> DialogueScenario:
         for index, topic in enumerate((*topics, topics[-1]))
     )
     return DialogueScenario("topic-drift", seed, turns)
+
+
+def casual_backchannel_scenario(seed: int = 0) -> DialogueScenario:
+    """Build a long casual turn with all planted backchannel functions."""
+    offset = seed % 30
+    return DialogueScenario(
+        "casual-backchannel",
+        seed,
+        (
+            TurnAnnotation("a", 0, 2_100, "scripted casual story", topic="story"),
+            TurnAnnotation("b", 350 + offset, 470 + offset, "mhm", "backchannel", "story"),
+            TurnAnnotation("b", 920 + offset, 1_040 + offset, "okay", "backchannel", "story"),
+            TurnAnnotation("b", 1_500 + offset, 1_650 + offset, "what", "backchannel", "story"),
+        ),
+    )
