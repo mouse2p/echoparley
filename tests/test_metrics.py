@@ -33,3 +33,10 @@ def test_evaluation_table_labels_planted_data() -> None:
             "floor_hold_accuracy",
         )
     )
+
+
+def test_chance_corrected_agreement_matches_hand_computation() -> None:
+    from echoparley.metrics import chance_corrected_agreement
+
+    assert chance_corrected_agreement((True, True, False, False), (True, False, True, False)) == 0.0
+    assert chance_corrected_agreement((True, False, True), (True, False, True)) == 1.0

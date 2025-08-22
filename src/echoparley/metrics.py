@@ -65,3 +65,16 @@ def evaluation_table(
         "missed_barge_in_rate": round(missed_barge_ins, 6),
         "floor_hold_accuracy": round(floor_hold_accuracy, 6),
     }
+
+
+def chance_corrected_agreement(first: tuple[bool, ...], second: tuple[bool, ...]) -> float:
+    """Compute Cohen-style kappa for two aligned boundary decision vectors."""
+    if len(first) != len(second) or not first:
+        raise ValueError("agreement vectors must have equal nonzero lengths")
+    observed = sum(left == right for left, right in zip(first, second, strict=True)) / len(first)
+    first_yes = sum(first) / len(first)
+    second_yes = sum(second) / len(second)
+    expected = first_yes * second_yes + (1 - first_yes) * (1 - second_yes)
+    if expected == 1:
+        return 1.0 if observed == 1 else 0.0
+    return round((observed - expected) / (1 - expected), 6)
