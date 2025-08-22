@@ -84,3 +84,11 @@ def test_casual_scenario_covers_backchannel_taxonomy() -> None:
     labels = {classify_planted_backchannel(turn.text) for turn in scenario.turns[1:]}
     assert labels == set(BackchannelKind)
     assert len(scenario.overlaps()) == 3
+
+
+def test_scenario_topics_can_collapse_adjacent_repetitions() -> None:
+    from echoparley.scenarios import scenario_topics, topic_drift_scenario
+
+    scenario = topic_drift_scenario(0)
+    assert scenario_topics(scenario) == ("travel", "food", "music")
+    assert scenario_topics(scenario, collapse=False)[-2:] == ("music", "music")

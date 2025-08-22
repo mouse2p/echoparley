@@ -148,3 +148,13 @@ def casual_backchannel_scenario(seed: int = 0) -> DialogueScenario:
             TurnAnnotation("b", 1_500 + offset, 1_650 + offset, "what", "backchannel", "story"),
         ),
     )
+
+
+def scenario_topics(scenario: DialogueScenario, *, collapse: bool = True) -> tuple[str, ...]:
+    """Return planted topics in temporal order, optionally collapsing repeats."""
+    topics = tuple(turn.topic for turn in scenario.turns if turn.topic is not None)
+    if not collapse:
+        return topics
+    return tuple(
+        topic for index, topic in enumerate(topics) if index == 0 or topic != topics[index - 1]
+    )
