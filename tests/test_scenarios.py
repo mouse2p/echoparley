@@ -58,3 +58,12 @@ def test_noisy_channel_scenario_exposes_planted_mishearing() -> None:
     assert fixture.dialogue.name == "noisy-channel"
     assert fixture.mishearings[0].expected == "monday"
     assert fixture.mishearings[0].observed in fixture.dialogue.turns[1].text
+
+
+def test_planted_mishearing_rejects_identical_forms() -> None:
+    import pytest
+
+    from echoparley.scenarios import PlantedMishearing
+
+    with pytest.raises(ValueError, match="differ"):
+        PlantedMishearing(0, "same", "same")

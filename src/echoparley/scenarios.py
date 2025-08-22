@@ -87,6 +87,12 @@ class PlantedMishearing:
     expected: str
     observed: str
 
+    def __post_init__(self) -> None:
+        if self.turn_index < 0 or not self.expected or not self.observed:
+            raise ValueError("mishearing requires a turn index and nonempty forms")
+        if self.expected == self.observed:
+            raise ValueError("mishearing forms must differ")
+
 
 @dataclass(frozen=True, slots=True)
 class NoisyChannelScenario:
