@@ -32,3 +32,10 @@ def test_context_policy_names_are_stable_and_validated() -> None:
     assert parse_eviction_policy("salience") is EvictionPolicy.SALIENCE
     with pytest.raises(ValueError, match="recency, turn-boundary, salience"):
         parse_eviction_policy("oldest")
+
+
+def test_policy_interface_matches_recency_selection() -> None:
+    from echoparley.context import select_context_by_policy
+
+    turns = (ConversationTurn("a", "one", 2, 0, 1), ConversationTurn("b", "two", 3, 2, 3))
+    assert select_context_by_policy(turns, 3, "recency") == select_context(turns, 3)

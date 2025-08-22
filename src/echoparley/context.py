@@ -54,3 +54,15 @@ def select_context_with_reserve(
     if response_reserve < 0 or response_reserve > total_budget:
         raise ValueError("response reserve must fit the total budget")
     return select_context(turns, total_budget - response_reserve)
+
+
+def select_context_by_policy(
+    turns: tuple[ConversationTurn, ...],
+    budget: int,
+    policy: EvictionPolicy | str = EvictionPolicy.RECENCY,
+) -> ContextWindow:
+    """Select context through a stable policy interface."""
+    resolved = parse_eviction_policy(policy) if isinstance(policy, str) else policy
+    if resolved is EvictionPolicy.RECENCY:
+        return select_context(turns, budget)
+    raise NotImplementedError(f"context policy {resolved.value!r} is not available yet")
