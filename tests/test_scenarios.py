@@ -67,3 +67,11 @@ def test_planted_mishearing_rejects_identical_forms() -> None:
 
     with pytest.raises(ValueError, match="differ"):
         PlantedMishearing(0, "same", "same")
+
+
+def test_topic_drift_scenario_plants_ordered_topic_changes() -> None:
+    from echoparley.scenarios import topic_drift_scenario
+
+    scenario = topic_drift_scenario(0)
+    assert [turn.topic for turn in scenario.turns] == ["travel", "food", "music", "music"]
+    assert scenario.overlaps() == ()

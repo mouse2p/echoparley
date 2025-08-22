@@ -113,3 +113,23 @@ def noisy_channel_scenario(seed: int = 0) -> NoisyChannelScenario:
         ),
     )
     return NoisyChannelScenario(dialogue, (PlantedMishearing(1, expected, observed),))
+
+
+def topic_drift_scenario(seed: int = 0) -> DialogueScenario:
+    """Build a dialogue whose planted topic changes twice."""
+    rotations = (
+        ("travel", "food", "music"),
+        ("study", "weather", "books"),
+    )
+    topics = rotations[seed % len(rotations)]
+    turns = tuple(
+        TurnAnnotation(
+            "a" if index % 2 == 0 else "b",
+            index * 620,
+            index * 620 + 420,
+            f"scripted remark about {topic}",
+            topic=topic,
+        )
+        for index, topic in enumerate((*topics, topics[-1]))
+    )
+    return DialogueScenario("topic-drift", seed, turns)
