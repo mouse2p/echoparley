@@ -40,3 +40,13 @@ def test_chance_corrected_agreement_matches_hand_computation() -> None:
 
     assert chance_corrected_agreement((True, True, False, False), (True, False, True, False)) == 0.0
     assert chance_corrected_agreement((True, False, True), (True, False, True)) == 1.0
+
+
+def test_chance_agreement_handles_constant_and_invalid_vectors() -> None:
+    import pytest
+
+    from echoparley.metrics import chance_corrected_agreement
+
+    assert chance_corrected_agreement((False, False), (False, False)) == 1.0
+    with pytest.raises(ValueError, match="equal nonzero"):
+        chance_corrected_agreement((True,), ())
