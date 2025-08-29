@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import itertools
+import math
 from dataclasses import dataclass
 
 
@@ -78,3 +80,15 @@ def chance_corrected_agreement(first: tuple[bool, ...], second: tuple[bool, ...]
     if expected == 1:
         return 1.0 if observed == 1 else 0.0
     return round((observed - expected) / (1 - expected), 6)
+
+
+def transition_entropy(speakers: tuple[str, ...]) -> float:
+    """Measure entropy of observed speaker-to-speaker transition pairs in bits."""
+    if any(not speaker for speaker in speakers):
+        raise ValueError("speaker labels cannot be empty")
+    transitions = tuple(itertools.pairwise(speakers))
+    if not transitions:
+        return 0.0
+    counts = {pair: transitions.count(pair) for pair in set(transitions)}
+    probabilities = (count / len(transitions) for count in counts.values())
+    return round(-sum(value * math.log2(value) for value in probabilities), 6)

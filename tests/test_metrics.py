@@ -50,3 +50,10 @@ def test_chance_agreement_handles_constant_and_invalid_vectors() -> None:
     assert chance_corrected_agreement((False, False), (False, False)) == 1.0
     with pytest.raises(ValueError, match="equal nonzero"):
         chance_corrected_agreement((True,), ())
+
+
+def test_transition_entropy_has_known_uniform_value() -> None:
+    from echoparley.metrics import transition_entropy
+
+    assert transition_entropy(("a", "b", "a", "a", "b")) == 1.5
+    assert transition_entropy(("a",)) == 0.0
