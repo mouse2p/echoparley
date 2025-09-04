@@ -80,3 +80,10 @@ def test_prosodic_vector_rejects_impossible_pause_timings() -> None:
     assert prosodic_features(track, duration_seconds=1, word_count=0).pitch_range_hz == 0
     with pytest.raises(ValueError, match="exceed"):
         prosodic_features(track, duration_seconds=1, word_count=0, pauses_seconds=(1.1,))
+
+
+def test_prosody_array_has_a_stable_documented_order() -> None:
+    from echoparley.prosody import ProsodicFeatures, prosody_array
+
+    value = ProsodicFeatures(2.0, 0.3, 0.1, 40.0, -5.0)
+    assert prosody_array(value).tolist() == [2.0, 0.3, 0.1, 40.0, -5.0]

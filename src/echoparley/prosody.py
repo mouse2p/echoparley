@@ -184,3 +184,17 @@ def prosodic_features(
         round(pitch_range, 6),
         round(slope, 6),
     )
+
+
+def prosody_array(features: ProsodicFeatures) -> FloatArray:
+    """Return the documented five-value feature order for clustering."""
+    return np.array(
+        [
+            features.speech_rate_hz,
+            features.pause_mean_seconds,
+            features.pause_fraction,
+            features.pitch_range_hz,
+            features.pitch_declination_hz_per_second,
+        ],
+        dtype=np.float64,
+    )
