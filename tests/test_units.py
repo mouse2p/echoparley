@@ -97,3 +97,11 @@ def test_prosody_aware_units_separate_equal_acoustics_by_pitch() -> None:
     identifiers = extractor.extract(np.concatenate((acoustic, prosody), axis=1))
     assert len(set(identifiers[:3])) == len(set(identifiers[3:])) == 1
     assert identifiers[0] != identifiers[-1]
+
+
+def test_prosody_aware_units_reject_misaligned_rows_and_weights() -> None:
+    acoustic = np.ones((3, 2))
+    with pytest.raises(ValueError, match="align"):
+        units.fit_prosody_unit_extractor(acoustic, np.ones((2, 1)), 1, 2)
+    with pytest.raises(ValueError, match="non-negative"):
+        units.fit_prosody_unit_extractor(acoustic, np.ones((3, 1)), 1, 2, prosody_weight=-1)
