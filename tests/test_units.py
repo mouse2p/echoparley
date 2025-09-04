@@ -88,3 +88,12 @@ def test_codebook_usage_rejects_out_of_range_ids() -> None:
 def test_unit_expansion_rejects_negative_identifiers() -> None:
     with pytest.raises(ValueError, match="non-negative"):
         units.expand_units(np.array([-1]), np.array([1]))
+
+
+def test_prosody_aware_units_separate_equal_acoustics_by_pitch() -> None:
+    acoustic = np.zeros((6, 2))
+    prosody = np.array([[100.0], [101.0], [99.0], [200.0], [201.0], [199.0]])
+    extractor = units.fit_prosody_unit_extractor(acoustic, prosody, 1, 2, seed=2)
+    identifiers = extractor.extract(np.concatenate((acoustic, prosody), axis=1))
+    assert len(set(identifiers[:3])) == len(set(identifiers[3:])) == 1
+    assert identifiers[0] != identifiers[-1]

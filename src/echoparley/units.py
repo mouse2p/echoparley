@@ -179,3 +179,23 @@ def codebook_usage(identifiers: IntArray, codebook_size: int) -> CodebookUsage:
     return CodebookUsage(
         int(np.count_nonzero(counts)), codebook_size, round(float(np.exp(entropy)), 6)
     )
+
+
+def fit_prosody_unit_extractor(
+    acoustic_features: FloatArray,
+    prosodic_features: FloatArray,
+    dimensions: int,
+    clusters: int,
+    *,
+    prosody_weight: float = 1.0,
+    seed: int = 0,
+) -> UnitExtractor:
+    """Fit units over acoustic columns augmented by measured prosodic columns."""
+    acoustic = np.asarray(acoustic_features, dtype=np.float64)
+    prosody = np.asarray(prosodic_features, dtype=np.float64)
+    if acoustic.ndim != 2 or prosody.ndim != 2 or len(acoustic) != len(prosody):
+        raise ValueError("acoustic and prosodic feature rows must align")
+    if prosody_weight < 0 or not np.all(np.isfinite(prosody)):
+        raise ValueError("prosody weight and values must be finite and non-negative")
+    combined = np.concatenate((acoustic, prosody * prosody_weight), axis=1)
+    return fit_unit_extractor(combined, dimensions, clusters, seed=seed)
