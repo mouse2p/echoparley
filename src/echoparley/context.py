@@ -66,3 +66,24 @@ def select_context_by_policy(
     if resolved is EvictionPolicy.RECENCY:
         return select_context(turns, budget)
     raise NotImplementedError(f"context policy {resolved.value!r} is not available yet")
+
+
+def select_turn_boundary_context(turns: tuple[ConversationTurn, ...], budget: int) -> ContextWindow:
+    """Keep newest complete contiguous topic segments without splitting one."""
+    if budget < 0:
+        raise ValueError("context budget must be non-negative")
+    segments: list[tuple[ConversationTurn, ...]] = []
+    for turn in turns:
+        if not segments or segments[-1][-1].topic != turn.topic:
+            segments.append((turn,))
+        else:
+            segments[-1] = (*segments[-1], turn)
+    selected: list[ConversationTurn] = []
+    used = 0
+    for segment in reversed(segments):
+        cost = sum(turn.token_count for turn in segment)
+        if used + cost > budget:
+            break
+        selected[0:0] = segment
+        used += cost
+    return ContextWindow(tuple(selected), used, len(turns) - len(selected))
