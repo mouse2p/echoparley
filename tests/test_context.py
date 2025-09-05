@@ -52,3 +52,12 @@ def test_boundary_policy_never_splits_a_topic_segment() -> None:
     assert select_turn_boundary_context(turns, 5).turns == ()
     assert select_turn_boundary_context(turns, 6).turns == turns[1:]
     assert select_context_by_policy(turns, 6, "turn-boundary").turns == turns[1:]
+
+
+def test_salience_policy_retains_important_old_turns_in_order() -> None:
+    from echoparley.context import select_salient_context
+
+    turns = tuple(ConversationTurn("a", str(i), 2, i, i + 1) for i in range(3))
+    window = select_salient_context(turns, 4, (1.0, 0.1, 0.9))
+    assert window.turns == (turns[0], turns[2])
+    assert window.used_tokens == 4

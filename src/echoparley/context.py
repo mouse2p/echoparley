@@ -89,3 +89,21 @@ def select_turn_boundary_context(turns: tuple[ConversationTurn, ...], budget: in
         selected[0:0] = segment
         used += cost
     return ContextWindow(tuple(selected), used, len(turns) - len(selected))
+
+
+def select_salient_context(
+    turns: tuple[ConversationTurn, ...], budget: int, scores: tuple[float, ...]
+) -> ContextWindow:
+    """Select high-scoring whole turns, breaking ties toward recent turns."""
+    if budget < 0 or len(scores) != len(turns) or any(score < 0 for score in scores):
+        raise ValueError("salience scores must align and budget must be non-negative")
+    ranking = sorted(range(len(turns)), key=lambda index: (scores[index], index), reverse=True)
+    chosen: set[int] = set()
+    used = 0
+    for index in ranking:
+        cost = turns[index].token_count
+        if used + cost <= budget:
+            chosen.add(index)
+            used += cost
+    selected = tuple(turn for index, turn in enumerate(turns) if index in chosen)
+    return ContextWindow(selected, used, len(turns) - len(selected))
