@@ -42,7 +42,7 @@ def test_policy_interface_matches_recency_selection() -> None:
 
 
 def test_boundary_policy_never_splits_a_topic_segment() -> None:
-    from echoparley.context import select_turn_boundary_context
+    from echoparley.context import select_context_by_policy, select_turn_boundary_context
 
     turns = (
         ConversationTurn("a", "old", 2, 0, 1, "old"),
@@ -51,3 +51,4 @@ def test_boundary_policy_never_splits_a_topic_segment() -> None:
     )
     assert select_turn_boundary_context(turns, 5).turns == ()
     assert select_turn_boundary_context(turns, 6).turns == turns[1:]
+    assert select_context_by_policy(turns, 6, "turn-boundary").turns == turns[1:]

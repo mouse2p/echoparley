@@ -65,6 +65,8 @@ def select_context_by_policy(
     resolved = parse_eviction_policy(policy) if isinstance(policy, str) else policy
     if resolved is EvictionPolicy.RECENCY:
         return select_context(turns, budget)
+    if resolved is EvictionPolicy.TURN_BOUNDARY:
+        return select_turn_boundary_context(turns, budget)
     raise NotImplementedError(f"context policy {resolved.value!r} is not available yet")
 
 
