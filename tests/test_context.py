@@ -61,3 +61,14 @@ def test_salience_policy_retains_important_old_turns_in_order() -> None:
     window = select_salient_context(turns, 4, (1.0, 0.1, 0.9))
     assert window.turns == (turns[0], turns[2])
     assert window.used_tokens == 4
+
+
+def test_salience_selection_is_deterministic_at_exact_budget() -> None:
+    import pytest
+
+    from echoparley.context import select_salient_context
+
+    turns = tuple(ConversationTurn("a", str(i), i + 1, i, i + 1) for i in range(3))
+    assert select_salient_context(turns, 3, (1.0, 1.0, 1.0)).turns == (turns[2],)
+    with pytest.raises(ValueError, match="align"):
+        select_salient_context(turns, 3, (1.0,))
