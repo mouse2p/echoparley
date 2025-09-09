@@ -60,6 +60,8 @@ def select_context_by_policy(
     turns: tuple[ConversationTurn, ...],
     budget: int,
     policy: EvictionPolicy | str = EvictionPolicy.RECENCY,
+    *,
+    salience_scores: tuple[float, ...] | None = None,
 ) -> ContextWindow:
     """Select context through a stable policy interface."""
     resolved = parse_eviction_policy(policy) if isinstance(policy, str) else policy
@@ -67,6 +69,10 @@ def select_context_by_policy(
         return select_context(turns, budget)
     if resolved is EvictionPolicy.TURN_BOUNDARY:
         return select_turn_boundary_context(turns, budget)
+    if resolved is EvictionPolicy.SALIENCE:
+        if salience_scores is None:
+            raise ValueError("salience policy requires scores")
+        return select_salient_context(turns, budget, salience_scores)
     raise NotImplementedError(f"context policy {resolved.value!r} is not available yet")
 
 
