@@ -75,3 +75,16 @@ def test_salience_selection_is_deterministic_at_exact_budget() -> None:
     assert select_context_by_policy(
         turns, 3, "salience", salience_scores=(1.0, 1.0, 1.0)
     ).turns == (turns[2],)
+
+
+def test_retention_score_counts_planted_relevant_topics() -> None:
+    from echoparley.context import EvictionPolicy, context_retention_score
+
+    turns = (
+        ConversationTurn("a", "x", 2, 0, 1, "keep"),
+        ConversationTurn("b", "y", 2, 2, 3, "drop"),
+    )
+    score = context_retention_score(
+        ContextWindow(turns, 4, 0), EvictionPolicy.RECENCY, frozenset({"keep"})
+    )
+    assert score.retained_relevant == 1 and score.used_tokens == 4

@@ -113,3 +113,25 @@ def select_salient_context(
             used += cost
     selected = tuple(turn for index, turn in enumerate(turns) if index in chosen)
     return ContextWindow(selected, used, len(turns) - len(selected))
+
+
+@dataclass(frozen=True, slots=True)
+class RetentionScore:
+    policy: EvictionPolicy
+    retained_relevant: int
+    total_relevant: int
+    used_tokens: int
+
+    @property
+    def recall(self) -> float:
+        return (
+            round(self.retained_relevant / self.total_relevant, 6) if self.total_relevant else 1.0
+        )
+
+
+def context_retention_score(
+    window: ContextWindow, policy: EvictionPolicy, relevant_topics: frozenset[str]
+) -> RetentionScore:
+    """Score retained planted topics for policy comparisons."""
+    relevant = sum(turn.topic in relevant_topics for turn in window.turns)
+    return RetentionScore(policy, relevant, -1, window.used_tokens)
