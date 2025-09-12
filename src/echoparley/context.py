@@ -130,8 +130,15 @@ class RetentionScore:
 
 
 def context_retention_score(
-    window: ContextWindow, policy: EvictionPolicy, relevant_topics: frozenset[str]
+    window: ContextWindow,
+    policy: EvictionPolicy,
+    relevant_topics: frozenset[str],
+    *,
+    total_relevant: int | None = None,
 ) -> RetentionScore:
     """Score retained planted topics for policy comparisons."""
     relevant = sum(turn.topic in relevant_topics for turn in window.turns)
-    return RetentionScore(policy, relevant, -1, window.used_tokens)
+    total = relevant if total_relevant is None else total_relevant
+    if total < relevant:
+        raise ValueError("total relevant turns cannot be smaller than retained count")
+    return RetentionScore(policy, relevant, total, window.used_tokens)

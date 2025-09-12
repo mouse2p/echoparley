@@ -85,6 +85,9 @@ def test_retention_score_counts_planted_relevant_topics() -> None:
         ConversationTurn("b", "y", 2, 2, 3, "drop"),
     )
     score = context_retention_score(
-        ContextWindow(turns, 4, 0), EvictionPolicy.RECENCY, frozenset({"keep"})
+        ContextWindow(turns, 4, 0),
+        EvictionPolicy.RECENCY,
+        frozenset({"keep"}),
+        total_relevant=2,
     )
-    assert score.retained_relevant == 1 and score.used_tokens == 4
+    assert score.retained_relevant == 1 and score.recall == 0.5
