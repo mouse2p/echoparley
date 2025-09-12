@@ -6,6 +6,8 @@ import itertools
 import math
 from dataclasses import dataclass
 
+import numpy as np
+
 
 @dataclass(frozen=True, slots=True)
 class BoundaryScores:
@@ -103,6 +105,22 @@ class FloorControl:
     @property
     def total_ms(self) -> int:
         return sum(self.speaker_ms.values()) + self.silence_ms - self.overlap_ms
+
+
+@dataclass(frozen=True, slots=True)
+class LatencyPercentiles:
+    p50_ms: float
+    p90_ms: float
+    p99_ms: float
+
+
+def latency_percentiles(values_ms: tuple[int, ...]) -> LatencyPercentiles:
+    """Return linear-interpolated latency percentiles rounded at production."""
+    if not values_ms or any(value < 0 for value in values_ms):
+        raise ValueError("latencies must be a nonempty non-negative sample")
+    values = np.asarray(values_ms, dtype=np.float64)
+    results = np.percentile(values, (50, 90, 99))
+    return LatencyPercentiles(*(round(float(value), 6) for value in results))
 
 
 def floor_control_statistics(

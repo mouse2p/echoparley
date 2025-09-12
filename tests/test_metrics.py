@@ -65,3 +65,9 @@ def test_floor_control_counts_overlap_and_silence_exactly() -> None:
     stats = floor_control_statistics((("a", 0, 4), ("b", 3, 6)), 8)
     assert stats == FloorControl({"a": 4, "b": 3}, overlap_ms=1, silence_ms=2)
     assert stats.total_ms == 8
+
+
+def test_latency_percentiles_match_hand_checked_interpolation() -> None:
+    from echoparley.metrics import LatencyPercentiles, latency_percentiles
+
+    assert latency_percentiles((10, 20, 30, 40, 50)) == LatencyPercentiles(30.0, 46.0, 49.6)
