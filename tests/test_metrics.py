@@ -71,3 +71,14 @@ def test_latency_percentiles_match_hand_checked_interpolation() -> None:
     from echoparley.metrics import LatencyPercentiles, latency_percentiles
 
     assert latency_percentiles((10, 20, 30, 40, 50)) == LatencyPercentiles(30.0, 46.0, 49.6)
+
+
+def test_expanded_metrics_reject_out_of_range_measurements() -> None:
+    import pytest
+
+    from echoparley.metrics import floor_control_statistics, latency_percentiles
+
+    with pytest.raises(ValueError, match="duration"):
+        floor_control_statistics((("a", 0, 5),), 4)
+    with pytest.raises(ValueError, match="nonempty"):
+        latency_percentiles(())
