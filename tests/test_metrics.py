@@ -57,3 +57,11 @@ def test_transition_entropy_has_known_uniform_value() -> None:
 
     assert transition_entropy(("a", "b", "a", "a", "b")) == 1.5
     assert transition_entropy(("a",)) == 0.0
+
+
+def test_floor_control_counts_overlap_and_silence_exactly() -> None:
+    from echoparley.metrics import FloorControl, floor_control_statistics
+
+    stats = floor_control_statistics((("a", 0, 4), ("b", 3, 6)), 8)
+    assert stats == FloorControl({"a": 4, "b": 3}, overlap_ms=1, silence_ms=2)
+    assert stats.total_ms == 8

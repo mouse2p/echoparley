@@ -92,3 +92,34 @@ def transition_entropy(speakers: tuple[str, ...]) -> float:
     counts = {pair: transitions.count(pair) for pair in set(transitions)}
     probabilities = (count / len(transitions) for count in counts.values())
     return round(-sum(value * math.log2(value) for value in probabilities), 6)
+
+
+@dataclass(frozen=True, slots=True)
+class FloorControl:
+    speaker_ms: dict[str, int]
+    overlap_ms: int
+    silence_ms: int
+
+    @property
+    def total_ms(self) -> int:
+        return sum(self.speaker_ms.values()) + self.silence_ms - self.overlap_ms
+
+
+def floor_control_statistics(
+    intervals: tuple[tuple[str, int, int], ...], duration_ms: int
+) -> FloorControl:
+    """Measure planted speaker occupancy, overlap, and silence on a millisecond grid."""
+    if duration_ms < 0 or any(
+        not speaker or start < 0 or end <= start or end > duration_ms
+        for speaker, start, end in intervals
+    ):
+        raise ValueError("floor intervals must fit the dialogue duration")
+    active = [set() for _ in range(duration_ms)]
+    for speaker, start, end in intervals:
+        for time_ms in range(start, end):
+            active[time_ms].add(speaker)
+    speakers = sorted({speaker for speaker, _, _ in intervals})
+    occupancy = {speaker: sum(speaker in frame for frame in active) for speaker in speakers}
+    return FloorControl(
+        occupancy, sum(len(frame) > 1 for frame in active), sum(not frame for frame in active)
+    )
