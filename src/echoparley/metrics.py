@@ -141,3 +141,27 @@ def floor_control_statistics(
     return FloorControl(
         occupancy, sum(len(frame) > 1 for frame in active), sum(not frame for frame in active)
     )
+
+
+@dataclass(frozen=True, slots=True)
+class ConfidenceInterval:
+    estimate: float
+    lower: float
+    upper: float
+    confidence: float
+
+
+def bootstrap_mean_interval(
+    values: tuple[float, ...], *, seed: int = 0, samples: int = 1_000, confidence: float = 0.95
+) -> ConfidenceInterval:
+    """Estimate a deterministic percentile bootstrap interval for a sample mean."""
+    if not values or samples <= 0 or not 0 < confidence < 1 or not np.all(np.isfinite(values)):
+        raise ValueError("bootstrap inputs are invalid")
+    data = np.asarray(values, dtype=np.float64)
+    rng = np.random.default_rng(seed)
+    means = np.mean(rng.choice(data, size=(samples, len(data)), replace=True), axis=1)
+    tail = (1 - confidence) / 2
+    lower, upper = np.quantile(means, (tail, 1 - tail))
+    return ConfidenceInterval(
+        round(float(np.mean(data)), 6), round(float(lower), 6), round(float(upper), 6), confidence
+    )

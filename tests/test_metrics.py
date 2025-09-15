@@ -82,3 +82,11 @@ def test_expanded_metrics_reject_out_of_range_measurements() -> None:
         floor_control_statistics((("a", 0, 5),), 4)
     with pytest.raises(ValueError, match="nonempty"):
         latency_percentiles(())
+
+
+def test_bootstrap_interval_is_seeded_and_contains_the_mean() -> None:
+    from echoparley.metrics import bootstrap_mean_interval
+
+    first = bootstrap_mean_interval((1.0, 2.0, 3.0, 4.0), seed=7, samples=200)
+    assert first == bootstrap_mean_interval((1.0, 2.0, 3.0, 4.0), seed=7, samples=200)
+    assert first.lower <= first.estimate <= first.upper
