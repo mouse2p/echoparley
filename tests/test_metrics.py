@@ -90,3 +90,14 @@ def test_bootstrap_interval_is_seeded_and_contains_the_mean() -> None:
     first = bootstrap_mean_interval((1.0, 2.0, 3.0, 4.0), seed=7, samples=200)
     assert first == bootstrap_mean_interval((1.0, 2.0, 3.0, 4.0), seed=7, samples=200)
     assert first.lower <= first.estimate <= first.upper
+
+
+def test_bootstrap_interval_validates_confidence_and_finite_values() -> None:
+    import pytest
+
+    from echoparley.metrics import bootstrap_mean_interval
+
+    with pytest.raises(ValueError, match="invalid"):
+        bootstrap_mean_interval((1.0,), confidence=1.0)
+    with pytest.raises(ValueError, match="invalid"):
+        bootstrap_mean_interval((float("nan"),))
