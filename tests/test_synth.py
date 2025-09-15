@@ -97,3 +97,15 @@ def test_renderer_requires_every_speaker_profile() -> None:
         synth.render_dialogue(
             synth.barge_in_scenario(), {"a": synth.SpeakerProfile("a", 100, (500,))}
         )
+
+
+def test_dialogue_accepts_three_speakers() -> None:
+    turns = tuple(
+        synth.TurnAnnotation(speaker, index * 10, index * 10 + 8, speaker)
+        for index, speaker in enumerate(("a", "b", "c"))
+    )
+    assert {turn.speaker for turn in synth.DialogueScenario("trio", 0, turns).turns} == {
+        "a",
+        "b",
+        "c",
+    }

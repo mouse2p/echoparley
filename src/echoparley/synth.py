@@ -76,7 +76,7 @@ class TurnAnnotation:
 
 @dataclass(frozen=True, slots=True)
 class DialogueScenario:
-    """A reproducible two-party script with explicit planted ground truth."""
+    """A reproducible script for up to three speakers with planted ground truth."""
 
     name: str
     seed: int
@@ -85,8 +85,8 @@ class DialogueScenario:
     def __post_init__(self) -> None:
         if not self.name or self.seed < 0 or not self.turns:
             raise ValueError("scenario requires a name, non-negative seed, and turns")
-        if len({turn.speaker for turn in self.turns}) > 2:
-            raise ValueError("synthetic dialogue supports at most two speakers")
+        if len({turn.speaker for turn in self.turns}) > 3:
+            raise ValueError("synthetic dialogue supports at most three speakers")
         if tuple(sorted(self.turns, key=lambda turn: (turn.start_ms, turn.end_ms))) != self.turns:
             raise ValueError("scenario turns must be sorted by start time")
 
