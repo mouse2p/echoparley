@@ -109,3 +109,12 @@ def test_dialogue_accepts_three_speakers() -> None:
         "b",
         "c",
     }
+
+
+def test_dialogue_rejects_a_fourth_speaker() -> None:
+    turns = tuple(
+        synth.TurnAnnotation(speaker, index * 10, index * 10 + 8, speaker)
+        for index, speaker in enumerate(("a", "b", "c", "d"))
+    )
+    with pytest.raises(ValueError, match="three speakers"):
+        synth.DialogueScenario("crowd", 0, turns)
