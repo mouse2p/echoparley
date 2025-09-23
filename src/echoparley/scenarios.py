@@ -196,3 +196,25 @@ def three_speaker_scenario(seed: int = 0) -> DialogueScenario:
             TurnAnnotation("a", 1_850, 2_300, "scripted resolution", topic="planning"),
         ),
     )
+
+
+@dataclass(frozen=True, slots=True)
+class ScenarioAnnotations:
+    """Supplemental planted labels keyed by dialogue turn index."""
+
+    backchannels: tuple[tuple[int, BackchannelKind], ...] = ()
+
+    def __post_init__(self) -> None:
+        indices = tuple(index for index, _ in self.backchannels)
+        if any(index < 0 for index in indices) or len(indices) != len(set(indices)):
+            raise ValueError("backchannel annotation indices must be unique and non-negative")
+
+
+def casual_backchannel_annotations(scenario: DialogueScenario) -> ScenarioAnnotations:
+    """Derive labels only for explicitly planted backchannel turns."""
+    labels = tuple(
+        (index, classify_planted_backchannel(turn.text))
+        for index, turn in enumerate(scenario.turns)
+        if turn.kind == "backchannel"
+    )
+    return ScenarioAnnotations(labels)

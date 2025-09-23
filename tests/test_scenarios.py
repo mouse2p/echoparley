@@ -109,3 +109,11 @@ def test_three_speaker_scenario_plants_contention() -> None:
     scenario = three_speaker_scenario(7)
     assert {turn.speaker for turn in scenario.turns} == {"a", "b", "c"}
     assert scenario.overlaps() == ((1, 2),)
+
+
+def test_casual_annotations_key_each_planted_backchannel() -> None:
+    from echoparley.scenarios import casual_backchannel_annotations, casual_backchannel_scenario
+
+    annotations = casual_backchannel_annotations(casual_backchannel_scenario())
+    assert [index for index, _ in annotations.backchannels] == [1, 2, 3]
+    assert {kind for _, kind in annotations.backchannels} == set(BackchannelKind)
