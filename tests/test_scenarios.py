@@ -14,6 +14,15 @@ def test_backchannel_taxonomy_is_explicit_not_inferred() -> None:
     assert classify_planted_backchannel("what") is BackchannelKind.REPAIR
 
 
+def test_floor_contention_policies_have_stable_ties() -> None:
+    from echoparley.scenarios import FloorContentionPolicy, resolve_floor_contention
+
+    claims = (("a", 20), ("b", 30), ("c", 30))
+    assert resolve_floor_contention(claims, FloorContentionPolicy.EARLIEST) == "a"
+    assert resolve_floor_contention(claims, FloorContentionPolicy.ROUND_ROBIN, turn_index=4) == "b"
+    assert resolve_floor_contention(claims, FloorContentionPolicy.LONGEST_WAIT) == "c"
+
+
 def test_negotiation_scenario_contains_a_contested_floor() -> None:
     from echoparley.scenarios import negotiation_scenario
 

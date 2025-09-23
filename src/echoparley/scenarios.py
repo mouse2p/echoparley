@@ -16,6 +16,27 @@ class BackchannelKind(StrEnum):
     REPAIR = "repair"
 
 
+class FloorContentionPolicy(StrEnum):
+    """Deterministic planted rules for choosing among simultaneous claimants."""
+
+    EARLIEST = "earliest"
+    ROUND_ROBIN = "round-robin"
+    LONGEST_WAIT = "longest-wait"
+
+
+def resolve_floor_contention(
+    claimants: tuple[tuple[str, int], ...], policy: FloorContentionPolicy, *, turn_index: int = 0
+) -> str:
+    """Choose a speaker from `(name, waiting_ms)` claims with stable ties."""
+    if not claimants or any(not name or wait < 0 for name, wait in claimants):
+        raise ValueError("floor contention requires valid claimants")
+    if policy is FloorContentionPolicy.EARLIEST:
+        return claimants[0][0]
+    if policy is FloorContentionPolicy.ROUND_ROBIN:
+        return claimants[turn_index % len(claimants)][0]
+    return max(claimants, key=lambda item: (item[1], item[0]))[0]
+
+
 _BACKCHANNEL_WORDS = {
     "okay": BackchannelKind.ACKNOWLEDGE,
     "mhm": BackchannelKind.CONTINUER,
