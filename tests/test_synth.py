@@ -118,3 +118,15 @@ def test_dialogue_rejects_a_fourth_speaker() -> None:
     )
     with pytest.raises(ValueError, match="three speakers"):
         synth.DialogueScenario("crowd", 0, turns)
+
+
+def test_renderer_produces_three_independent_contention_channels() -> None:
+    from echoparley.scenarios import three_speaker_scenario
+
+    profiles = {
+        name: synth.SpeakerProfile(name, frequency, (frequency * 3,))
+        for name, frequency in (("a", 100), ("b", 140), ("c", 180))
+    }
+    channels = synth.render_dialogue(three_speaker_scenario(2), profiles, 2_000)
+    assert set(channels) == set(profiles)
+    assert len({channel.samples.tobytes() for channel in channels.values()}) == 3
