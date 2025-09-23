@@ -179,3 +179,20 @@ def scenario_topics(scenario: DialogueScenario, *, collapse: bool = True) -> tup
     return tuple(
         topic for index, topic in enumerate(topics) if index == 0 or topic != topics[index - 1]
     )
+
+
+def three_speaker_scenario(seed: int = 0) -> DialogueScenario:
+    """Build a three-party exchange with a planted simultaneous floor claim."""
+    offset = seed % 25
+    return DialogueScenario(
+        "three-speaker-contention",
+        seed,
+        (
+            TurnAnnotation("a", 0, 700, "opening statement", topic="planning"),
+            TurnAnnotation("b", 900, 1_450, "first proposal", topic="planning"),
+            TurnAnnotation(
+                "c", 1_180 + offset, 1_620 + offset, "competing proposal", "interrupt", "planning"
+            ),
+            TurnAnnotation("a", 1_850, 2_300, "scripted resolution", topic="planning"),
+        ),
+    )

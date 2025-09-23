@@ -101,3 +101,11 @@ def test_scenario_topics_can_collapse_adjacent_repetitions() -> None:
     scenario = topic_drift_scenario(0)
     assert scenario_topics(scenario) == ("travel", "food", "music")
     assert scenario_topics(scenario, collapse=False)[-2:] == ("music", "music")
+
+
+def test_three_speaker_scenario_plants_contention() -> None:
+    from echoparley.scenarios import three_speaker_scenario
+
+    scenario = three_speaker_scenario(7)
+    assert {turn.speaker for turn in scenario.turns} == {"a", "b", "c"}
+    assert scenario.overlaps() == ((1, 2),)
