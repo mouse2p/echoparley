@@ -218,3 +218,14 @@ def casual_backchannel_annotations(scenario: DialogueScenario) -> ScenarioAnnota
         if turn.kind == "backchannel"
     )
     return ScenarioAnnotations(labels)
+
+
+def validate_scenario_annotations(
+    scenario: DialogueScenario, annotations: ScenarioAnnotations
+) -> None:
+    """Reject supplemental labels that do not point at matching planted turns."""
+    for index, kind in annotations.backchannels:
+        if index >= len(scenario.turns) or scenario.turns[index].kind != "backchannel":
+            raise ValueError("backchannel annotation must reference a backchannel turn")
+        if classify_planted_backchannel(scenario.turns[index].text) is not kind:
+            raise ValueError("backchannel annotation conflicts with planted text")

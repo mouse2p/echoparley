@@ -117,3 +117,14 @@ def test_casual_annotations_key_each_planted_backchannel() -> None:
     annotations = casual_backchannel_annotations(casual_backchannel_scenario())
     assert [index for index, _ in annotations.backchannels] == [1, 2, 3]
     assert {kind for _, kind in annotations.backchannels} == set(BackchannelKind)
+
+
+def test_scenario_annotation_validation_rejects_wrong_turns() -> None:
+    import pytest
+
+    from echoparley.scenarios import ScenarioAnnotations, validate_scenario_annotations
+
+    with pytest.raises(ValueError, match="reference"):
+        validate_scenario_annotations(
+            tutorial_scenario(), ScenarioAnnotations(((0, BackchannelKind.REPAIR),))
+        )
