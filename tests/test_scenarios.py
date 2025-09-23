@@ -128,3 +128,17 @@ def test_scenario_annotation_validation_rejects_wrong_turns() -> None:
         validate_scenario_annotations(
             tutorial_scenario(), ScenarioAnnotations(((0, BackchannelKind.REPAIR),))
         )
+
+
+def test_manifest_two_contains_speakers_and_taxonomy() -> None:
+    from echoparley.scenarios import (
+        casual_backchannel_annotations,
+        casual_backchannel_scenario,
+        scenario_manifest,
+    )
+
+    scenario = casual_backchannel_scenario()
+    manifest = scenario_manifest(scenario, casual_backchannel_annotations(scenario))
+    assert manifest["schema_version"] == "2.0"
+    assert manifest["speakers"] == ["a", "b"]
+    assert manifest["turns"][1]["backchannel_kind"] == "continuer"

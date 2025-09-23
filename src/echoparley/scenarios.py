@@ -229,3 +229,28 @@ def validate_scenario_annotations(
             raise ValueError("backchannel annotation must reference a backchannel turn")
         if classify_planted_backchannel(scenario.turns[index].text) is not kind:
             raise ValueError("backchannel annotation conflicts with planted text")
+
+
+def scenario_manifest(
+    scenario: DialogueScenario, annotations: ScenarioAnnotations | None = None
+) -> dict[str, object]:
+    """Encode complete planted dialogue ground truth using manifest schema 2.0."""
+    labels = dict((annotations or ScenarioAnnotations()).backchannels)
+    return {
+        "schema_version": "2.0",
+        "name": scenario.name,
+        "seed": scenario.seed,
+        "speakers": sorted({turn.speaker for turn in scenario.turns}),
+        "turns": [
+            {
+                "speaker": turn.speaker,
+                "start_ms": turn.start_ms,
+                "end_ms": turn.end_ms,
+                "text": turn.text,
+                "kind": turn.kind,
+                "topic": turn.topic,
+                "backchannel_kind": labels[index].value if index in labels else None,
+            }
+            for index, turn in enumerate(scenario.turns)
+        ],
+    }
