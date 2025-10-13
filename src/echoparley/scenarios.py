@@ -254,3 +254,16 @@ def scenario_manifest(
             for index, turn in enumerate(scenario.turns)
         ],
     }
+
+
+def migrate_scenario_manifest(value: dict[str, object]) -> dict[str, object]:
+    """Upgrade a trusted schema-1 manifest to schema 2 without changing turns."""
+    if value.get("schema_version") == "2.0":
+        return value
+    if value.get("schema_version") != "1.0" or not isinstance(value.get("turns"), list):
+        raise ValueError("unsupported dialogue manifest schema")
+    migrated = {**value, "schema_version": "2.0"}
+    turns = [{**turn, "backchannel_kind": None} for turn in value["turns"]]
+    migrated["turns"] = turns
+    migrated["speakers"] = sorted({str(turn["speaker"]) for turn in turns})
+    return migrated

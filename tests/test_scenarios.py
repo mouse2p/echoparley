@@ -158,3 +158,19 @@ def test_manifest_two_turn_fields_are_exhaustive() -> None:
         "topic",
         "backchannel_kind",
     }
+
+
+def test_manifest_one_migrates_without_losing_turn_content() -> None:
+    from echoparley.scenarios import migrate_scenario_manifest
+
+    legacy = {
+        "schema_version": "1.0",
+        "name": "old",
+        "seed": 1,
+        "turns": [
+            {"speaker": "a", "start_ms": 0, "end_ms": 2, "text": "x", "kind": "turn", "topic": None}
+        ],
+    }
+    migrated = migrate_scenario_manifest(legacy)
+    assert migrated["turns"][0]["text"] == "x"
+    assert migrated["turns"][0]["backchannel_kind"] is None
