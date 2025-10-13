@@ -142,3 +142,19 @@ def test_manifest_two_contains_speakers_and_taxonomy() -> None:
     assert manifest["schema_version"] == "2.0"
     assert manifest["speakers"] == ["a", "b"]
     assert manifest["turns"][1]["backchannel_kind"] == "continuer"
+
+
+def test_manifest_two_turn_fields_are_exhaustive() -> None:
+    from echoparley.scenarios import scenario_manifest
+
+    manifest = scenario_manifest(tutorial_scenario(1))
+    assert set(manifest) == {"schema_version", "name", "seed", "speakers", "turns"}
+    assert set(manifest["turns"][0]) == {
+        "speaker",
+        "start_ms",
+        "end_ms",
+        "text",
+        "kind",
+        "topic",
+        "backchannel_kind",
+    }
