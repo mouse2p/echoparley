@@ -267,3 +267,37 @@ def migrate_scenario_manifest(value: dict[str, object]) -> dict[str, object]:
     migrated["turns"] = turns
     migrated["speakers"] = sorted({str(turn["speaker"]) for turn in turns})
     return migrated
+
+
+def scenario_from_manifest(
+    value: dict[str, object],
+) -> tuple[DialogueScenario, ScenarioAnnotations]:
+    """Restore and validate a dialogue plus supplemental labels from schema 2."""
+    manifest = migrate_scenario_manifest(value)
+    if set(manifest) != {"schema_version", "name", "seed", "speakers", "turns"}:
+        raise ValueError("dialogue manifest fields do not match schema 2")
+    raw_turns = manifest["turns"]
+    if not isinstance(raw_turns, list):
+        raise TypeError("dialogue manifest turns must be a list")
+    turns = tuple(
+        TurnAnnotation(
+            str(item["speaker"]),
+            int(item["start_ms"]),
+            int(item["end_ms"]),
+            str(item["text"]),
+            str(item["kind"]),
+            item["topic"],
+        )
+        for item in raw_turns
+    )
+    labels = tuple(
+        (index, BackchannelKind(item["backchannel_kind"]))
+        for index, item in enumerate(raw_turns)
+        if item["backchannel_kind"] is not None
+    )
+    scenario = DialogueScenario(str(manifest["name"]), int(manifest["seed"]), turns)
+    annotations = ScenarioAnnotations(labels)
+    validate_scenario_annotations(scenario, annotations)
+    if sorted({turn.speaker for turn in turns}) != manifest["speakers"]:
+        raise ValueError("dialogue manifest speaker index does not match turns")
+    return scenario, annotations

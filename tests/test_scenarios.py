@@ -183,3 +183,19 @@ def test_manifest_migration_rejects_unknown_versions() -> None:
 
     with pytest.raises(ValueError, match="unsupported"):
         migrate_scenario_manifest({"schema_version": "3.0", "turns": []})
+
+
+def test_manifest_two_roundtrips_dialogue_and_annotations() -> None:
+    from echoparley.scenarios import (
+        casual_backchannel_annotations,
+        casual_backchannel_scenario,
+        scenario_from_manifest,
+        scenario_manifest,
+    )
+
+    scenario = casual_backchannel_scenario(3)
+    annotations = casual_backchannel_annotations(scenario)
+    assert scenario_from_manifest(scenario_manifest(scenario, annotations)) == (
+        scenario,
+        annotations,
+    )
