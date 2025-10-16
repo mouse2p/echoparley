@@ -199,3 +199,14 @@ def test_manifest_two_roundtrips_dialogue_and_annotations() -> None:
         scenario,
         annotations,
     )
+
+
+def test_manifest_reader_rejects_stale_speaker_index() -> None:
+    import pytest
+
+    from echoparley.scenarios import scenario_from_manifest, scenario_manifest
+
+    manifest = scenario_manifest(tutorial_scenario())
+    manifest["speakers"] = ["nobody"]
+    with pytest.raises(ValueError, match="speaker index"):
+        scenario_from_manifest(manifest)
