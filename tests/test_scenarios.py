@@ -223,3 +223,11 @@ def test_corpus_statistics_count_planted_events() -> None:
     assert corpus_statistics(
         (casual_backchannel_scenario(), three_speaker_scenario())
     ) == CorpusStatistics(2, 8, 3, 4, 3, 4400)
+
+
+def test_corpus_report_checksum_is_reproducible() -> None:
+    from echoparley.scenarios import corpus_report, three_speaker_scenario
+
+    first = corpus_report((three_speaker_scenario(0),))
+    assert first == corpus_report((three_speaker_scenario(0),))
+    assert first["data_origin"] == "synthetic-planted"

@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import StrEnum
 
+from echoparley.artifacts import content_checksum
 from echoparley.synth import DialogueScenario, TurnAnnotation
 
 
@@ -325,3 +326,18 @@ def corpus_statistics(scenarios: tuple[DialogueScenario, ...]) -> CorpusStatisti
         sum(turn.kind == "backchannel" for item in scenarios for turn in item.turns),
         sum(item.duration_ms for item in scenarios),
     )
+
+
+def corpus_report(scenarios: tuple[DialogueScenario, ...]) -> dict[str, object]:
+    """Build a checksummed report whose measurements are synthetic counts."""
+    statistics = corpus_statistics(scenarios)
+    payload = {
+        "data_origin": "synthetic-planted",
+        "dialogues": statistics.dialogues,
+        "turns": statistics.turns,
+        "speakers": statistics.speakers,
+        "overlaps": statistics.overlaps,
+        "backchannels": statistics.backchannels,
+        "duration_ms": statistics.duration_ms,
+    }
+    return {**payload, "checksum": content_checksum(payload)}
