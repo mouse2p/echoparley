@@ -301,3 +301,27 @@ def scenario_from_manifest(
     if sorted({turn.speaker for turn in turns}) != manifest["speakers"]:
         raise ValueError("dialogue manifest speaker index does not match turns")
     return scenario, annotations
+
+
+@dataclass(frozen=True, slots=True)
+class CorpusStatistics:
+    dialogues: int
+    turns: int
+    speakers: int
+    overlaps: int
+    backchannels: int
+    duration_ms: int
+
+
+def corpus_statistics(scenarios: tuple[DialogueScenario, ...]) -> CorpusStatistics:
+    """Aggregate transparent counts over a synthetic scenario collection."""
+    if not scenarios:
+        raise ValueError("corpus statistics require at least one scenario")
+    return CorpusStatistics(
+        len(scenarios),
+        sum(len(item.turns) for item in scenarios),
+        len({turn.speaker for item in scenarios for turn in item.turns}),
+        sum(len(item.overlaps()) for item in scenarios),
+        sum(turn.kind == "backchannel" for item in scenarios for turn in item.turns),
+        sum(item.duration_ms for item in scenarios),
+    )

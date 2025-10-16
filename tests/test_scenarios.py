@@ -210,3 +210,16 @@ def test_manifest_reader_rejects_stale_speaker_index() -> None:
     manifest["speakers"] = ["nobody"]
     with pytest.raises(ValueError, match="speaker index"):
         scenario_from_manifest(manifest)
+
+
+def test_corpus_statistics_count_planted_events() -> None:
+    from echoparley.scenarios import (
+        CorpusStatistics,
+        casual_backchannel_scenario,
+        corpus_statistics,
+        three_speaker_scenario,
+    )
+
+    assert corpus_statistics(
+        (casual_backchannel_scenario(), three_speaker_scenario())
+    ) == CorpusStatistics(2, 8, 3, 4, 3, 4400)
