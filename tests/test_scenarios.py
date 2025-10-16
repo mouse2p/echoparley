@@ -174,3 +174,12 @@ def test_manifest_one_migrates_without_losing_turn_content() -> None:
     migrated = migrate_scenario_manifest(legacy)
     assert migrated["turns"][0]["text"] == "x"
     assert migrated["turns"][0]["backchannel_kind"] is None
+
+
+def test_manifest_migration_rejects_unknown_versions() -> None:
+    import pytest
+
+    from echoparley.scenarios import migrate_scenario_manifest
+
+    with pytest.raises(ValueError, match="unsupported"):
+        migrate_scenario_manifest({"schema_version": "3.0", "turns": []})
