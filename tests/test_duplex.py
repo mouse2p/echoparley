@@ -142,3 +142,12 @@ def test_engine_rejects_regression_without_prior_transition() -> None:
     engine.handle(EndpointEvent(EventKind.SPEECH_START, 10))
     with pytest.raises(ValueError, match="chronological"):
         engine.handle(EndpointEvent(EventKind.SPEECH_END, 9))
+
+
+def test_barge_in_strategy_rejects_invalid_parameters() -> None:
+    from echoparley.duplex import BargeInStrategy
+
+    with pytest.raises(ValueError, match="invalid"):
+        BargeInStrategy(grace_ms=-1)
+    with pytest.raises(ValueError, match="invalid"):
+        BargeInStrategy(competitive_threshold=1.1)
