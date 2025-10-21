@@ -7,6 +7,12 @@ def test_default_turn_policy_is_valid() -> None:
     assert TurnPolicy().min_turn_ms < TurnPolicy().max_turn_ms
 
 
+def test_default_barge_in_strategy_yields_immediately() -> None:
+    from echoparley.duplex import BargeInMode, BargeInStrategy
+
+    assert BargeInStrategy().mode is BargeInMode.IMMEDIATE_YIELD
+
+
 @pytest.mark.parametrize(
     "changes",
     [{"patience_ms": -1}, {"min_turn_ms": 10, "max_turn_ms": 10}, {"interrupt_threshold": 1.1}],

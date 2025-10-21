@@ -34,6 +34,23 @@ class DuplexState(StrEnum):
     RECOVER = "RECOVER"
 
 
+class BargeInMode(StrEnum):
+    IMMEDIATE_YIELD = "immediate-yield"
+    GRACE_WINDOW = "grace-window"
+    COMPETITIVE_FLOOR = "competitive-floor"
+
+
+@dataclass(frozen=True, slots=True)
+class BargeInStrategy:
+    mode: BargeInMode = BargeInMode.IMMEDIATE_YIELD
+    grace_ms: int = 120
+    competitive_threshold: float = 0.9
+
+    def __post_init__(self) -> None:
+        if self.grace_ms < 0 or not 0 <= self.competitive_threshold <= 1:
+            raise ValueError("barge-in strategy parameters are invalid")
+
+
 @dataclass(frozen=True, slots=True)
 class Transition:
     previous: DuplexState
