@@ -174,3 +174,15 @@ def test_grace_strategy_defers_early_interruptions() -> None:
     assert decide_interruption(
         strategy, posterior=1, threshold=0.5, elapsed_speaking_ms=100
     ).should_yield
+
+
+def test_grace_window_reports_why_the_floor_was_retained() -> None:
+    from echoparley.duplex import BargeInMode, BargeInStrategy, decide_interruption
+
+    decision = decide_interruption(
+        BargeInStrategy(BargeInMode.GRACE_WINDOW, 50),
+        posterior=0.9,
+        threshold=0.8,
+        elapsed_speaking_ms=20,
+    )
+    assert decision.reason == "inside grace window" and not decision.should_yield
