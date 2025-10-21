@@ -186,3 +186,15 @@ def test_grace_window_reports_why_the_floor_was_retained() -> None:
         elapsed_speaking_ms=20,
     )
     assert decision.reason == "inside grace window" and not decision.should_yield
+
+
+def test_competitive_strategy_requires_stronger_evidence() -> None:
+    from echoparley.duplex import BargeInMode, BargeInStrategy, decide_interruption
+
+    strategy = BargeInStrategy(BargeInMode.COMPETITIVE_FLOOR, competitive_threshold=0.9)
+    assert not decide_interruption(
+        strategy, posterior=0.85, threshold=0.75, elapsed_speaking_ms=200
+    ).should_yield
+    assert decide_interruption(
+        strategy, posterior=0.95, threshold=0.75, elapsed_speaking_ms=200
+    ).should_yield

@@ -152,4 +152,6 @@ def decide_interruption(
         if elapsed_speaking_ms >= strategy.grace_ms:
             return InterruptionDecision(True, "grace window elapsed")
         return InterruptionDecision(False, "inside grace window")
+    if posterior >= max(threshold, strategy.competitive_threshold):
+        return InterruptionDecision(True, "remote won competitive floor")
     return InterruptionDecision(False, "strategy retained floor")
