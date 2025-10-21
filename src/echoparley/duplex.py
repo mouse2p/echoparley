@@ -126,3 +126,26 @@ class DuplexEngine:
             self.remote_end_ms = None
             return self._move(DuplexState.LISTEN, event, "recovery completed")
         return None
+
+
+@dataclass(frozen=True, slots=True)
+class InterruptionDecision:
+    should_yield: bool
+    reason: str
+
+
+def decide_interruption(
+    strategy: BargeInStrategy,
+    *,
+    posterior: float,
+    threshold: float,
+    elapsed_speaking_ms: int,
+) -> InterruptionDecision:
+    """Apply one deterministic barge-in strategy to a remote speech claim."""
+    if not 0 <= posterior <= 1 or not 0 <= threshold <= 1 or elapsed_speaking_ms < 0:
+        raise ValueError("interruption evidence is invalid")
+    if posterior < threshold:
+        return InterruptionDecision(False, "below interrupt threshold")
+    if strategy.mode is BargeInMode.IMMEDIATE_YIELD:
+        return InterruptionDecision(True, "immediate confident interruption")
+    return InterruptionDecision(False, "strategy retained floor")

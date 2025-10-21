@@ -151,3 +151,14 @@ def test_barge_in_strategy_rejects_invalid_parameters() -> None:
         BargeInStrategy(grace_ms=-1)
     with pytest.raises(ValueError, match="invalid"):
         BargeInStrategy(competitive_threshold=1.1)
+
+
+def test_immediate_strategy_uses_policy_threshold() -> None:
+    from echoparley.duplex import BargeInStrategy, decide_interruption
+
+    assert decide_interruption(
+        BargeInStrategy(), posterior=0.8, threshold=0.75, elapsed_speaking_ms=10
+    ).should_yield
+    assert not decide_interruption(
+        BargeInStrategy(), posterior=0.7, threshold=0.75, elapsed_speaking_ms=10
+    ).should_yield
