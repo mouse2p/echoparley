@@ -162,3 +162,15 @@ def test_immediate_strategy_uses_policy_threshold() -> None:
     assert not decide_interruption(
         BargeInStrategy(), posterior=0.7, threshold=0.75, elapsed_speaking_ms=10
     ).should_yield
+
+
+def test_grace_strategy_defers_early_interruptions() -> None:
+    from echoparley.duplex import BargeInMode, BargeInStrategy, decide_interruption
+
+    strategy = BargeInStrategy(BargeInMode.GRACE_WINDOW, grace_ms=100)
+    assert not decide_interruption(
+        strategy, posterior=1, threshold=0.5, elapsed_speaking_ms=99
+    ).should_yield
+    assert decide_interruption(
+        strategy, posterior=1, threshold=0.5, elapsed_speaking_ms=100
+    ).should_yield

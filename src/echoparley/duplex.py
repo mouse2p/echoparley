@@ -148,4 +148,8 @@ def decide_interruption(
         return InterruptionDecision(False, "below interrupt threshold")
     if strategy.mode is BargeInMode.IMMEDIATE_YIELD:
         return InterruptionDecision(True, "immediate confident interruption")
+    if strategy.mode is BargeInMode.GRACE_WINDOW:
+        if elapsed_speaking_ms >= strategy.grace_ms:
+            return InterruptionDecision(True, "grace window elapsed")
+        return InterruptionDecision(False, "inside grace window")
     return InterruptionDecision(False, "strategy retained floor")
