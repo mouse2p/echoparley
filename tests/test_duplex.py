@@ -208,3 +208,20 @@ def test_interruption_decision_rejects_invalid_evidence() -> None:
         decide_interruption(BargeInStrategy(), posterior=1.1, threshold=0.5, elapsed_speaking_ms=0)
     with pytest.raises(ValueError, match="evidence"):
         decide_interruption(BargeInStrategy(), posterior=0.8, threshold=0.5, elapsed_speaking_ms=-1)
+
+
+def test_grace_window_engine_retains_floor_until_elapsed() -> None:
+    from echoparley.duplex import BargeInMode, BargeInStrategy, DuplexEngine, DuplexState
+    from echoparley.events import EndpointEvent, EventKind
+
+    engine = DuplexEngine(barge_in_strategy=BargeInStrategy(BargeInMode.GRACE_WINDOW, 50))
+    for event in (
+        EndpointEvent(EventKind.SPEECH_END, 0),
+        EndpointEvent(EventKind.DECISION_TICK, 200),
+        EndpointEvent(EventKind.GENERATION_READY, 210),
+    ):
+        engine.handle(event)
+    assert engine.handle(EndpointEvent(EventKind.INTERRUPT, 259, 1.0)) is None
+    assert engine.state is DuplexState.SPEAK
+    engine.handle(EndpointEvent(EventKind.INTERRUPT, 260, 1.0))
+    assert engine.state is DuplexState.BARGE_IN
