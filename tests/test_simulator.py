@@ -70,3 +70,11 @@ def test_strategy_sweep_point_is_immutable() -> None:
 
     point = StrategySweepPoint(BargeInMode.IMMEDIATE_YIELD, 0.8, True, "test")
     assert point.mode.value == "immediate-yield"
+
+
+def test_strategy_sweep_reuses_identical_evidence() -> None:
+    from echoparley.simulator import sweep_barge_in_strategies
+
+    points = sweep_barge_in_strategies((0.8, 0.95))
+    assert len(points) == 6
+    assert sum(point.yielded for point in points) == 5

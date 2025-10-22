@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from echoparley.artifacts import canonical_json
-from echoparley.duplex import BargeInMode, DuplexEngine, DuplexState, TurnPolicy
+from echoparley.duplex import BargeInMode, BargeInStrategy, DuplexEngine, DuplexState, TurnPolicy
 from echoparley.events import EndpointEvent, EventKind
 from echoparley.latency import LatencyBudget, TurnLatency
 from echoparley.synth import DialogueScenario
@@ -127,3 +127,25 @@ def simulation_metadata(scenario: DialogueScenario, result: SimulationResult) ->
         "turns": len(scenario.turns),
         "trace_events": len(result.trace),
     }
+
+
+def sweep_barge_in_strategies(
+    posteriors: tuple[float, ...], *, elapsed_speaking_ms: int = 200
+) -> tuple[StrategySweepPoint, ...]:
+    """Evaluate strategy decisions on identical planted interruption evidence."""
+    from echoparley.duplex import decide_interruption
+
+    points: list[StrategySweepPoint] = []
+    for mode in BargeInMode:
+        strategy = BargeInStrategy(mode)
+        for posterior in posteriors:
+            decision = decide_interruption(
+                strategy,
+                posterior=posterior,
+                threshold=0.75,
+                elapsed_speaking_ms=elapsed_speaking_ms,
+            )
+            points.append(
+                StrategySweepPoint(mode, posterior, decision.should_yield, decision.reason)
+            )
+    return tuple(points)
