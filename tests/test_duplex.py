@@ -225,3 +225,21 @@ def test_grace_window_engine_retains_floor_until_elapsed() -> None:
     assert engine.state is DuplexState.SPEAK
     engine.handle(EndpointEvent(EventKind.INTERRUPT, 260, 1.0))
     assert engine.state is DuplexState.BARGE_IN
+
+
+def test_all_barge_in_modes_preserve_speak_entry_invariant() -> None:
+    import random
+
+    from echoparley.duplex import BargeInMode, BargeInStrategy, DuplexEngine, DuplexState
+    from echoparley.events import EndpointEvent, EventKind
+
+    for mode in BargeInMode:
+        engine = DuplexEngine(barge_in_strategy=BargeInStrategy(mode))
+        rng = random.Random(mode.value)
+        for time_ms in range(60):
+            previous = engine.state
+            engine.handle(EndpointEvent(rng.choice(list(EventKind)), time_ms, rng.random()))
+            assert engine.state is not DuplexState.SPEAK or previous in {
+                DuplexState.SPEAK,
+                DuplexState.TAKE_FLOOR,
+            }
