@@ -103,6 +103,7 @@ def test_interrupt_threshold_controls_barge_in() -> None:
     assert engine.handle(EndpointEvent(EventKind.INTERRUPT, 220, 0.7)) is None
     engine.handle(EndpointEvent(EventKind.INTERRUPT, 221, 0.8))
     assert engine.state is DuplexState.BARGE_IN
+    assert engine.transitions[-1].reason == "immediate confident interruption"
 
 
 def test_barge_in_recovery_flushes_partials_and_listens() -> None:

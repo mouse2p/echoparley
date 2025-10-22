@@ -65,6 +65,7 @@ class DuplexEngine:
     """Deterministic state machine with explicit partial-generation state."""
 
     policy: TurnPolicy = field(default_factory=TurnPolicy)
+    barge_in_strategy: BargeInStrategy = field(default_factory=BargeInStrategy)
     state: DuplexState = DuplexState.LISTEN
     transitions: list[Transition] = field(default_factory=list)
     partial_units: list[int] = field(default_factory=list)
@@ -99,12 +100,19 @@ class DuplexEngine:
             return self._move(DuplexState.SPEAK, event, "first unit ready")
         elif self.state is DuplexState.SPEAK and event.kind is EventKind.UNIT_EMITTED:
             self.partial_units.append(round(event.posterior * 1000))
-        elif (
-            self.state is DuplexState.SPEAK
-            and event.kind in {EventKind.INTERRUPT, EventKind.SPEECH_START}
-            and event.posterior >= self.policy.interrupt_threshold
-        ):
-            return self._move(DuplexState.BARGE_IN, event, "confident remote interruption")
+        elif self.state is DuplexState.SPEAK and event.kind in {
+            EventKind.INTERRUPT,
+            EventKind.SPEECH_START,
+        }:
+            elapsed = event.time_ms - (self.speaking_since_ms or event.time_ms)
+            decision = decide_interruption(
+                self.barge_in_strategy,
+                posterior=event.posterior,
+                threshold=self.policy.interrupt_threshold,
+                elapsed_speaking_ms=elapsed,
+            )
+            if decision.should_yield:
+                return self._move(DuplexState.BARGE_IN, event, decision.reason)
         elif self.state is DuplexState.SPEAK and (
             event.kind is EventKind.TURN_COMPLETE
             or (
