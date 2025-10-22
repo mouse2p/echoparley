@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from echoparley.artifacts import canonical_json
-from echoparley.duplex import DuplexEngine, DuplexState, TurnPolicy
+from echoparley.duplex import BargeInMode, DuplexEngine, DuplexState, TurnPolicy
 from echoparley.events import EndpointEvent, EventKind
 from echoparley.latency import LatencyBudget, TurnLatency
 from echoparley.synth import DialogueScenario
@@ -36,6 +36,14 @@ class SimulationResult:
             for event in self.trace
         ]
         return (canonical_json(payload) + "\n").encode()
+
+
+@dataclass(frozen=True, slots=True)
+class StrategySweepPoint:
+    mode: BargeInMode
+    parameter: float
+    yielded: bool
+    decision_reason: str
 
 
 def planted_events(scenario: DialogueScenario) -> tuple[EndpointEvent, ...]:

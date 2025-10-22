@@ -62,3 +62,11 @@ def test_simulation_metadata_is_honestly_labeled() -> None:
     metadata = simulation_metadata(scenario, simulate_dialogue(scenario))
     assert metadata["data_origin"] == "synthetic-planted"
     assert metadata["seed"] == 3
+
+
+def test_strategy_sweep_point_is_immutable() -> None:
+    from echoparley.duplex import BargeInMode
+    from echoparley.simulator import StrategySweepPoint
+
+    point = StrategySweepPoint(BargeInMode.IMMEDIATE_YIELD, 0.8, True, "test")
+    assert point.mode.value == "immediate-yield"
