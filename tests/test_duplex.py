@@ -198,3 +198,12 @@ def test_competitive_strategy_requires_stronger_evidence() -> None:
     assert decide_interruption(
         strategy, posterior=0.95, threshold=0.75, elapsed_speaking_ms=200
     ).should_yield
+
+
+def test_interruption_decision_rejects_invalid_evidence() -> None:
+    from echoparley.duplex import BargeInStrategy, decide_interruption
+
+    with pytest.raises(ValueError, match="evidence"):
+        decide_interruption(BargeInStrategy(), posterior=1.1, threshold=0.5, elapsed_speaking_ms=0)
+    with pytest.raises(ValueError, match="evidence"):
+        decide_interruption(BargeInStrategy(), posterior=0.8, threshold=0.5, elapsed_speaking_ms=-1)
