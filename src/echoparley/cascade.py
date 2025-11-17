@@ -5,6 +5,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Protocol
 
+import numpy as np
+from numpy.typing import NDArray
+
 from echoparley.adapters import AdapterAction
 from echoparley.events import EndpointEvent
 from echoparley.stream import UnifiedStream
@@ -12,6 +15,33 @@ from echoparley.stream import UnifiedStream
 
 class TextStage(Protocol):
     def __call__(self, value: str) -> str: ...
+
+
+@dataclass(frozen=True, slots=True)
+class VoiceActivitySpan:
+    start_frame: int
+    end_frame: int
+
+
+@dataclass(frozen=True, slots=True)
+class MockVAD:
+    """Energy threshold stage for offline synthetic fixtures."""
+
+    threshold: float = 0.05
+
+    def __post_init__(self) -> None:
+        if self.threshold < 0:
+            raise ValueError("VAD threshold must be non-negative")
+
+    def __call__(self, frame_energy: NDArray[np.float64]) -> tuple[VoiceActivitySpan, ...]:
+        values = np.asarray(frame_energy, dtype=np.float64)
+        if values.ndim != 1 or not np.all(np.isfinite(values)):
+            raise ValueError("VAD energy must be a finite vector")
+        active = values >= self.threshold
+        boundaries = np.flatnonzero(np.diff(np.concatenate(([False], active, [False]))))
+        return tuple(
+            VoiceActivitySpan(int(start), int(end)) for start, end in boundaries.reshape(-1, 2)
+        )
 
 
 @dataclass(frozen=True, slots=True)
