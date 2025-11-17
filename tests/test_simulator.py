@@ -78,3 +78,9 @@ def test_strategy_sweep_reuses_identical_evidence() -> None:
     points = sweep_barge_in_strategies((0.8, 0.95))
     assert len(points) == 6
     assert sum(point.yielded for point in points) == 5
+
+
+def test_strategy_sweep_is_deterministic() -> None:
+    from echoparley.simulator import sweep_barge_in_strategies
+
+    assert sweep_barge_in_strategies((0.7, 0.8, 0.9)) == sweep_barge_in_strategies((0.7, 0.8, 0.9))
