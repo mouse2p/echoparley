@@ -17,3 +17,11 @@ def test_latency_histogram_uses_half_open_bins() -> None:
     assert latency_histogram((0, 49, 50, 101), 50) == ((0, 2), (50, 1), (100, 1))
     with pytest.raises(ValueError):
         latency_histogram((-1,))
+
+
+def test_strategy_comparison_svg_is_stable_and_labeled() -> None:
+    from echoparley.reports import strategy_comparison_svg
+
+    svg = strategy_comparison_svg(({"strategy": "grace-window", "yield_rate": 0.5},))
+    assert 'width="200"' in svg
+    assert "synthetic-planted" in svg and svg.endswith("\n")

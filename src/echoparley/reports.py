@@ -53,3 +53,29 @@ def latency_histogram(values: tuple[int, ...], bin_ms: int = 50) -> tuple[tuple[
         start = value // bin_ms * bin_ms
         counts[start] = counts.get(start, 0) + 1
     return tuple(sorted(counts.items()))
+
+
+def strategy_comparison_svg(rows: tuple[dict[str, object], ...]) -> str:
+    """Render measured synthetic strategy yield rates as deterministic bars."""
+    bars = []
+    for index, row in enumerate(rows):
+        rate = float(row["yield_rate"])
+        if not 0 <= rate <= 1:
+            raise ValueError("strategy yield rates must be bounded")
+        width = round(rate * 400)
+        label = html.escape(str(row["strategy"]))
+        bars.append(
+            f'<text x="20" y="{35 + index * 35}">{label}</text>'
+            f'<rect x="180" y="{20 + index * 35}" width="{width}" '
+            'height="18" fill="#0f766e"/>'
+        )
+    height = 40 + 35 * len(rows)
+    return "\n".join(
+        [
+            f'<svg xmlns="http://www.w3.org/2000/svg" width="620" height="{height}">',
+            '<metadata data-origin="synthetic-planted"/>',
+            *bars,
+            "</svg>",
+            "",
+        ]
+    )
