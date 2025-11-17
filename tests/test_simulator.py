@@ -84,3 +84,15 @@ def test_strategy_sweep_is_deterministic() -> None:
     from echoparley.simulator import sweep_barge_in_strategies
 
     assert sweep_barge_in_strategies((0.7, 0.8, 0.9)) == sweep_barge_in_strategies((0.7, 0.8, 0.9))
+
+
+def test_strategy_table_reports_bounded_measured_rates() -> None:
+    from echoparley.simulator import strategy_comparison_table, sweep_barge_in_strategies
+
+    rows = strategy_comparison_table(sweep_barge_in_strategies((0.7, 0.8, 0.95)))
+    assert [row["strategy"] for row in rows] == [
+        "immediate-yield",
+        "grace-window",
+        "competitive-floor",
+    ]
+    assert all(0 <= row["yield_rate"] <= 1 for row in rows)

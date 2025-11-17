@@ -149,3 +149,23 @@ def sweep_barge_in_strategies(
                 StrategySweepPoint(mode, posterior, decision.should_yield, decision.reason)
             )
     return tuple(points)
+
+
+def strategy_comparison_table(
+    points: tuple[StrategySweepPoint, ...],
+) -> tuple[dict[str, object], ...]:
+    """Aggregate yielded proportions for a synthetic parameter sweep."""
+    rows = []
+    for mode in BargeInMode:
+        selected = tuple(point for point in points if point.mode is mode)
+        if selected:
+            rows.append(
+                {
+                    "strategy": mode.value,
+                    "trials": len(selected),
+                    "yield_rate": round(
+                        sum(point.yielded for point in selected) / len(selected), 6
+                    ),
+                }
+            )
+    return tuple(rows)
