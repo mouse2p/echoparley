@@ -16,3 +16,10 @@ def test_mock_vad_validates_thresholds_and_finite_energy() -> None:
     with pytest.raises(ValueError, match="finite"):
         MockVAD()(np.array([np.nan]))
     assert MockVAD()(np.array([])) == ()
+
+
+def test_mock_punctuation_normalizes_spacing_and_terminal_mark() -> None:
+    from echoparley.cascade import MockPunctuation
+
+    assert MockPunctuation()("  hello   synthetic world ") == "Hello synthetic world."
+    assert MockPunctuation("?")("where now!") == "Where now!"

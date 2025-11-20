@@ -115,3 +115,21 @@ class CascadeAdapter:
         return AdapterAction(
             tuple(f"<unit:{unit}>" for unit in result.units), result.total_delay_ms
         )
+
+
+@dataclass(frozen=True, slots=True)
+class MockPunctuation:
+    """Deterministic transcript casing and terminal punctuation stage."""
+
+    terminal: str = "."
+
+    def __post_init__(self) -> None:
+        if self.terminal not in {".", "?", "!"}:
+            raise ValueError("unsupported terminal punctuation")
+
+    def __call__(self, value: str) -> str:
+        text = " ".join(value.split())
+        if not text:
+            return ""
+        restored = text[0].upper() + text[1:]
+        return restored if restored[-1] in ".?!" else restored + self.terminal
