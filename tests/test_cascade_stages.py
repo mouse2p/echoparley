@@ -44,3 +44,13 @@ def test_mock_tts_alignment_covers_each_scripted_word() -> None:
         (50, 100, "world"),
     ]
     assert all(0 <= item.identifier < 64 for item in aligned)
+
+
+def test_mock_tts_alignment_handles_empty_text_and_bad_duration() -> None:
+    import pytest
+
+    from echoparley.cascade import MockTTSAlignment
+
+    assert MockTTSAlignment()("") == ()
+    with pytest.raises(ValueError, match="positive"):
+        MockTTSAlignment(0)
