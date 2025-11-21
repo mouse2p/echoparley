@@ -33,3 +33,14 @@ def test_mock_punctuation_preserves_empty_input_and_validates_marks() -> None:
     assert MockPunctuation()("   ") == ""
     with pytest.raises(ValueError, match="unsupported"):
         MockPunctuation(",")
+
+
+def test_mock_tts_alignment_covers_each_scripted_word() -> None:
+    from echoparley.cascade import MockTTSAlignment
+
+    aligned = MockTTSAlignment(50)("hello world")
+    assert [(item.start_ms, item.end_ms, item.text) for item in aligned] == [
+        (0, 50, "hello"),
+        (50, 100, "world"),
+    ]
+    assert all(0 <= item.identifier < 64 for item in aligned)

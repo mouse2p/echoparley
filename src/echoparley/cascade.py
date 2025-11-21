@@ -133,3 +133,29 @@ class MockPunctuation:
             return ""
         restored = text[0].upper() + text[1:]
         return restored if restored[-1] in ".?!" else restored + self.terminal
+
+
+@dataclass(frozen=True, slots=True)
+class AlignedTTSUnit:
+    identifier: int
+    start_ms: int
+    end_ms: int
+    text: str
+
+
+@dataclass(frozen=True, slots=True)
+class MockTTSAlignment:
+    unit_ms: int = 40
+
+    def __post_init__(self) -> None:
+        if self.unit_ms <= 0:
+            raise ValueError("TTS unit duration must be positive")
+
+    def __call__(self, text: str) -> tuple[AlignedTTSUnit, ...]:
+        words = text.split()
+        return tuple(
+            AlignedTTSUnit(
+                sum(map(ord, word)) % 64, index * self.unit_ms, (index + 1) * self.unit_ms, word
+            )
+            for index, word in enumerate(words)
+        )
