@@ -23,3 +23,13 @@ def test_mock_punctuation_normalizes_spacing_and_terminal_mark() -> None:
 
     assert MockPunctuation()("  hello   synthetic world ") == "Hello synthetic world."
     assert MockPunctuation("?")("where now!") == "Where now!"
+
+
+def test_mock_punctuation_preserves_empty_input_and_validates_marks() -> None:
+    import pytest
+
+    from echoparley.cascade import MockPunctuation
+
+    assert MockPunctuation()("   ") == ""
+    with pytest.raises(ValueError, match="unsupported"):
+        MockPunctuation(",")
