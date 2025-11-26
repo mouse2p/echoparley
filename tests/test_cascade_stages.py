@@ -63,3 +63,14 @@ def test_stage_latency_ledger_is_immutable_and_exact() -> None:
     second = first.append("stt", 20)
     assert first.total_ms == 10 and second.total_ms == 30
     assert [item.name for item in second.timings] == ["vad", "stt"]
+
+
+def test_stage_timing_rejects_blank_names_and_negative_delay() -> None:
+    import pytest
+
+    from echoparley.cascade import StageTiming
+
+    with pytest.raises(ValueError, match="name"):
+        StageTiming("", 1)
+    with pytest.raises(ValueError, match="non-negative"):
+        StageTiming("stt", -1)
