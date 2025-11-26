@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import random
 from dataclasses import dataclass
 from typing import Protocol
 
@@ -181,3 +182,23 @@ class StageLatencyLedger:
 
     def append(self, name: str, delay_ms: int) -> StageLatencyLedger:
         return StageLatencyLedger((*self.timings, StageTiming(name, delay_ms)))
+
+
+@dataclass(frozen=True, slots=True)
+class SeededFaultPlan:
+    seed: int
+    failure_rate: float
+    stages: tuple[str, ...] = ("vad", "stt", "punctuation", "lm", "tts")
+
+    def __post_init__(self) -> None:
+        if (
+            self.seed < 0
+            or not 0 <= self.failure_rate <= 1
+            or not self.stages
+            or any(not item for item in self.stages)
+        ):
+            raise ValueError("fault plan configuration is invalid")
+
+    def failing_stages(self) -> frozenset[str]:
+        rng = random.Random(self.seed)
+        return frozenset(stage for stage in self.stages if rng.random() < self.failure_rate)

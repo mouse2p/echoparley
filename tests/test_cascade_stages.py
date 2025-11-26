@@ -74,3 +74,11 @@ def test_stage_timing_rejects_blank_names_and_negative_delay() -> None:
         StageTiming("", 1)
     with pytest.raises(ValueError, match="non-negative"):
         StageTiming("stt", -1)
+
+
+def test_fault_plan_is_seeded_and_stage_specific() -> None:
+    from echoparley.cascade import SeededFaultPlan
+
+    plan = SeededFaultPlan(4, 0.5)
+    assert plan.failing_stages() == SeededFaultPlan(4, 0.5).failing_stages()
+    assert plan.failing_stages() <= set(plan.stages)
