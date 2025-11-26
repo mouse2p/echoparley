@@ -54,3 +54,12 @@ def test_mock_tts_alignment_handles_empty_text_and_bad_duration() -> None:
     assert MockTTSAlignment()("") == ()
     with pytest.raises(ValueError, match="positive"):
         MockTTSAlignment(0)
+
+
+def test_stage_latency_ledger_is_immutable_and_exact() -> None:
+    from echoparley.cascade import StageLatencyLedger
+
+    first = StageLatencyLedger().append("vad", 10)
+    second = first.append("stt", 20)
+    assert first.total_ms == 10 and second.total_ms == 30
+    assert [item.name for item in second.timings] == ["vad", "stt"]

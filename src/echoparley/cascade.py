@@ -159,3 +159,25 @@ class MockTTSAlignment:
             )
             for index, word in enumerate(words)
         )
+
+
+@dataclass(frozen=True, slots=True)
+class StageTiming:
+    name: str
+    delay_ms: int
+
+    def __post_init__(self) -> None:
+        if not self.name or self.delay_ms < 0:
+            raise ValueError("stage timing requires a name and non-negative delay")
+
+
+@dataclass(frozen=True, slots=True)
+class StageLatencyLedger:
+    timings: tuple[StageTiming, ...] = ()
+
+    @property
+    def total_ms(self) -> int:
+        return sum(item.delay_ms for item in self.timings)
+
+    def append(self, name: str, delay_ms: int) -> StageLatencyLedger:
+        return StageLatencyLedger((*self.timings, StageTiming(name, delay_ms)))
