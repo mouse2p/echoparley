@@ -102,3 +102,12 @@ def test_stage_failures_map_to_explicit_local_fallbacks() -> None:
     assert degrade_after_failure("vad", "audio").retained_output == ""
     assert degrade_after_failure("punctuation", "raw words").retained_output == "raw words"
     assert degrade_after_failure("tts", "answer").fallback == "text-only-response"
+
+
+def test_degradation_rejects_unknown_stage_names() -> None:
+    import pytest
+
+    from echoparley.cascade import degrade_after_failure
+
+    with pytest.raises(ValueError, match="unknown"):
+        degrade_after_failure("network", "")
