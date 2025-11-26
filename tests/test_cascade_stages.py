@@ -94,3 +94,11 @@ def test_fault_plan_rate_extremes_are_exact() -> None:
     assert full.failing_stages() == frozenset(full.stages)
     with pytest.raises(ValueError, match="invalid"):
         SeededFaultPlan(0, 1.1)
+
+
+def test_stage_failures_map_to_explicit_local_fallbacks() -> None:
+    from echoparley.cascade import degrade_after_failure
+
+    assert degrade_after_failure("vad", "audio").retained_output == ""
+    assert degrade_after_failure("punctuation", "raw words").retained_output == "raw words"
+    assert degrade_after_failure("tts", "answer").fallback == "text-only-response"

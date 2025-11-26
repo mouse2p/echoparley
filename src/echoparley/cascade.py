@@ -202,3 +202,25 @@ class SeededFaultPlan:
     def failing_stages(self) -> frozenset[str]:
         rng = random.Random(self.seed)
         return frozenset(stage for stage in self.stages if rng.random() < self.failure_rate)
+
+
+@dataclass(frozen=True, slots=True)
+class CascadeDegradation:
+    failed_stage: str
+    fallback: str
+    retained_output: str
+
+
+def degrade_after_failure(stage: str, last_output: str) -> CascadeDegradation:
+    """Choose an explicit local fallback without pretending the stage succeeded."""
+    fallbacks = {
+        "vad": "treat-as-silence",
+        "stt": "empty-transcript",
+        "punctuation": "raw-transcript",
+        "lm": "scripted-apology",
+        "tts": "text-only-response",
+    }
+    if stage not in fallbacks:
+        raise ValueError(f"unknown cascade stage: {stage}")
+    retained = last_output if stage in {"punctuation", "tts"} else ""
+    return CascadeDegradation(stage, fallbacks[stage], retained)
