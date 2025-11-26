@@ -82,3 +82,15 @@ def test_fault_plan_is_seeded_and_stage_specific() -> None:
     plan = SeededFaultPlan(4, 0.5)
     assert plan.failing_stages() == SeededFaultPlan(4, 0.5).failing_stages()
     assert plan.failing_stages() <= set(plan.stages)
+
+
+def test_fault_plan_rate_extremes_are_exact() -> None:
+    import pytest
+
+    from echoparley.cascade import SeededFaultPlan
+
+    assert SeededFaultPlan(0, 0).failing_stages() == frozenset()
+    full = SeededFaultPlan(0, 1)
+    assert full.failing_stages() == frozenset(full.stages)
+    with pytest.raises(ValueError, match="invalid"):
+        SeededFaultPlan(0, 1.1)
