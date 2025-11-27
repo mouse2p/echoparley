@@ -118,3 +118,14 @@ def test_cascade_configuration_accepts_ordered_subsets() -> None:
 
     config = CascadeConfiguration(("vad", "stt", "tts"), (5, 40, 70))
     assert dict(zip(config.enabled_stages, config.delays_ms, strict=True))["tts"] == 70
+
+
+def test_cascade_configuration_rejects_reordered_or_duplicate_stages() -> None:
+    import pytest
+
+    from echoparley.cascade import CascadeConfiguration
+
+    with pytest.raises(ValueError, match="pipeline order"):
+        CascadeConfiguration(("tts", "stt"), (1, 1))
+    with pytest.raises(ValueError, match="known and unique"):
+        CascadeConfiguration(("stt", "stt"), (1, 1))
