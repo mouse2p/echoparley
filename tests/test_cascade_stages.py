@@ -129,3 +129,12 @@ def test_cascade_configuration_rejects_reordered_or_duplicate_stages() -> None:
         CascadeConfiguration(("tts", "stt"), (1, 1))
     with pytest.raises(ValueError, match="known and unique"):
         CascadeConfiguration(("stt", "stt"), (1, 1))
+
+
+def test_cascade_reconfiguration_preserves_original_and_updates_ledger() -> None:
+    from echoparley.cascade import CascadeConfiguration
+
+    original = CascadeConfiguration(("stt", "tts"), (80, 90))
+    changed = original.with_delay("tts", 120)
+    assert original.delays_ms == (80, 90)
+    assert changed.latency_ledger().total_ms == 200

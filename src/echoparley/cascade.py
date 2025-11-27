@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import random
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Protocol
 
 import numpy as np
@@ -244,3 +244,19 @@ class CascadeConfiguration:
         positions = [CASCADE_STAGE_ORDER.index(stage) for stage in self.enabled_stages]
         if positions != sorted(positions) or any(delay < 0 for delay in self.delays_ms):
             raise ValueError("cascade stages must follow pipeline order with non-negative delays")
+
+    def with_delay(self, stage: str, delay_ms: int) -> CascadeConfiguration:
+        """Return a validated copy with one stage delay replaced."""
+        if stage not in self.enabled_stages:
+            raise ValueError(f"stage is not enabled: {stage}")
+        delays = list(self.delays_ms)
+        delays[self.enabled_stages.index(stage)] = delay_ms
+        return replace(self, delays_ms=tuple(delays))
+
+    def latency_ledger(self) -> StageLatencyLedger:
+        return StageLatencyLedger(
+            tuple(
+                StageTiming(name, delay)
+                for name, delay in zip(self.enabled_stages, self.delays_ms, strict=True)
+            )
+        )
