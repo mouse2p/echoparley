@@ -224,3 +224,23 @@ def degrade_after_failure(stage: str, last_output: str) -> CascadeDegradation:
         raise ValueError(f"unknown cascade stage: {stage}")
     retained = last_output if stage in {"punctuation", "tts"} else ""
     return CascadeDegradation(stage, fallbacks[stage], retained)
+
+
+CASCADE_STAGE_ORDER = ("vad", "stt", "punctuation", "lm", "tts")
+
+
+@dataclass(frozen=True, slots=True)
+class CascadeConfiguration:
+    enabled_stages: tuple[str, ...] = CASCADE_STAGE_ORDER
+    delays_ms: tuple[int, ...] = (10, 80, 15, 60, 90)
+
+    def __post_init__(self) -> None:
+        if not self.enabled_stages or len(self.enabled_stages) != len(self.delays_ms):
+            raise ValueError("cascade stages and delays must align")
+        if any(stage not in CASCADE_STAGE_ORDER for stage in self.enabled_stages) or len(
+            set(self.enabled_stages)
+        ) != len(self.enabled_stages):
+            raise ValueError("cascade stages must be known and unique")
+        positions = [CASCADE_STAGE_ORDER.index(stage) for stage in self.enabled_stages]
+        if positions != sorted(positions) or any(delay < 0 for delay in self.delays_ms):
+            raise ValueError("cascade stages must follow pipeline order with non-negative delays")

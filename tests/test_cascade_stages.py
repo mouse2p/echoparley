@@ -111,3 +111,10 @@ def test_degradation_rejects_unknown_stage_names() -> None:
 
     with pytest.raises(ValueError, match="unknown"):
         degrade_after_failure("network", "")
+
+
+def test_cascade_configuration_accepts_ordered_subsets() -> None:
+    from echoparley.cascade import CascadeConfiguration
+
+    config = CascadeConfiguration(("vad", "stt", "tts"), (5, 40, 70))
+    assert dict(zip(config.enabled_stages, config.delays_ms, strict=True))["tts"] == 70
