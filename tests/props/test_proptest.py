@@ -15,3 +15,11 @@ def test_stream_generator_is_seeded_and_schema_valid() -> None:
     first = generate_streams(7, 5)
     assert first == generate_streams(7, 5)
     assert all(stream.policy == "time-aligned" for stream in first.values)
+
+
+def test_stream_generator_varies_cases_and_validates_count() -> None:
+    from echoparley.proptest import generate_streams
+
+    assert generate_streams(1, 3) != generate_streams(2, 3)
+    with pytest.raises(ValueError, match="invalid"):
+        generate_streams(0, 0)
