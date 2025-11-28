@@ -1,3 +1,5 @@
+import itertools
+
 import pytest
 
 from echoparley.proptest import CaseSet
@@ -23,3 +25,10 @@ def test_stream_generator_varies_cases_and_validates_count() -> None:
     assert generate_streams(1, 3) != generate_streams(2, 3)
     with pytest.raises(ValueError, match="invalid"):
         generate_streams(0, 0)
+
+
+def test_turn_generator_produces_chronological_histories() -> None:
+    from echoparley.proptest import generate_turns
+
+    for turns in generate_turns(9, 8).values:
+        assert all(left.end_ms <= right.start_ms for left, right in itertools.pairwise(turns))

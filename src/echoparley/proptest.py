@@ -6,6 +6,7 @@ import random
 from dataclasses import dataclass
 from typing import Generic, TypeVar
 
+from echoparley.state import ConversationTurn
 from echoparley.stream import StreamToken, TokenKind, UnifiedStream
 
 T = TypeVar("T")
@@ -44,3 +45,29 @@ def generate_streams(seed: int, count: int = 20) -> CaseSet[UnifiedStream]:
             time_ms += rng.randint(0, 30)
         streams.append(UnifiedStream(tuple(tokens), "time-aligned"))
     return CaseSet(seed, tuple(streams))
+
+
+def generate_turns(seed: int, count: int = 20) -> CaseSet[tuple[ConversationTurn, ...]]:
+    """Generate histories with planted topics and exact token costs."""
+    if seed < 0 or count <= 0:
+        raise ValueError("turn generator configuration is invalid")
+    rng = random.Random(seed)
+    histories = []
+    for _ in range(count):
+        time_ms = 0
+        turns = []
+        for index in range(rng.randint(1, 10)):
+            duration = rng.randint(1, 200)
+            turns.append(
+                ConversationTurn(
+                    ("a", "b")[index % 2],
+                    f"turn-{index}",
+                    rng.randint(0, 12),
+                    time_ms,
+                    time_ms + duration,
+                    rng.choice(("alpha", "beta")),
+                )
+            )
+            time_ms += duration + rng.randint(0, 50)
+        histories.append(tuple(turns))
+    return CaseSet(seed, tuple(histories))
