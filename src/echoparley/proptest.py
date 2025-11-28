@@ -6,6 +6,7 @@ import random
 from dataclasses import dataclass
 from typing import Generic, TypeVar
 
+from echoparley.session import SessionEvent
 from echoparley.state import ConversationTurn
 from echoparley.stream import StreamToken, TokenKind, UnifiedStream
 
@@ -71,3 +72,26 @@ def generate_turns(seed: int, count: int = 20) -> CaseSet[tuple[ConversationTurn
             time_ms += duration + rng.randint(0, 50)
         histories.append(tuple(turns))
     return CaseSet(seed, tuple(histories))
+
+
+def generate_sessions(seed: int, count: int = 20) -> CaseSet[tuple[SessionEvent, ...]]:
+    """Generate contiguous, monotone session traces for replay properties."""
+    if seed < 0 or count <= 0:
+        raise ValueError("session generator configuration is invalid")
+    rng = random.Random(seed)
+    sessions = []
+    for _ in range(count):
+        now = 0
+        events = []
+        for sequence in range(rng.randint(1, 12)):
+            now += rng.randint(0, 30)
+            events.append(
+                SessionEvent(
+                    sequence,
+                    now,
+                    rng.choice(("tick", "observe", "act")),
+                    {"value": rng.randint(0, 9)},
+                )
+            )
+        sessions.append(tuple(events))
+    return CaseSet(seed, tuple(sessions))

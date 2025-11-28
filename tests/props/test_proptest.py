@@ -32,3 +32,11 @@ def test_turn_generator_produces_chronological_histories() -> None:
 
     for turns in generate_turns(9, 8).values:
         assert all(left.end_ms <= right.start_ms for left, right in itertools.pairwise(turns))
+
+
+def test_session_generator_produces_contiguous_sequences() -> None:
+    from echoparley.proptest import generate_sessions
+
+    for events in generate_sessions(2, 7).values:
+        assert [event.sequence for event in events] == list(range(len(events)))
+        assert [event.time_ms for event in events] == sorted(event.time_ms for event in events)
