@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
+import random
 from dataclasses import dataclass
 from typing import Generic, TypeVar
+
+from echoparley.stream import StreamToken, TokenKind, UnifiedStream
 
 T = TypeVar("T")
 
@@ -18,3 +21,26 @@ class CaseSet(Generic[T]):
     def __post_init__(self) -> None:
         if self.seed < 0 or not self.values:
             raise ValueError("property cases require a non-negative seed and values")
+
+
+def generate_streams(seed: int, count: int = 20) -> CaseSet[UnifiedStream]:
+    """Generate valid time-aligned streams with mixed token namespaces."""
+    if seed < 0 or count <= 0:
+        raise ValueError("stream generator configuration is invalid")
+    rng = random.Random(seed)
+    streams = []
+    spellings = {TokenKind.TEXT: "word", TokenKind.UNIT: "<unit:3>", TokenKind.CONTROL: "<silence>"}
+    for _ in range(count):
+        time_ms = 0
+        tokens = []
+        for _ in range(rng.randint(1, 8)):
+            kind = rng.choice(list(TokenKind))
+            duration = rng.randint(0, 40)
+            tokens.append(
+                StreamToken(
+                    kind, spellings[kind], rng.choice(("a", "b")), time_ms, time_ms + duration
+                )
+            )
+            time_ms += rng.randint(0, 30)
+        streams.append(UnifiedStream(tuple(tokens), "time-aligned"))
+    return CaseSet(seed, tuple(streams))
