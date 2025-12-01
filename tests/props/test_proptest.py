@@ -48,3 +48,10 @@ def test_endpoint_generator_is_monotone_and_bounded() -> None:
     for events in generate_endpoint_traces(5, 6).values:
         assert [event.time_ms for event in events] == sorted(event.time_ms for event in events)
         assert all(0 <= event.posterior <= 1 for event in events)
+
+
+def test_integer_shrinker_moves_toward_zero() -> None:
+    from echoparley.proptest import shrink_non_negative
+
+    assert shrink_non_negative(10) == (0, 1, 2, 5)
+    assert shrink_non_negative(0) == ()

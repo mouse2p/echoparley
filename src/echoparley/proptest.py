@@ -116,3 +116,16 @@ def generate_endpoint_traces(seed: int, count: int = 20) -> CaseSet[tuple[Endpoi
             )
         traces.append(tuple(events))
     return CaseSet(seed, tuple(traces))
+
+
+def shrink_non_negative(value: int) -> tuple[int, ...]:
+    """Return deterministic candidates approaching the minimal value zero."""
+    if value < 0:
+        raise ValueError("integer shrinker accepts only non-negative values")
+    candidates = {0}
+    current = value
+    while current > 1:
+        current //= 2
+        candidates.add(current)
+    candidates.discard(value)
+    return tuple(sorted(candidates))
