@@ -40,3 +40,11 @@ def test_session_generator_produces_contiguous_sequences() -> None:
     for events in generate_sessions(2, 7).values:
         assert [event.sequence for event in events] == list(range(len(events)))
         assert [event.time_ms for event in events] == sorted(event.time_ms for event in events)
+
+
+def test_endpoint_generator_is_monotone_and_bounded() -> None:
+    from echoparley.proptest import generate_endpoint_traces
+
+    for events in generate_endpoint_traces(5, 6).values:
+        assert [event.time_ms for event in events] == sorted(event.time_ms for event in events)
+        assert all(0 <= event.posterior <= 1 for event in events)

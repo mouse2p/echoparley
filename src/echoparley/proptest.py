@@ -6,6 +6,7 @@ import random
 from dataclasses import dataclass
 from typing import Generic, TypeVar
 
+from echoparley.events import EndpointEvent, EventKind
 from echoparley.session import SessionEvent
 from echoparley.state import ConversationTurn
 from echoparley.stream import StreamToken, TokenKind, UnifiedStream
@@ -95,3 +96,23 @@ def generate_sessions(seed: int, count: int = 20) -> CaseSet[tuple[SessionEvent,
             )
         sessions.append(tuple(events))
     return CaseSet(seed, tuple(sessions))
+
+
+def generate_endpoint_traces(seed: int, count: int = 20) -> CaseSet[tuple[EndpointEvent, ...]]:
+    """Generate chronological endpoint evidence for state-machine properties."""
+    if seed < 0 or count <= 0:
+        raise ValueError("endpoint generator configuration is invalid")
+    rng = random.Random(seed)
+    traces = []
+    for _ in range(count):
+        now = 0
+        events = []
+        for _ in range(rng.randint(1, 20)):
+            now += rng.randint(0, 20)
+            events.append(
+                EndpointEvent(
+                    rng.choice(list(EventKind)), now, rng.random(), rng.choice(("a", "b"))
+                )
+            )
+        traces.append(tuple(events))
+    return CaseSet(seed, tuple(traces))
