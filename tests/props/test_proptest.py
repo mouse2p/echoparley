@@ -55,3 +55,10 @@ def test_integer_shrinker_moves_toward_zero() -> None:
 
     assert shrink_non_negative(10) == (0, 1, 2, 5)
     assert shrink_non_negative(0) == ()
+
+
+def test_integer_shrinker_rejects_negative_inputs() -> None:
+    from echoparley.proptest import shrink_non_negative
+
+    with pytest.raises(ValueError, match="non-negative"):
+        shrink_non_negative(-1)
