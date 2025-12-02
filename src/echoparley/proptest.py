@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import random
+from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Generic, TypeVar
 
@@ -146,3 +147,29 @@ def shrink_sequence(values: tuple[T, ...]) -> tuple[tuple[T, ...], ...]:
             break
         width //= 2
     return tuple(candidates)
+
+
+@dataclass(frozen=True, slots=True)
+class PropertyFailure(Generic[T]):
+    seed: int
+    case_index: int
+    original: T
+    minimal: T
+
+
+def check_cases(
+    cases: CaseSet[T],
+    predicate: Callable[[T], bool],
+    shrinker: Callable[[T], tuple[T, ...]] | None = None,
+) -> PropertyFailure[T] | None:
+    """Return the first failing case and greedily minimized reproduction."""
+    for index, value in enumerate(cases.values):
+        if predicate(value):
+            continue
+        minimal = value
+        if shrinker is not None:
+            for candidate in shrinker(value):
+                if not predicate(candidate):
+                    minimal = candidate
+        return PropertyFailure(cases.seed, index, value, minimal)
+    return None
