@@ -181,3 +181,11 @@ def stream_roundtrip_invariant(value: UnifiedStream) -> bool:
     from echoparley.stream import stream_from_mapping, stream_to_mapping
 
     return stream_from_mapping(stream_to_mapping(value)) == value
+
+
+def session_roundtrip_invariant(value: tuple[SessionEvent, ...]) -> bool:
+    """Check byte-stable encode/decode reconstruction for generated sessions."""
+    from echoparley.session import decode_session, encode_session
+
+    encoded = encode_session(value)
+    return decode_session(encoded) == value and encode_session(decode_session(encoded)) == encoded

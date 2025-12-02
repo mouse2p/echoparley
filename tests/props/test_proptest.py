@@ -84,3 +84,9 @@ def test_generated_streams_roundtrip_exactly() -> None:
     from echoparley.proptest import check_cases, generate_streams, stream_roundtrip_invariant
 
     assert check_cases(generate_streams(11, 30), stream_roundtrip_invariant) is None
+
+
+def test_generated_sessions_replay_byte_identically() -> None:
+    from echoparley.proptest import check_cases, generate_sessions, session_roundtrip_invariant
+
+    assert check_cases(generate_sessions(12, 25), session_roundtrip_invariant) is None
