@@ -78,3 +78,9 @@ def test_property_checker_reports_reproducible_minimum() -> None:
     failure = check_cases(CaseSet(8, (2, 7, 10)), lambda value: value < 0, shrink_non_negative)
     assert failure is not None
     assert (failure.seed, failure.case_index, failure.original, failure.minimal) == (8, 0, 2, 0)
+
+
+def test_generated_streams_roundtrip_exactly() -> None:
+    from echoparley.proptest import check_cases, generate_streams, stream_roundtrip_invariant
+
+    assert check_cases(generate_streams(11, 30), stream_roundtrip_invariant) is None

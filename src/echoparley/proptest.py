@@ -174,3 +174,10 @@ def check_cases(
                     break
         return PropertyFailure(cases.seed, index, value, minimal)
     return None
+
+
+def stream_roundtrip_invariant(value: UnifiedStream) -> bool:
+    """Check exact public mapping roundtrip for a generated stream."""
+    from echoparley.stream import stream_from_mapping, stream_to_mapping
+
+    return stream_from_mapping(stream_to_mapping(value)) == value
