@@ -171,5 +171,6 @@ def check_cases(
             for candidate in shrinker(value):
                 if not predicate(candidate):
                     minimal = candidate
+                    break
         return PropertyFailure(cases.seed, index, value, minimal)
     return None

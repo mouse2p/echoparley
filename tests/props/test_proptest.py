@@ -75,6 +75,6 @@ def test_sequence_shrinker_includes_empty_and_single_removals() -> None:
 def test_property_checker_reports_reproducible_minimum() -> None:
     from echoparley.proptest import check_cases, shrink_non_negative
 
-    failure = check_cases(CaseSet(8, (2, 7, 10)), lambda value: value < 5, shrink_non_negative)
+    failure = check_cases(CaseSet(8, (2, 7, 10)), lambda value: value < 0, shrink_non_negative)
     assert failure is not None
-    assert (failure.seed, failure.case_index, failure.original, failure.minimal) == (8, 1, 7, 7)
+    assert (failure.seed, failure.case_index, failure.original, failure.minimal) == (8, 0, 2, 0)
