@@ -189,3 +189,19 @@ def session_roundtrip_invariant(value: tuple[SessionEvent, ...]) -> bool:
 
     encoded = encode_session(value)
     return decode_session(encoded) == value and encode_session(decode_session(encoded)) == encoded
+
+
+def legal_duplex_invariant(events: tuple[EndpointEvent, ...]) -> bool:
+    """Check that SPEAK is entered only from TAKE_FLOOR for an event trace."""
+    from echoparley.duplex import DuplexEngine, DuplexState
+
+    engine = DuplexEngine()
+    for event in events:
+        previous = engine.state
+        engine.handle(event)
+        if engine.state is DuplexState.SPEAK and previous not in {
+            DuplexState.SPEAK,
+            DuplexState.TAKE_FLOOR,
+        }:
+            return False
+    return True

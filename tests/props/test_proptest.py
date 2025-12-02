@@ -90,3 +90,9 @@ def test_generated_sessions_replay_byte_identically() -> None:
     from echoparley.proptest import check_cases, generate_sessions, session_roundtrip_invariant
 
     assert check_cases(generate_sessions(12, 25), session_roundtrip_invariant) is None
+
+
+def test_generated_endpoints_preserve_duplex_legality() -> None:
+    from echoparley.proptest import check_cases, generate_endpoint_traces, legal_duplex_invariant
+
+    assert check_cases(generate_endpoint_traces(13, 40), legal_duplex_invariant) is None
