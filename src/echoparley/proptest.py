@@ -129,3 +129,20 @@ def shrink_non_negative(value: int) -> tuple[int, ...]:
         candidates.add(current)
     candidates.discard(value)
     return tuple(sorted(candidates))
+
+
+def shrink_sequence(values: tuple[T, ...]) -> tuple[tuple[T, ...], ...]:
+    """Generate ordered chunk removals, from coarse halves to single items."""
+    if not values:
+        return ()
+    candidates: list[tuple[T, ...]] = [()]
+    width = max(1, len(values) // 2)
+    while width:
+        for start in range(0, len(values), width):
+            candidate = values[:start] + values[start + width :]
+            if candidate not in candidates and candidate != values:
+                candidates.append(candidate)
+        if width == 1:
+            break
+        width //= 2
+    return tuple(candidates)

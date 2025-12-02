@@ -62,3 +62,11 @@ def test_integer_shrinker_rejects_negative_inputs() -> None:
 
     with pytest.raises(ValueError, match="non-negative"):
         shrink_non_negative(-1)
+
+
+def test_sequence_shrinker_includes_empty_and_single_removals() -> None:
+    from echoparley.proptest import shrink_sequence
+
+    candidates = shrink_sequence((1, 2, 3))
+    assert candidates[0] == ()
+    assert (2, 3) in candidates and (1, 2) in candidates
