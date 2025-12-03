@@ -15,3 +15,10 @@ def test_benchmark_sample_rejects_invalid_fields() -> None:
         BenchmarkSample("case", 0, -1)
     with pytest.raises(ValueError, match="positive"):
         BenchmarkSample("case", 0, 1, 0)
+
+
+def test_benchmark_summary_has_hand_checked_statistics() -> None:
+    from echoparley.bench import BenchmarkSummary, summarize_samples
+
+    samples = tuple(BenchmarkSample("x", index, value) for index, value in enumerate((1, 2, 3)))
+    assert summarize_samples(samples) == BenchmarkSummary("x", 3, 2.0, 2.0, 3, 1.0)
