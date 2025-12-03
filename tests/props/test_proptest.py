@@ -103,3 +103,15 @@ def test_generated_contexts_respect_every_small_budget() -> None:
 
     for turns in generate_turns(14, 20).values:
         assert all(context_budget_invariant(turns, budget) for budget in range(20))
+
+
+def test_sequence_shrinking_finds_minimal_nonmonotone_trace() -> None:
+    from echoparley.proptest import check_cases, shrink_sequence
+
+    def monotone(values: tuple[int, ...]) -> bool:
+        return list(values) == sorted(values)
+
+    failure = check_cases(CaseSet(21, ((0, 2, 1, 3),)), monotone, shrink_sequence)
+    assert failure is not None
+    assert not monotone(failure.minimal)
+    assert len(failure.minimal) <= len(failure.original)
