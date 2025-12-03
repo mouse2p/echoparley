@@ -205,3 +205,14 @@ def legal_duplex_invariant(events: tuple[EndpointEvent, ...]) -> bool:
         }:
             return False
     return True
+
+
+def context_budget_invariant(turns: tuple[ConversationTurn, ...], budget: int) -> bool:
+    """Check reported cost equals retained turns and never exceeds the cap."""
+    from echoparley.context import select_context
+
+    window = select_context(turns, budget)
+    return (
+        window.used_tokens == sum(turn.token_count for turn in window.turns)
+        and window.used_tokens <= budget
+    )

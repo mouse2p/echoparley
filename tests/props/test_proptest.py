@@ -96,3 +96,10 @@ def test_generated_endpoints_preserve_duplex_legality() -> None:
     from echoparley.proptest import check_cases, generate_endpoint_traces, legal_duplex_invariant
 
     assert check_cases(generate_endpoint_traces(13, 40), legal_duplex_invariant) is None
+
+
+def test_generated_contexts_respect_every_small_budget() -> None:
+    from echoparley.proptest import context_budget_invariant, generate_turns
+
+    for turns in generate_turns(14, 20).values:
+        assert all(context_budget_invariant(turns, budget) for budget in range(20))
