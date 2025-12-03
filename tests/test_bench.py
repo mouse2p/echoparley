@@ -31,3 +31,15 @@ def test_benchmark_summary_rejects_empty_and_mixed_cases() -> None:
         summarize_samples(())
     with pytest.raises(ValueError, match="one case"):
         summarize_samples((BenchmarkSample("a", 0, 1), BenchmarkSample("b", 1, 2)))
+
+
+def test_benchmark_runner_excludes_warmups_from_samples() -> None:
+    from echoparley.bench import run_benchmark
+
+    calls = []
+    ticks = iter((0.0, 0.001, 0.010, 0.013))
+    samples = run_benchmark(
+        "x", lambda: calls.append(1), warmup=2, repeats=2, clock=lambda: next(ticks)
+    )
+    assert len(calls) == 4
+    assert [sample.elapsed_ms for sample in samples] == [1.0, 3.0]

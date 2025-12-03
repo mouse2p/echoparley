@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import statistics
+import time
+from collections.abc import Callable
 from dataclasses import dataclass
 
 
@@ -50,3 +52,26 @@ def summarize_samples(samples: tuple[BenchmarkSample, ...]) -> BenchmarkSummary:
         round(values[rank], 6),
         round(statistics.stdev(values), 6) if len(values) > 1 else 0.0,
     )
+
+
+def run_benchmark(
+    case: str,
+    operation: Callable[[], object],
+    *,
+    warmup: int = 1,
+    repeats: int = 5,
+    work_seconds: float | None = None,
+    clock: Callable[[], float] = time.perf_counter,
+) -> tuple[BenchmarkSample, ...]:
+    """Warm an operation, then measure repeats using an injectable clock."""
+    if not case or warmup < 0 or repeats <= 0:
+        raise ValueError("benchmark runner configuration is invalid")
+    for _ in range(warmup):
+        operation()
+    samples = []
+    for repeat in range(repeats):
+        started = clock()
+        operation()
+        elapsed_ms = (clock() - started) * 1000
+        samples.append(BenchmarkSample(case, repeat, round(elapsed_ms, 6), work_seconds))
+    return tuple(samples)
