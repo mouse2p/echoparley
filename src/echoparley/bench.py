@@ -75,3 +75,23 @@ def run_benchmark(
         elapsed_ms = (clock() - started) * 1000
         samples.append(BenchmarkSample(case, repeat, round(elapsed_ms, 6), work_seconds))
     return tuple(samples)
+
+
+@dataclass(frozen=True, slots=True)
+class RegressionGuard:
+    case: str
+    upper_bound_ms: float
+
+    def __post_init__(self) -> None:
+        if not self.case or self.upper_bound_ms <= 0:
+            raise ValueError("regression guard requires a case and positive bound")
+
+    def assert_summary(self, summary: BenchmarkSummary) -> None:
+        """Fail only when the measured mean exceeds a deliberately loose bound."""
+        if summary.case != self.case:
+            raise ValueError("regression guard case does not match summary")
+        if summary.mean_ms > self.upper_bound_ms:
+            raise AssertionError(
+                f"{self.case} mean {summary.mean_ms} ms exceeded loose bound "
+                f"{self.upper_bound_ms} ms"
+            )

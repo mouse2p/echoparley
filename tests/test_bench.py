@@ -52,3 +52,12 @@ def test_benchmark_runner_rejects_nonpositive_repeats() -> None:
         run_benchmark("x", lambda: None, repeats=0)
     with pytest.raises(ValueError, match="configuration"):
         run_benchmark("", lambda: None)
+
+
+def test_regression_guard_uses_measured_mean() -> None:
+    from echoparley.bench import BenchmarkSummary, RegressionGuard
+
+    guard = RegressionGuard("units", 100)
+    guard.assert_summary(BenchmarkSummary("units", 2, 99, 99, 99, 0))
+    with pytest.raises(AssertionError, match="loose bound"):
+        guard.assert_summary(BenchmarkSummary("units", 2, 101, 101, 101, 0))
