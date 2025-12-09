@@ -7,7 +7,10 @@ import time
 from collections.abc import Callable
 from dataclasses import asdict, dataclass
 
+import numpy as np
+
 from echoparley.artifacts import ArtifactEnvelope, decode_jsonl, encode_jsonl
+from echoparley.units import fit_unit_extractor
 
 
 @dataclass(frozen=True, slots=True)
@@ -111,3 +114,15 @@ def decode_benchmark_jsonl(data: bytes) -> tuple[BenchmarkSample, ...]:
     if any(item.kind != "benchmark-sample" or item.schema_version != "1.0" for item in envelopes):
         raise ValueError("benchmark JSONL contains an unsupported artifact")
     return tuple(BenchmarkSample(**item.payload) for item in envelopes)
+
+
+def benchmark_units(seed: int = 0, repeats: int = 3) -> tuple[BenchmarkSample, ...]:
+    """Measure fitting and extraction over a small seeded synthetic matrix."""
+    rng = np.random.default_rng(seed)
+    features = rng.normal(size=(128, 8))
+
+    def operation() -> None:
+        extractor = fit_unit_extractor(features, 4, 8, seed=seed)
+        extractor.extract(features)
+
+    return run_benchmark("unit-extraction", operation, warmup=1, repeats=repeats, work_seconds=1.28)

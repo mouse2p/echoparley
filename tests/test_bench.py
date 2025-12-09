@@ -88,3 +88,14 @@ def test_benchmark_jsonl_rejects_unrelated_artifacts() -> None:
     data = encode_jsonl((ArtifactEnvelope.create("other", {}),))
     with pytest.raises(ValueError, match="unsupported"):
         decode_benchmark_jsonl(data)
+
+
+def test_unit_benchmark_reports_rtf_samples() -> None:
+    from echoparley.bench import benchmark_units
+
+    samples = benchmark_units(3, 2)
+    assert len(samples) == 2
+    assert all(
+        sample.case == "unit-extraction" and sample.real_time_factor is not None
+        for sample in samples
+    )
