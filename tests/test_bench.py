@@ -79,3 +79,12 @@ def test_benchmark_jsonl_roundtrips_exact_samples() -> None:
     encoded = encode_benchmark_jsonl(samples)
     assert decode_benchmark_jsonl(encoded) == samples
     assert encoded.endswith(b"\n")
+
+
+def test_benchmark_jsonl_rejects_unrelated_artifacts() -> None:
+    from echoparley.artifacts import ArtifactEnvelope, encode_jsonl
+    from echoparley.bench import decode_benchmark_jsonl
+
+    data = encode_jsonl((ArtifactEnvelope.create("other", {}),))
+    with pytest.raises(ValueError, match="unsupported"):
+        decode_benchmark_jsonl(data)
