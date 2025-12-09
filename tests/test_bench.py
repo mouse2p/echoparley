@@ -99,3 +99,9 @@ def test_unit_benchmark_reports_rtf_samples() -> None:
         sample.case == "unit-extraction" and sample.real_time_factor is not None
         for sample in samples
     )
+
+
+def test_stream_benchmark_reports_requested_repeats() -> None:
+    from echoparley.bench import benchmark_streams
+
+    assert [sample.repeat for sample in benchmark_streams(2, 2)] == [0, 1]

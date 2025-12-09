@@ -126,3 +126,17 @@ def benchmark_units(seed: int = 0, repeats: int = 3) -> tuple[BenchmarkSample, .
         extractor.extract(features)
 
     return run_benchmark("unit-extraction", operation, warmup=1, repeats=repeats, work_seconds=1.28)
+
+
+def benchmark_streams(seed: int = 0, repeats: int = 3) -> tuple[BenchmarkSample, ...]:
+    """Measure mapping roundtrips over generated deterministic streams."""
+    from echoparley.proptest import generate_streams
+    from echoparley.stream import stream_from_mapping, stream_to_mapping
+
+    streams = generate_streams(seed, 64).values
+
+    def operation() -> None:
+        for stream in streams:
+            stream_from_mapping(stream_to_mapping(stream))
+
+    return run_benchmark("stream-roundtrip", operation, warmup=1, repeats=repeats)
