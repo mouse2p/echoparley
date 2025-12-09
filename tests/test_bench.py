@@ -61,3 +61,12 @@ def test_regression_guard_uses_measured_mean() -> None:
     guard.assert_summary(BenchmarkSummary("units", 2, 99, 99, 99, 0))
     with pytest.raises(AssertionError, match="loose bound"):
         guard.assert_summary(BenchmarkSummary("units", 2, 101, 101, 101, 0))
+
+
+def test_regression_guard_rejects_mismatched_cases() -> None:
+    from echoparley.bench import BenchmarkSummary, RegressionGuard
+
+    with pytest.raises(ValueError, match="does not match"):
+        RegressionGuard("units", 10).assert_summary(BenchmarkSummary("stream", 1, 1, 1, 1, 0))
+    with pytest.raises(ValueError, match="positive"):
+        RegressionGuard("units", 0)
