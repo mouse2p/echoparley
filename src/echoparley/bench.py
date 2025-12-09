@@ -5,7 +5,9 @@ from __future__ import annotations
 import statistics
 import time
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
+
+from echoparley.artifacts import ArtifactEnvelope, decode_jsonl, encode_jsonl
 
 
 @dataclass(frozen=True, slots=True)
@@ -95,3 +97,17 @@ class RegressionGuard:
                 f"{self.case} mean {summary.mean_ms} ms exceeded loose bound "
                 f"{self.upper_bound_ms} ms"
             )
+
+
+def encode_benchmark_jsonl(samples: tuple[BenchmarkSample, ...]) -> bytes:
+    """Encode samples in the common checksummed artifact envelope."""
+    return encode_jsonl(
+        ArtifactEnvelope.create("benchmark-sample", asdict(sample), "1.0") for sample in samples
+    )
+
+
+def decode_benchmark_jsonl(data: bytes) -> tuple[BenchmarkSample, ...]:
+    envelopes = decode_jsonl(data)
+    if any(item.kind != "benchmark-sample" or item.schema_version != "1.0" for item in envelopes):
+        raise ValueError("benchmark JSONL contains an unsupported artifact")
+    return tuple(BenchmarkSample(**item.payload) for item in envelopes)

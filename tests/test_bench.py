@@ -70,3 +70,12 @@ def test_regression_guard_rejects_mismatched_cases() -> None:
         RegressionGuard("units", 10).assert_summary(BenchmarkSummary("stream", 1, 1, 1, 1, 0))
     with pytest.raises(ValueError, match="positive"):
         RegressionGuard("units", 0)
+
+
+def test_benchmark_jsonl_roundtrips_exact_samples() -> None:
+    from echoparley.bench import decode_benchmark_jsonl, encode_benchmark_jsonl
+
+    samples = (BenchmarkSample("units", 0, 1.25, 0.1),)
+    encoded = encode_benchmark_jsonl(samples)
+    assert decode_benchmark_jsonl(encoded) == samples
+    assert encoded.endswith(b"\n")
