@@ -43,3 +43,12 @@ def test_benchmark_runner_excludes_warmups_from_samples() -> None:
     )
     assert len(calls) == 4
     assert [sample.elapsed_ms for sample in samples] == [1.0, 3.0]
+
+
+def test_benchmark_runner_rejects_nonpositive_repeats() -> None:
+    from echoparley.bench import run_benchmark
+
+    with pytest.raises(ValueError, match="configuration"):
+        run_benchmark("x", lambda: None, repeats=0)
+    with pytest.raises(ValueError, match="configuration"):
+        run_benchmark("", lambda: None)
