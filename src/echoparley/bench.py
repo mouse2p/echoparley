@@ -155,3 +155,21 @@ def benchmark_simulator(seed: int = 0, repeats: int = 3) -> tuple[BenchmarkSampl
         repeats=repeats,
         work_seconds=scenario.duration_ms / 1000,
     )
+
+
+def benchmark_suite(seed: int = 0, repeats: int = 3) -> tuple[BenchmarkSample, ...]:
+    """Run all offline cases with shared seed and repeat settings."""
+    return (
+        *benchmark_units(seed, repeats),
+        *benchmark_streams(seed, repeats),
+        *benchmark_simulator(seed, repeats),
+    )
+
+
+def benchmark_summaries(samples: tuple[BenchmarkSample, ...]) -> tuple[BenchmarkSummary, ...]:
+    """Group suite samples by case in stable first-seen order."""
+    cases = tuple(dict.fromkeys(sample.case for sample in samples))
+    return tuple(
+        summarize_samples(tuple(sample for sample in samples if sample.case == case))
+        for case in cases
+    )

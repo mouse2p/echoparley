@@ -126,3 +126,11 @@ def test_representative_benchmarks_stay_below_loose_bounds() -> None:
 
     for samples in (benchmark_units(1, 1), benchmark_streams(1, 1), benchmark_simulator(1, 1)):
         RegressionGuard(samples[0].case, 10_000).assert_summary(summarize_samples(samples))
+
+
+def test_benchmark_suite_groups_three_stable_cases() -> None:
+    from echoparley.bench import benchmark_suite, benchmark_summaries
+
+    summaries = benchmark_summaries(benchmark_suite(0, 1))
+    assert [item.case for item in summaries] == ["unit-extraction", "stream-roundtrip", "simulator"]
+    assert all(item.repeats == 1 for item in summaries)
