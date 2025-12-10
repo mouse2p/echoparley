@@ -53,6 +53,16 @@ def test_session_diff_reports_changes_and_missing_tails() -> None:
     assert differences[1].right is None
 
 
+def test_session_difference_kinds_follow_left_to_right_operations() -> None:
+    from echoparley.session import DifferenceKind, SessionDifference, difference_kind
+
+    event = SessionEvent(0, 0, "tick", {})
+    changed = SessionEvent(0, 1, "tick", {})
+    assert difference_kind(SessionDifference(0, None, event)) is DifferenceKind.INSERT
+    assert difference_kind(SessionDifference(0, event, None)) is DifferenceKind.DELETE
+    assert difference_kind(SessionDifference(0, event, changed)) is DifferenceKind.CHANGE
+
+
 def test_session_digest_changes_with_payload() -> None:
     from echoparley.session import session_digest
 

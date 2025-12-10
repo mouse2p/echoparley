@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from enum import StrEnum
 from typing import Any
 
 from echoparley.artifacts import ArtifactEnvelope, bytes_checksum, decode_jsonl, encode_jsonl
@@ -107,6 +108,23 @@ class SessionDifference:
     sequence: int
     left: SessionEvent | None
     right: SessionEvent | None
+
+
+class DifferenceKind(StrEnum):
+    INSERT = "insert"
+    DELETE = "delete"
+    CHANGE = "change"
+
+
+def difference_kind(value: SessionDifference) -> DifferenceKind:
+    """Classify a left-to-right event difference."""
+    if value.left is None and value.right is not None:
+        return DifferenceKind.INSERT
+    if value.left is not None and value.right is None:
+        return DifferenceKind.DELETE
+    if value.left is not None and value.right is not None and value.left != value.right:
+        return DifferenceKind.CHANGE
+    raise ValueError("session difference must contain unequal events")
 
 
 def diff_sessions(
