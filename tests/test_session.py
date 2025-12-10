@@ -76,3 +76,15 @@ def test_session_encoder_rejects_sequence_gaps() -> None:
 
     with pytest.raises(ValueError, match="contiguous"):
         encode_session((SessionEvent(1, 0, "gap", {}),))
+
+
+def test_difference_kind_rejects_equal_or_empty_sides() -> None:
+    import pytest
+
+    from echoparley.session import SessionDifference, difference_kind
+
+    event = SessionEvent(0, 0, "tick", {})
+    with pytest.raises(ValueError, match="unequal"):
+        difference_kind(SessionDifference(0, event, event))
+    with pytest.raises(ValueError, match="unequal"):
+        difference_kind(SessionDifference(0, None, None))
