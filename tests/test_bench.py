@@ -113,3 +113,16 @@ def test_simulator_benchmark_uses_synthetic_duration() -> None:
     sample = benchmark_simulator(4, 1)[0]
     assert sample.case == "simulator"
     assert sample.work_seconds == 1.5 and sample.real_time_factor is not None
+
+
+def test_representative_benchmarks_stay_below_loose_bounds() -> None:
+    from echoparley.bench import (
+        RegressionGuard,
+        benchmark_simulator,
+        benchmark_streams,
+        benchmark_units,
+        summarize_samples,
+    )
+
+    for samples in (benchmark_units(1, 1), benchmark_streams(1, 1), benchmark_simulator(1, 1)):
+        RegressionGuard(samples[0].case, 10_000).assert_summary(summarize_samples(samples))
