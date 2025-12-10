@@ -140,3 +140,18 @@ def benchmark_streams(seed: int = 0, repeats: int = 3) -> tuple[BenchmarkSample,
             stream_from_mapping(stream_to_mapping(stream))
 
     return run_benchmark("stream-roundtrip", operation, warmup=1, repeats=repeats)
+
+
+def benchmark_simulator(seed: int = 0, repeats: int = 3) -> tuple[BenchmarkSample, ...]:
+    """Measure deterministic synthetic dialogue simulation throughput."""
+    from echoparley.simulator import simulate_dialogue
+    from echoparley.synth import barge_in_scenario
+
+    scenario = barge_in_scenario(seed)
+    return run_benchmark(
+        "simulator",
+        lambda: simulate_dialogue(scenario),
+        warmup=1,
+        repeats=repeats,
+        work_seconds=scenario.duration_ms / 1000,
+    )

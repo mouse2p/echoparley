@@ -105,3 +105,11 @@ def test_stream_benchmark_reports_requested_repeats() -> None:
     from echoparley.bench import benchmark_streams
 
     assert [sample.repeat for sample in benchmark_streams(2, 2)] == [0, 1]
+
+
+def test_simulator_benchmark_uses_synthetic_duration() -> None:
+    from echoparley.bench import benchmark_simulator
+
+    sample = benchmark_simulator(4, 1)[0]
+    assert sample.case == "simulator"
+    assert sample.work_seconds == 1.5 and sample.real_time_factor is not None
