@@ -138,3 +138,24 @@ def diff_sessions(
         if left_event != right_event:
             differences.append(SessionDifference(index, left_event, right_event))
     return tuple(differences)
+
+
+@dataclass(frozen=True, slots=True)
+class DifferenceSummary:
+    inserted: int
+    deleted: int
+    changed: int
+
+    @property
+    def total(self) -> int:
+        return self.inserted + self.deleted + self.changed
+
+
+def summarize_differences(values: tuple[SessionDifference, ...]) -> DifferenceSummary:
+    """Count insert, delete, and change operations in a replay diff."""
+    kinds = tuple(difference_kind(value) for value in values)
+    return DifferenceSummary(
+        kinds.count(DifferenceKind.INSERT),
+        kinds.count(DifferenceKind.DELETE),
+        kinds.count(DifferenceKind.CHANGE),
+    )

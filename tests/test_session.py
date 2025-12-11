@@ -88,3 +88,12 @@ def test_difference_kind_rejects_equal_or_empty_sides() -> None:
         difference_kind(SessionDifference(0, event, event))
     with pytest.raises(ValueError, match="unequal"):
         difference_kind(SessionDifference(0, None, None))
+
+
+def test_difference_summary_counts_each_operation() -> None:
+    from echoparley.session import DifferenceSummary, diff_sessions, summarize_differences
+
+    left = (SessionEvent(0, 0, "a", {}), SessionEvent(1, 1, "b", {}))
+    right = (SessionEvent(0, 0, "changed", {}),)
+    summary = summarize_differences(diff_sessions(left, right))
+    assert summary == DifferenceSummary(0, 1, 1) and summary.total == 2
