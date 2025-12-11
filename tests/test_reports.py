@@ -34,3 +34,9 @@ def test_session_timeline_group_scales_events_and_escapes_labels() -> None:
     group = session_timeline_group((SessionEvent(0, 10, "a<b", {}),), label="left & first")
     assert "left &amp; first" in group and "a&lt;b" in group
     assert 'cx="340"' in group
+
+
+def test_empty_session_timeline_still_has_a_label() -> None:
+    from echoparley.reports import session_timeline_group
+
+    assert session_timeline_group((), label="empty") == '<text x="20" y="22">empty</text>'
