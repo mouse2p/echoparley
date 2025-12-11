@@ -5,6 +5,7 @@ from __future__ import annotations
 import html
 
 from echoparley.artifacts import content_checksum
+from echoparley.session import SessionEvent
 from echoparley.simulator import SimulationResult
 
 
@@ -79,3 +80,19 @@ def strategy_comparison_svg(rows: tuple[dict[str, object], ...]) -> str:
             "",
         ]
     )
+
+
+def session_timeline_group(
+    events: tuple[SessionEvent, ...], *, label: str, x_offset: int = 0
+) -> str:
+    """Render one session as a labeled SVG group for composition."""
+    maximum = max((event.time_ms for event in events), default=1)
+    elements = [f'<text x="{x_offset + 20}" y="22">{html.escape(label)}</text>']
+    for index, event in enumerate(events):
+        x = x_offset + 20 + round(320 * event.time_ms / max(1, maximum))
+        y = 45 + index * 20
+        elements.append(
+            f'<circle cx="{x}" cy="{y}" r="4" class="event">'
+            f"<title>{html.escape(event.kind)}</title></circle>"
+        )
+    return "\n".join(elements)
