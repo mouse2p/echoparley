@@ -86,6 +86,8 @@ def session_timeline_group(
     events: tuple[SessionEvent, ...], *, label: str, x_offset: int = 0
 ) -> str:
     """Render one session as a labeled SVG group for composition."""
+    if any(events[index + 1].time_ms < events[index].time_ms for index in range(len(events) - 1)):
+        raise ValueError("session timeline events must be chronological")
     maximum = max((event.time_ms for event in events), default=1)
     elements = [f'<text x="{x_offset + 20}" y="22">{html.escape(label)}</text>']
     for index, event in enumerate(events):

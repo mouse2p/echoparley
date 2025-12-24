@@ -42,6 +42,18 @@ def test_empty_session_timeline_still_has_a_label() -> None:
     assert session_timeline_group((), label="empty") == '<text x="20" y="22">empty</text>'
 
 
+def test_session_timeline_rejects_time_regression() -> None:
+    import pytest
+
+    from echoparley.reports import session_timeline_group
+    from echoparley.session import SessionEvent
+
+    with pytest.raises(ValueError, match="chronological"):
+        session_timeline_group(
+            (SessionEvent(0, 2, "a", {}), SessionEvent(1, 1, "b", {})), label="bad"
+        )
+
+
 def test_side_by_side_timeline_places_sessions_in_separate_columns() -> None:
     from echoparley.reports import side_by_side_session_svg
     from echoparley.session import SessionEvent
