@@ -5,7 +5,7 @@ from __future__ import annotations
 import html
 
 from echoparley.artifacts import content_checksum
-from echoparley.session import SessionEvent
+from echoparley.session import SessionDifference, SessionEvent, difference_kind
 from echoparley.simulator import SimulationResult
 
 
@@ -120,3 +120,15 @@ def side_by_side_session_svg(
             "",
         ]
     )
+
+
+def event_diff_rows(values: tuple[SessionDifference, ...], *, start_y: int = 20) -> tuple[str, ...]:
+    """Render insert/delete/change rows with semantic CSS classes."""
+    rows = []
+    for index, value in enumerate(values):
+        kind = difference_kind(value).value
+        left = value.left.kind if value.left else "∅"
+        right = value.right.kind if value.right else "∅"
+        label = html.escape(f"{value.sequence}: {left} → {right}")
+        rows.append(f'<text x="20" y="{start_y + index * 22}" class="diff {kind}">{label}</text>')
+    return tuple(rows)

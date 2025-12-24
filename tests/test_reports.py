@@ -62,3 +62,14 @@ def test_side_by_side_timeline_places_sessions_in_separate_columns() -> None:
     svg = side_by_side_session_svg((event,), (event,), left_label="A", right_label="B")
     assert '<text x="20" y="22">A</text>' in svg
     assert '<text x="420" y="22">B</text>' in svg
+
+
+def test_event_diff_rows_use_insert_delete_change_classes() -> None:
+    from echoparley.reports import event_diff_rows
+    from echoparley.session import SessionEvent, diff_sessions
+
+    left = (SessionEvent(0, 0, "old", {}), SessionEvent(1, 1, "tail", {}))
+    right = (SessionEvent(0, 0, "new", {}),)
+    rows = event_diff_rows(diff_sessions(left, right))
+    assert 'class="diff change"' in rows[0]
+    assert 'class="diff delete"' in rows[1]
