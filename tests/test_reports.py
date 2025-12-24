@@ -73,3 +73,12 @@ def test_event_diff_rows_use_insert_delete_change_classes() -> None:
     rows = event_diff_rows(diff_sessions(left, right))
     assert 'class="diff change"' in rows[0]
     assert 'class="diff delete"' in rows[1]
+
+
+def test_event_diff_rows_render_inserted_tails() -> None:
+    from echoparley.reports import event_diff_rows
+    from echoparley.session import SessionEvent, diff_sessions
+
+    rows = event_diff_rows(diff_sessions((), (SessionEvent(0, 0, "added", {}),)))
+    assert 'class="diff insert"' in rows[0]
+    assert "∅ → added" in rows[0]
