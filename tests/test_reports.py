@@ -40,3 +40,13 @@ def test_empty_session_timeline_still_has_a_label() -> None:
     from echoparley.reports import session_timeline_group
 
     assert session_timeline_group((), label="empty") == '<text x="20" y="22">empty</text>'
+
+
+def test_side_by_side_timeline_places_sessions_in_separate_columns() -> None:
+    from echoparley.reports import side_by_side_session_svg
+    from echoparley.session import SessionEvent
+
+    event = SessionEvent(0, 0, "tick", {})
+    svg = side_by_side_session_svg((event,), (event,), left_label="A", right_label="B")
+    assert '<text x="20" y="22">A</text>' in svg
+    assert '<text x="420" y="22">B</text>' in svg

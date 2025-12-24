@@ -96,3 +96,25 @@ def session_timeline_group(
             f"<title>{html.escape(event.kind)}</title></circle>"
         )
     return "\n".join(elements)
+
+
+def side_by_side_session_svg(
+    left: tuple[SessionEvent, ...],
+    right: tuple[SessionEvent, ...],
+    *,
+    left_label: str = "left",
+    right_label: str = "right",
+) -> str:
+    """Compose two replay timelines using independent time scales."""
+    height = 70 + 20 * max(len(left), len(right))
+    return "\n".join(
+        [
+            f'<svg xmlns="http://www.w3.org/2000/svg" width="760" height="{height}">',
+            "<style>.event{fill:#2563eb}.divider{stroke:#94a3b8}</style>",
+            '<line class="divider" x1="380" y1="0" x2="380" y2="100%"/>',
+            session_timeline_group(left, label=left_label),
+            session_timeline_group(right, label=right_label, x_offset=400),
+            "</svg>",
+            "",
+        ]
+    )
