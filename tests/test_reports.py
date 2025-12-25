@@ -92,3 +92,12 @@ def test_event_diff_svg_is_deterministic_and_escaped() -> None:
     svg = event_diff_svg(diff, title="A < B")
     assert svg == event_diff_svg(diff, title="A < B")
     assert "A &lt; B" in svg
+
+
+def test_session_diff_report_combines_timelines_and_rows() -> None:
+    from echoparley.reports import session_diff_report_svg
+    from echoparley.session import SessionEvent
+
+    svg = session_diff_report_svg((SessionEvent(0, 0, "a", {}),), (SessionEvent(0, 1, "b", {}),))
+    assert "left" in svg and "right" in svg
+    assert 'class="diff change"' in svg

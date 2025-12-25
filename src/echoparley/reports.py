@@ -5,7 +5,7 @@ from __future__ import annotations
 import html
 
 from echoparley.artifacts import content_checksum
-from echoparley.session import SessionDifference, SessionEvent, difference_kind
+from echoparley.session import SessionDifference, SessionEvent, diff_sessions, difference_kind
 from echoparley.simulator import SimulationResult
 
 
@@ -143,6 +143,29 @@ def event_diff_svg(values: tuple[SessionDifference, ...], *, title: str = "sessi
             f'<svg xmlns="http://www.w3.org/2000/svg" width="760" height="{height}">',
             "<style>.insert{fill:#15803d}.delete{fill:#b91c1c}.change{fill:#a16207}</style>",
             f'<text x="20" y="25">{html.escape(title)}</text>',
+            *rows,
+            "</svg>",
+            "",
+        ]
+    )
+
+
+def session_diff_report_svg(
+    left: tuple[SessionEvent, ...],
+    right: tuple[SessionEvent, ...],
+    *,
+    title: str = "session comparison",
+) -> str:
+    """Combine paired timelines and semantic diff rows in one SVG."""
+    differences = diff_sessions(left, right)
+    height = 120 + 20 * max(len(left), len(right)) + 22 * len(differences)
+    timeline = side_by_side_session_svg(left, right).splitlines()[1:-1]
+    rows = event_diff_rows(differences, start_y=90 + 20 * max(len(left), len(right)))
+    return "\n".join(
+        [
+            f'<svg xmlns="http://www.w3.org/2000/svg" width="760" height="{height}">',
+            f"<title>{html.escape(title)}</title>",
+            *timeline,
             *rows,
             "</svg>",
             "",
