@@ -132,3 +132,19 @@ def event_diff_rows(values: tuple[SessionDifference, ...], *, start_y: int = 20)
         label = html.escape(f"{value.sequence}: {left} → {right}")
         rows.append(f'<text x="20" y="{start_y + index * 22}" class="diff {kind}">{label}</text>')
     return tuple(rows)
+
+
+def event_diff_svg(values: tuple[SessionDifference, ...], *, title: str = "session diff") -> str:
+    """Render semantic event differences in a deterministic standalone SVG."""
+    height = 60 + 22 * len(values)
+    rows = event_diff_rows(values, start_y=55)
+    return "\n".join(
+        [
+            f'<svg xmlns="http://www.w3.org/2000/svg" width="760" height="{height}">',
+            "<style>.insert{fill:#15803d}.delete{fill:#b91c1c}.change{fill:#a16207}</style>",
+            f'<text x="20" y="25">{html.escape(title)}</text>',
+            *rows,
+            "</svg>",
+            "",
+        ]
+    )

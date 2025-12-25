@@ -82,3 +82,13 @@ def test_event_diff_rows_render_inserted_tails() -> None:
     rows = event_diff_rows(diff_sessions((), (SessionEvent(0, 0, "added", {}),)))
     assert 'class="diff insert"' in rows[0]
     assert "∅ → added" in rows[0]
+
+
+def test_event_diff_svg_is_deterministic_and_escaped() -> None:
+    from echoparley.reports import event_diff_svg
+    from echoparley.session import SessionEvent, diff_sessions
+
+    diff = diff_sessions((SessionEvent(0, 0, "a", {}),), (SessionEvent(0, 0, "b", {}),))
+    svg = event_diff_svg(diff, title="A < B")
+    assert svg == event_diff_svg(diff, title="A < B")
+    assert "A &lt; B" in svg
