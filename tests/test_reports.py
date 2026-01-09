@@ -117,3 +117,14 @@ def test_svg_normalization_removes_only_volatile_attributes() -> None:
 
     source = '<svg data-generated-ms="123" data-origin="synthetic">\r\n</svg>'
     assert normalize_svg(source) == '<svg data-origin="synthetic">\n</svg>'
+
+
+def test_session_comparison_metadata_tracks_exact_inputs() -> None:
+    from echoparley.reports import session_comparison_metadata
+    from echoparley.session import SessionEvent
+
+    left = (SessionEvent(0, 0, "a", {}),)
+    right = (SessionEvent(0, 0, "b", {}),)
+    metadata = session_comparison_metadata(left, right)
+    assert metadata["differences"] == 1
+    assert metadata["left_digest"] != metadata["right_digest"]

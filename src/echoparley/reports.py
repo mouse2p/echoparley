@@ -6,7 +6,13 @@ import html
 import re
 
 from echoparley.artifacts import content_checksum
-from echoparley.session import SessionDifference, SessionEvent, diff_sessions, difference_kind
+from echoparley.session import (
+    SessionDifference,
+    SessionEvent,
+    diff_sessions,
+    difference_kind,
+    session_digest,
+)
 from echoparley.simulator import SimulationResult
 
 
@@ -178,3 +184,17 @@ def normalize_svg(value: str) -> str:
     """Remove explicitly volatile generation attributes before golden comparison."""
     normalized = re.sub(r' data-generated-ms="[0-9]+"', "", value)
     return normalized.replace("\r\n", "\n")
+
+
+def session_comparison_metadata(
+    left: tuple[SessionEvent, ...], right: tuple[SessionEvent, ...]
+) -> dict[str, object]:
+    """Describe exact inputs to a deterministic session comparison."""
+    differences = diff_sessions(left, right)
+    payload = {
+        "left_digest": session_digest(left),
+        "right_digest": session_digest(right),
+        "differences": len(differences),
+        "schema_version": "1.0",
+    }
+    return {**payload, "checksum": content_checksum(payload)}
