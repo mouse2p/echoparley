@@ -198,3 +198,17 @@ def session_comparison_metadata(
         "schema_version": "1.0",
     }
     return {**payload, "checksum": content_checksum(payload)}
+
+
+def svg_document(width: int, height: int, elements: tuple[str, ...]) -> str:
+    """Wrap trusted SVG fragments with validated positive dimensions."""
+    if width <= 0 or height <= 0:
+        raise ValueError("SVG dimensions must be positive")
+    return "\n".join(
+        [
+            f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}">',
+            *elements,
+            "</svg>",
+            "",
+        ]
+    )

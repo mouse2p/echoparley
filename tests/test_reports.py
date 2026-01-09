@@ -128,3 +128,13 @@ def test_session_comparison_metadata_tracks_exact_inputs() -> None:
     metadata = session_comparison_metadata(left, right)
     assert metadata["differences"] == 1
     assert metadata["left_digest"] != metadata["right_digest"]
+
+
+def test_svg_document_wraps_fragments_and_validates_dimensions() -> None:
+    import pytest
+
+    from echoparley.reports import svg_document
+
+    assert svg_document(10, 20, ("<title>x</title>",)).endswith("</svg>\n")
+    with pytest.raises(ValueError, match="positive"):
+        svg_document(0, 20, ())
