@@ -110,3 +110,10 @@ def test_identical_sessions_have_no_diff_rows() -> None:
     events = (SessionEvent(0, 0, "same", {}),)
     svg = session_diff_report_svg(events, events)
     assert 'class="diff ' not in svg
+
+
+def test_svg_normalization_removes_only_volatile_attributes() -> None:
+    from echoparley.reports import normalize_svg
+
+    source = '<svg data-generated-ms="123" data-origin="synthetic">\r\n</svg>'
+    assert normalize_svg(source) == '<svg data-origin="synthetic">\n</svg>'

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import html
+import re
 
 from echoparley.artifacts import content_checksum
 from echoparley.session import SessionDifference, SessionEvent, diff_sessions, difference_kind
@@ -171,3 +172,9 @@ def session_diff_report_svg(
             "",
         ]
     )
+
+
+def normalize_svg(value: str) -> str:
+    """Remove explicitly volatile generation attributes before golden comparison."""
+    normalized = re.sub(r' data-generated-ms="[0-9]+"', "", value)
+    return normalized.replace("\r\n", "\n")
