@@ -101,3 +101,12 @@ def test_session_diff_report_combines_timelines_and_rows() -> None:
     svg = session_diff_report_svg((SessionEvent(0, 0, "a", {}),), (SessionEvent(0, 1, "b", {}),))
     assert "left" in svg and "right" in svg
     assert 'class="diff change"' in svg
+
+
+def test_identical_sessions_have_no_diff_rows() -> None:
+    from echoparley.reports import session_diff_report_svg
+    from echoparley.session import SessionEvent
+
+    events = (SessionEvent(0, 0, "same", {}),)
+    svg = session_diff_report_svg(events, events)
+    assert 'class="diff ' not in svg
