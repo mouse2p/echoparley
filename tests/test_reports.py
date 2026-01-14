@@ -138,3 +138,16 @@ def test_svg_document_wraps_fragments_and_validates_dimensions() -> None:
     assert svg_document(10, 20, ("<title>x</title>",)).endswith("</svg>\n")
     with pytest.raises(ValueError, match="positive"):
         svg_document(0, 20, ())
+
+
+def test_normalized_session_diff_has_stable_structural_digest() -> None:
+    from echoparley.artifacts import bytes_checksum
+    from echoparley.reports import normalize_svg, session_diff_report_svg
+    from echoparley.session import SessionEvent
+
+    left = (SessionEvent(0, 0, "start", {}),)
+    right = (SessionEvent(0, 5, "start", {}), SessionEvent(1, 8, "end", {}))
+    first = normalize_svg(session_diff_report_svg(left, right))
+    second = normalize_svg(session_diff_report_svg(left, right))
+    assert bytes_checksum(first.encode()) == bytes_checksum(second.encode())
+    assert first.count("<svg") == 1 and first.count("</svg>") == 1
