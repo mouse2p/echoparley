@@ -24,3 +24,13 @@ def test_collapse_assessment_reports_triggering_thresholds() -> None:
     assert collapsed.collapsed and collapsed.occupancy_below_threshold
     healthy = assess_collapse(codebook_health(np.arange(8), 8))
     assert not healthy.collapsed
+
+
+def test_collapse_assessment_rejects_invalid_thresholds() -> None:
+    from echoparley.vq import assess_collapse
+
+    health = codebook_health(np.array([0]), 1)
+    with pytest.raises(ValueError, match="thresholds"):
+        assess_collapse(health, minimum_occupancy=1.1)
+    with pytest.raises(ValueError, match="thresholds"):
+        assess_collapse(health, minimum_perplexity=0.5)
