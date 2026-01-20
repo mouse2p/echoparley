@@ -15,3 +15,12 @@ def test_codebook_health_handles_empty_and_invalid_assignments() -> None:
         codebook_health(np.array([3]), 3)
     with pytest.raises(ValueError, match="inside"):
         codebook_health(np.ones((2, 1), dtype=np.int64), 3)
+
+
+def test_collapse_assessment_reports_triggering_thresholds() -> None:
+    from echoparley.vq import assess_collapse
+
+    collapsed = assess_collapse(codebook_health(np.zeros(8, dtype=np.int64), 8))
+    assert collapsed.collapsed and collapsed.occupancy_below_threshold
+    healthy = assess_collapse(codebook_health(np.arange(8), 8))
+    assert not healthy.collapsed

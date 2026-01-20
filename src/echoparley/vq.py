@@ -33,3 +33,21 @@ def codebook_health(assignments: IntArray, size: int) -> CodebookHealth:
     return CodebookHealth(
         size, occupied, round(occupied / size, 6), round(perplexity, 6), round(perplexity / size, 6)
     )
+
+
+@dataclass(frozen=True, slots=True)
+class CollapseAssessment:
+    collapsed: bool
+    occupancy_below_threshold: bool
+    perplexity_below_threshold: bool
+
+
+def assess_collapse(
+    health: CodebookHealth, *, minimum_occupancy: float = 0.25, minimum_perplexity: float = 2.0
+) -> CollapseAssessment:
+    """Apply explicit experiment thresholds to codebook diagnostics."""
+    if not 0 <= minimum_occupancy <= 1 or minimum_perplexity < 1:
+        raise ValueError("collapse thresholds are invalid")
+    low_occupancy = health.occupancy_ratio < minimum_occupancy
+    low_perplexity = health.perplexity < minimum_perplexity
+    return CollapseAssessment(low_occupancy or low_perplexity, low_occupancy, low_perplexity)
