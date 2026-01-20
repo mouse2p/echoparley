@@ -51,3 +51,19 @@ def assess_collapse(
     low_occupancy = health.occupancy_ratio < minimum_occupancy
     low_perplexity = health.perplexity < minimum_perplexity
     return CollapseAssessment(low_occupancy or low_perplexity, low_occupancy, low_perplexity)
+
+
+@dataclass(frozen=True, slots=True)
+class EMACodebook:
+    centroids: FloatArray
+    counts: FloatArray
+    sums: FloatArray
+
+
+def initialize_ema_codebook(centroids: FloatArray) -> EMACodebook:
+    """Initialize running statistics from finite two-dimensional centroids."""
+    values = np.asarray(centroids, dtype=np.float64)
+    if values.ndim != 2 or not len(values) or not np.all(np.isfinite(values)):
+        raise ValueError("EMA centroids must be a nonempty finite matrix")
+    counts = np.ones(len(values), dtype=np.float64)
+    return EMACodebook(values.copy(), counts, values.copy())

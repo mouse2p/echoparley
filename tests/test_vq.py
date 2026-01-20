@@ -34,3 +34,12 @@ def test_collapse_assessment_rejects_invalid_thresholds() -> None:
         assess_collapse(health, minimum_occupancy=1.1)
     with pytest.raises(ValueError, match="thresholds"):
         assess_collapse(health, minimum_perplexity=0.5)
+
+
+def test_ema_codebook_initializes_independent_statistics() -> None:
+    from echoparley.vq import initialize_ema_codebook
+
+    source = np.array([[0.0, 1.0], [2.0, 3.0]])
+    state = initialize_ema_codebook(source)
+    source[0, 0] = 99
+    assert state.centroids[0, 0] == 0 and state.counts.tolist() == [1, 1]
