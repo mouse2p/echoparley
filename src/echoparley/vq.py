@@ -67,3 +67,33 @@ def initialize_ema_codebook(centroids: FloatArray) -> EMACodebook:
         raise ValueError("EMA centroids must be a nonempty finite matrix")
     counts = np.ones(len(values), dtype=np.float64)
     return EMACodebook(values.copy(), counts, values.copy())
+
+
+def ema_codebook_step(
+    state: EMACodebook,
+    embeddings: FloatArray,
+    assignments: IntArray,
+    *,
+    decay: float = 0.99,
+    epsilon: float = 1e-5,
+) -> EMACodebook:
+    """Apply one exponential-moving-average codebook update."""
+    values = np.asarray(embeddings, dtype=np.float64)
+    identifiers = np.asarray(assignments, dtype=np.int64)
+    if not 0 <= decay < 1 or epsilon <= 0:
+        raise ValueError("EMA decay and epsilon are invalid")
+    if (
+        values.ndim != 2
+        or values.shape[1] != state.centroids.shape[1]
+        or identifiers.shape != (len(values),)
+    ):
+        raise ValueError("EMA embeddings and assignments must align")
+    if np.any((identifiers < 0) | (identifiers >= len(state.centroids))):
+        raise ValueError("EMA assignment falls outside codebook")
+    batch_counts = np.bincount(identifiers, minlength=len(state.centroids)).astype(np.float64)
+    batch_sums = np.zeros_like(state.sums)
+    np.add.at(batch_sums, identifiers, values)
+    counts = decay * state.counts + (1 - decay) * batch_counts
+    sums = decay * state.sums + (1 - decay) * batch_sums
+    centroids = sums / np.maximum(counts[:, None], epsilon)
+    return EMACodebook(centroids, counts, sums)

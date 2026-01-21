@@ -43,3 +43,14 @@ def test_ema_codebook_initializes_independent_statistics() -> None:
     state = initialize_ema_codebook(source)
     source[0, 0] = 99
     assert state.centroids[0, 0] == 0 and state.counts.tolist() == [1, 1]
+
+
+def test_ema_step_moves_centroids_toward_assigned_embeddings() -> None:
+    from echoparley.vq import ema_codebook_step, initialize_ema_codebook
+
+    state = initialize_ema_codebook(np.array([[0.0], [10.0]]))
+    updated = ema_codebook_step(
+        state, np.array([[2.0], [4.0], [8.0]]), np.array([0, 0, 1]), decay=0.5
+    )
+    assert 0 < updated.centroids[0, 0] < 3
+    assert 8 < updated.centroids[1, 0] < 10
