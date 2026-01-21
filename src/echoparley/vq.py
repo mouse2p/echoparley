@@ -96,4 +96,7 @@ def ema_codebook_step(
     counts = decay * state.counts + (1 - decay) * batch_counts
     sums = decay * state.sums + (1 - decay) * batch_sums
     centroids = sums / np.maximum(counts[:, None], epsilon)
+    unused = batch_counts == 0
+    centroids[unused] = state.centroids[unused]
+    sums[unused] = centroids[unused] * counts[unused, None]
     return EMACodebook(centroids, counts, sums)
