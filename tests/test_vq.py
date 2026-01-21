@@ -62,3 +62,13 @@ def test_ema_step_does_not_drift_unused_codes() -> None:
     state = initialize_ema_codebook(np.array([[0.0], [10.0]]))
     updated = ema_codebook_step(state, np.array([[2.0]]), np.array([0]), decay=0.5)
     assert updated.centroids[1, 0] == 10
+
+
+def test_ema_step_rejects_bad_decay_and_assignments() -> None:
+    from echoparley.vq import ema_codebook_step, initialize_ema_codebook
+
+    state = initialize_ema_codebook(np.zeros((2, 1)))
+    with pytest.raises(ValueError, match="decay"):
+        ema_codebook_step(state, np.ones((1, 1)), np.array([0]), decay=1)
+    with pytest.raises(ValueError, match="outside"):
+        ema_codebook_step(state, np.ones((1, 1)), np.array([2]))
