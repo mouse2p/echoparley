@@ -89,3 +89,10 @@ def test_dead_code_revival_is_seeded_and_updates_statistics() -> None:
     second = revive_dead_codes(state, values, seed=7)
     np.testing.assert_array_equal(first.centroids, second.centroids)
     assert first.counts[0] == 1 and first.centroids[0, 0] in {3, 4}
+
+
+def test_revival_returns_healthy_state_unchanged() -> None:
+    from echoparley.vq import initialize_ema_codebook, revive_dead_codes
+
+    state = initialize_ema_codebook(np.array([[1.0], [2.0]]))
+    assert revive_dead_codes(state, np.array([[9.0]])) is state
