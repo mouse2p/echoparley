@@ -100,3 +100,16 @@ def ema_codebook_step(
     centroids[unused] = state.centroids[unused]
     sums[unused] = centroids[unused] * counts[unused, None]
     return EMACodebook(centroids, counts, sums)
+
+
+def dead_code_indices(counts: FloatArray, *, minimum_count: float = 0.5) -> tuple[int, ...]:
+    """Return code indices below an explicit usage-count threshold."""
+    values = np.asarray(counts, dtype=np.float64)
+    if (
+        values.ndim != 1
+        or minimum_count < 0
+        or not np.all(np.isfinite(values))
+        or np.any(values < 0)
+    ):
+        raise ValueError("dead-code counts and threshold are invalid")
+    return tuple(int(index) for index in np.flatnonzero(values < minimum_count))

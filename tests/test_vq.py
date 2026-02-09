@@ -72,3 +72,9 @@ def test_ema_step_rejects_bad_decay_and_assignments() -> None:
         ema_codebook_step(state, np.ones((1, 1)), np.array([0]), decay=1)
     with pytest.raises(ValueError, match="outside"):
         ema_codebook_step(state, np.ones((1, 1)), np.array([2]))
+
+
+def test_dead_code_indices_use_strict_count_threshold() -> None:
+    from echoparley.vq import dead_code_indices
+
+    assert dead_code_indices(np.array([0.0, 0.5, 2.0]), minimum_count=0.5) == (0,)
