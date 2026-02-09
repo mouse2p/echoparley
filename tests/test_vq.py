@@ -96,3 +96,11 @@ def test_revival_returns_healthy_state_unchanged() -> None:
 
     state = initialize_ema_codebook(np.array([[1.0], [2.0]]))
     assert revive_dead_codes(state, np.array([[9.0]])) is state
+
+
+def test_vq_loss_curve_validates_parallel_series() -> None:
+    from echoparley.vq import VQLossCurve
+
+    assert VQLossCurve((1.0, 0.5), (0.2, 0.1)).steps == 2
+    with pytest.raises(ValueError, match="equal"):
+        VQLossCurve((1.0,), ())

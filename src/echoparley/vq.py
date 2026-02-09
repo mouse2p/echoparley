@@ -135,3 +135,22 @@ def revive_dead_codes(
         counts[code] = max(1.0, minimum_count)
         sums[code] = centroids[code] * counts[code]
     return EMACodebook(centroids, counts, sums)
+
+
+@dataclass(frozen=True, slots=True)
+class VQLossCurve:
+    reconstruction: tuple[float, ...]
+    quantization: tuple[float, ...]
+
+    def __post_init__(self) -> None:
+        if not self.reconstruction or len(self.reconstruction) != len(self.quantization):
+            raise ValueError("VQ loss curves must have equal nonzero lengths")
+        if any(
+            value < 0 or not np.isfinite(value)
+            for value in (*self.reconstruction, *self.quantization)
+        ):
+            raise ValueError("VQ losses must be finite and non-negative")
+
+    @property
+    def steps(self) -> int:
+        return len(self.reconstruction)
