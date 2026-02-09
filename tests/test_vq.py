@@ -112,3 +112,13 @@ def test_vq_loss_svg_is_deterministic_and_honestly_labeled() -> None:
     curve = VQLossCurve((1.0, 0.5), (0.2, 0.1))
     assert vq_loss_svg(curve) == vq_loss_svg(curve)
     assert "deterministic-synthetic" in vq_loss_svg(curve)
+
+
+@pytest.mark.model
+def test_tiny_vq_loss_history_is_seeded_and_decreases() -> None:
+    pytest.importorskip("torch")
+    from echoparley.vq import train_vq_loss_curve
+
+    first = train_vq_loss_curve(5, 15)
+    assert first == train_vq_loss_curve(5, 15)
+    assert first.reconstruction[-1] < first.reconstruction[0]

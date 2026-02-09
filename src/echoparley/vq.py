@@ -180,3 +180,33 @@ def vq_loss_svg(curve: VQLossCurve, *, title: str = "synthetic VQ loss") -> str:
             "",
         ]
     )
+
+
+def train_vq_loss_curve(seed: int = 0, steps: int = 20) -> VQLossCurve:
+    """Train a tiny CPU VQ bottleneck on synthetic clusters and return real losses."""
+    if steps <= 0:
+        raise ValueError("VQ training steps must be positive")
+    try:
+        import torch
+    except ImportError as error:
+        raise RuntimeError("install the torch extra for VQ training") from error
+    torch.manual_seed(seed)
+    inputs = torch.cat((torch.randn(24, 3) * 0.05 - 1, torch.randn(24, 3) * 0.05 + 1))
+    encoder = torch.nn.Linear(3, 2)
+    decoder = torch.nn.Linear(2, 3)
+    optimizer = torch.optim.Adam((*encoder.parameters(), *decoder.parameters()), lr=0.04)
+    reconstruction, quantization = [], []
+    for _ in range(steps):
+        latent = encoder(inputs)
+        quantized = torch.round(latent * 4) / 4
+        reconstruction_loss = torch.mean(
+            (decoder(latent + (quantized - latent).detach()) - inputs) ** 2
+        )
+        quantization_loss = torch.mean((latent - quantized.detach()) ** 2)
+        loss = reconstruction_loss + 0.25 * quantization_loss
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+        reconstruction.append(round(float(reconstruction_loss.detach()), 6))
+        quantization.append(round(float(quantization_loss.detach()), 6))
+    return VQLossCurve(tuple(reconstruction), tuple(quantization))
