@@ -113,3 +113,25 @@ def dead_code_indices(counts: FloatArray, *, minimum_count: float = 0.5) -> tupl
     ):
         raise ValueError("dead-code counts and threshold are invalid")
     return tuple(int(index) for index in np.flatnonzero(values < minimum_count))
+
+
+def revive_dead_codes(
+    state: EMACodebook, embeddings: FloatArray, *, minimum_count: float = 0.5, seed: int = 0
+) -> EMACodebook:
+    """Replace dead centroids with distinct seeded synthetic batch embeddings."""
+    values = np.asarray(embeddings, dtype=np.float64)
+    dead = dead_code_indices(state.counts, minimum_count=minimum_count)
+    if values.ndim != 2 or values.shape[1] != state.centroids.shape[1] or len(values) < len(dead):
+        raise ValueError("revival embeddings must cover dead codes and match width")
+    if seed < 0:
+        raise ValueError("revival seed must be non-negative")
+    if not dead:
+        return state
+    rng = np.random.default_rng(seed)
+    chosen = rng.choice(len(values), len(dead), replace=False)
+    centroids, counts, sums = state.centroids.copy(), state.counts.copy(), state.sums.copy()
+    for code, row in zip(dead, chosen, strict=True):
+        centroids[code] = values[row]
+        counts[code] = max(1.0, minimum_count)
+        sums[code] = centroids[code] * counts[code]
+    return EMACodebook(centroids, counts, sums)

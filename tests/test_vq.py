@@ -78,3 +78,14 @@ def test_dead_code_indices_use_strict_count_threshold() -> None:
     from echoparley.vq import dead_code_indices
 
     assert dead_code_indices(np.array([0.0, 0.5, 2.0]), minimum_count=0.5) == (0,)
+
+
+def test_dead_code_revival_is_seeded_and_updates_statistics() -> None:
+    from echoparley.vq import EMACodebook, revive_dead_codes
+
+    state = EMACodebook(np.zeros((2, 1)), np.array([0.0, 2.0]), np.zeros((2, 1)))
+    values = np.array([[3.0], [4.0]])
+    first = revive_dead_codes(state, values, seed=7)
+    second = revive_dead_codes(state, values, seed=7)
+    np.testing.assert_array_equal(first.centroids, second.centroids)
+    assert first.counts[0] == 1 and first.centroids[0, 0] in {3, 4}
