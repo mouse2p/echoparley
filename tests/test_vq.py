@@ -104,3 +104,11 @@ def test_vq_loss_curve_validates_parallel_series() -> None:
     assert VQLossCurve((1.0, 0.5), (0.2, 0.1)).steps == 2
     with pytest.raises(ValueError, match="equal"):
         VQLossCurve((1.0,), ())
+
+
+def test_vq_loss_svg_is_deterministic_and_honestly_labeled() -> None:
+    from echoparley.vq import VQLossCurve, vq_loss_svg
+
+    curve = VQLossCurve((1.0, 0.5), (0.2, 0.1))
+    assert vq_loss_svg(curve) == vq_loss_svg(curve)
+    assert "deterministic-synthetic" in vq_loss_svg(curve)

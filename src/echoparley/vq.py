@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import html
 from dataclasses import dataclass
 
 import numpy as np
@@ -154,3 +155,28 @@ class VQLossCurve:
     @property
     def steps(self) -> int:
         return len(self.reconstruction)
+
+
+def vq_loss_svg(curve: VQLossCurve, *, title: str = "synthetic VQ loss") -> str:
+    """Render reconstruction and quantization loss without plotting dependencies."""
+    maximum = max((*curve.reconstruction, *curve.quantization, 1e-12))
+
+    def points(values: tuple[float, ...]) -> str:
+        coordinates = []
+        for index, value in enumerate(values):
+            x = 20 + round(index * 560 / max(1, curve.steps - 1))
+            y = 20 + round(160 * (1 - value / maximum))
+            coordinates.append(f"{x},{y}")
+        return " ".join(coordinates)
+
+    return "\n".join(
+        [
+            '<svg xmlns="http://www.w3.org/2000/svg" width="600" height="220">',
+            '<metadata data-origin="deterministic-synthetic"/>',
+            f"<title>{html.escape(title)}</title>",
+            f'<polyline class="reconstruction" points="{points(curve.reconstruction)}"/>',
+            f'<polyline class="quantization" points="{points(curve.quantization)}"/>',
+            "</svg>",
+            "",
+        ]
+    )
