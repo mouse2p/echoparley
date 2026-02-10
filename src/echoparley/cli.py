@@ -12,6 +12,7 @@ import numpy as np
 
 from echoparley import __version__
 from echoparley.metrics import accuracy, error_rate, evaluation_table, match_boundaries
+from echoparley.prosody import autocorrelation_f0
 from echoparley.reports import svg_report
 from echoparley.session import decode_session, diff_sessions
 from echoparley.simulator import SimulationResult, simulate_dialogue
@@ -90,6 +91,22 @@ def _run(args: argparse.Namespace) -> int:
             else len(events)
         )
         print(json.dumps({"differences" if args.against else "events": count}))
+        return 0
+    if args.command == "prosody":
+        if args.frequency <= 0 or args.duration <= 0:
+            raise ValueError("prosody frequency and duration must be positive")
+        sample_rate = 8_000
+        time = np.arange(round(args.duration * sample_rate)) / sample_rate
+        rng = np.random.default_rng(args.seed)
+        samples = np.sin(2 * np.pi * args.frequency * time) + rng.normal(0, 0.001, len(time))
+        track = autocorrelation_f0(samples, sample_rate)
+        voiced = track.frequencies_hz[track.frequencies_hz > 0]
+        payload = {
+            "data_origin": "deterministic-synthetic",
+            "frames": len(track.frequencies_hz),
+            "median_f0_hz": round(float(np.median(voiced)), 6) if len(voiced) else 0.0,
+        }
+        print(json.dumps(payload, sort_keys=True))
         return 0
     table, result = _metrics(args.scenario, args.seed)
     if args.command == "compare":

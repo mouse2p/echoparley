@@ -33,3 +33,12 @@ def test_demo_writes_svg_report(tmp_path: Path) -> None:
     output = tmp_path / "report.svg"
     assert main(["demo", "--scenario", "booking", "--output", str(output)]) == 0
     assert output.read_text().startswith("<svg")
+
+
+def test_prosody_command_measures_a_synthetic_tone(capsys: pytest.CaptureFixture[str]) -> None:
+    import json
+
+    assert main(["prosody", "--frequency", "200"]) == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["data_origin"] == "deterministic-synthetic"
+    assert abs(payload["median_f0_hz"] - 200) < 5
