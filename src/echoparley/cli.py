@@ -46,6 +46,10 @@ def build_parser() -> argparse.ArgumentParser:
     replay = commands.add_parser("replay", help="inspect or diff session JSONL")
     replay.add_argument("path", type=Path)
     replay.add_argument("--against", type=Path)
+    prosody = commands.add_parser("prosody", help="measure a generated synthetic tone")
+    prosody.add_argument("--frequency", type=float, default=200.0)
+    prosody.add_argument("--duration", type=float, default=0.5)
+    prosody.add_argument("--seed", type=int, default=0)
     return parser
 
 

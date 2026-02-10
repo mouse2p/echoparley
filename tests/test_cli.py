@@ -18,6 +18,7 @@ def test_cli_exposes_required_subcommands() -> None:
         "compare",
         "report",
         "demo",
+        "prosody",
     ):
         assert command in help_text
 
