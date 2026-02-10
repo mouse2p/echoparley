@@ -42,3 +42,8 @@ def test_prosody_command_measures_a_synthetic_tone(capsys: pytest.CaptureFixture
     payload = json.loads(capsys.readouterr().out)
     assert payload["data_origin"] == "deterministic-synthetic"
     assert abs(payload["median_f0_hz"] - 200) < 5
+
+
+def test_prosody_command_rejects_nonpositive_frequency() -> None:
+    with pytest.raises(ValueError, match="positive"):
+        main(["prosody", "--frequency", "0"])
