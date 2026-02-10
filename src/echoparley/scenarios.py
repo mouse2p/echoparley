@@ -341,3 +341,17 @@ def corpus_report(scenarios: tuple[DialogueScenario, ...]) -> dict[str, object]:
         "duration_ms": statistics.duration_ms,
     }
     return {**payload, "checksum": content_checksum(payload)}
+
+
+def scenario_catalog(seed: int = 0) -> dict[str, DialogueScenario]:
+    """Return all expanded Phase 2 scenarios at one reproducible seed."""
+    noisy = noisy_channel_scenario(seed).dialogue
+    scenarios = (
+        tutorial_scenario(seed),
+        negotiation_scenario(seed),
+        noisy,
+        topic_drift_scenario(seed),
+        casual_backchannel_scenario(seed),
+        three_speaker_scenario(seed),
+    )
+    return {scenario.name: scenario for scenario in scenarios}

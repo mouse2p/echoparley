@@ -231,3 +231,16 @@ def test_corpus_report_checksum_is_reproducible() -> None:
     first = corpus_report((three_speaker_scenario(0),))
     assert first == corpus_report((three_speaker_scenario(0),))
     assert first["data_origin"] == "synthetic-planted"
+
+
+def test_scenario_catalog_contains_every_expanded_template() -> None:
+    from echoparley.scenarios import scenario_catalog
+
+    assert set(scenario_catalog()) == {
+        "tutorial",
+        "negotiation",
+        "noisy-channel",
+        "topic-drift",
+        "casual-backchannel",
+        "three-speaker-contention",
+    }
