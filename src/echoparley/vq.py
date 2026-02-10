@@ -210,3 +210,15 @@ def train_vq_loss_curve(seed: int = 0, steps: int = 20) -> VQLossCurve:
         reconstruction.append(round(float(reconstruction_loss.detach()), 6))
         quantization.append(round(float(quantization_loss.detach()), 6))
     return VQLossCurve(tuple(reconstruction), tuple(quantization))
+
+
+def vq_curve_summary(curve: VQLossCurve) -> dict[str, float | int | str]:
+    """Report measured loss changes with an explicit synthetic-data label."""
+    return {
+        "data_origin": "deterministic-synthetic",
+        "steps": curve.steps,
+        "initial_reconstruction": curve.reconstruction[0],
+        "final_reconstruction": curve.reconstruction[-1],
+        "initial_quantization": curve.quantization[0],
+        "final_quantization": curve.quantization[-1],
+    }

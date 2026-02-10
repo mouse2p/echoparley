@@ -122,3 +122,11 @@ def test_tiny_vq_loss_history_is_seeded_and_decreases() -> None:
     first = train_vq_loss_curve(5, 15)
     assert first == train_vq_loss_curve(5, 15)
     assert first.reconstruction[-1] < first.reconstruction[0]
+
+
+def test_vq_curve_summary_reports_measured_endpoints() -> None:
+    from echoparley.vq import VQLossCurve, vq_curve_summary
+
+    summary = vq_curve_summary(VQLossCurve((1.0, 0.4), (0.3, 0.2)))
+    assert summary["data_origin"] == "deterministic-synthetic"
+    assert summary["steps"] == 2 and summary["final_reconstruction"] == 0.4
