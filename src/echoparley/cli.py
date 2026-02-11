@@ -54,6 +54,10 @@ def build_parser() -> argparse.ArgumentParser:
     prosody.add_argument("--seed", type=int, default=0)
     scenarios = commands.add_parser("scenarios", help="list expanded planted scenarios")
     scenarios.add_argument("--seed", type=int, default=0)
+    bench = commands.add_parser("bench", help="run loose offline performance measurements")
+    bench.add_argument("--seed", type=int, default=0)
+    bench.add_argument("--repeats", type=int, default=3)
+    bench.add_argument("--output", type=Path)
     return parser
 
 

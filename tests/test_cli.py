@@ -20,6 +20,7 @@ def test_cli_exposes_required_subcommands() -> None:
         "demo",
         "prosody",
         "scenarios",
+        "bench",
     ):
         assert command in help_text
 
