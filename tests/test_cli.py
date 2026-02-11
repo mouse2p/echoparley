@@ -78,3 +78,8 @@ def test_bench_command_exports_checksummed_samples(
     assert main(["bench", "--repeats", "1", "--output", str(output)]) == 0
     assert len(json.loads(capsys.readouterr().out)) == 3
     assert len(decode_benchmark_jsonl(output.read_bytes())) == 3
+
+
+def test_bench_command_rejects_nonpositive_repeats() -> None:
+    with pytest.raises(ValueError, match="configuration"):
+        main(["bench", "--repeats", "0"])
