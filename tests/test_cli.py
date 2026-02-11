@@ -19,6 +19,7 @@ def test_cli_exposes_required_subcommands() -> None:
         "report",
         "demo",
         "prosody",
+        "scenarios",
     ):
         assert command in help_text
 
@@ -42,6 +43,15 @@ def test_prosody_command_measures_a_synthetic_tone(capsys: pytest.CaptureFixture
     payload = json.loads(capsys.readouterr().out)
     assert payload["data_origin"] == "deterministic-synthetic"
     assert abs(payload["median_f0_hz"] - 200) < 5
+
+
+def test_scenarios_command_lists_expanded_templates(capsys: pytest.CaptureFixture[str]) -> None:
+    import json
+
+    assert main(["scenarios", "--seed", "2"]) == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert "three-speaker-contention" in payload["names"]
+    assert payload["statistics"]["data_origin"] == "synthetic-planted"
 
 
 def test_prosody_command_rejects_nonpositive_frequency() -> None:

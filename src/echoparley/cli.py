@@ -14,6 +14,7 @@ from echoparley import __version__
 from echoparley.metrics import accuracy, error_rate, evaluation_table, match_boundaries
 from echoparley.prosody import autocorrelation_f0
 from echoparley.reports import svg_report
+from echoparley.scenarios import corpus_report, scenario_catalog
 from echoparley.session import decode_session, diff_sessions
 from echoparley.simulator import SimulationResult, simulate_dialogue
 from echoparley.synth import SCENARIO_FACTORIES, make_scenario
@@ -51,6 +52,8 @@ def build_parser() -> argparse.ArgumentParser:
     prosody.add_argument("--frequency", type=float, default=200.0)
     prosody.add_argument("--duration", type=float, default=0.5)
     prosody.add_argument("--seed", type=int, default=0)
+    scenarios = commands.add_parser("scenarios", help="list expanded planted scenarios")
+    scenarios.add_argument("--seed", type=int, default=0)
     return parser
 
 
@@ -106,6 +109,11 @@ def _run(args: argparse.Namespace) -> int:
             "frames": len(track.frequencies_hz),
             "median_f0_hz": round(float(np.median(voiced)), 6) if len(voiced) else 0.0,
         }
+        print(json.dumps(payload, sort_keys=True))
+        return 0
+    if args.command == "scenarios":
+        catalog = scenario_catalog(args.seed)
+        payload = {"names": sorted(catalog), "statistics": corpus_report(tuple(catalog.values()))}
         print(json.dumps(payload, sort_keys=True))
         return 0
     table, result = _metrics(args.scenario, args.seed)
