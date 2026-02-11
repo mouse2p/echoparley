@@ -57,3 +57,10 @@ def test_scenarios_command_lists_expanded_templates(capsys: pytest.CaptureFixtur
 def test_prosody_command_rejects_nonpositive_frequency() -> None:
     with pytest.raises(ValueError, match="positive"):
         main(["prosody", "--frequency", "0"])
+
+
+def test_scenarios_command_is_reproducible(capsys: pytest.CaptureFixture[str]) -> None:
+    main(["scenarios", "--seed", "5"])
+    first = capsys.readouterr().out
+    main(["scenarios", "--seed", "5"])
+    assert capsys.readouterr().out == first
