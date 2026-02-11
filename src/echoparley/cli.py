@@ -11,6 +11,7 @@ from pathlib import Path
 import numpy as np
 
 from echoparley import __version__
+from echoparley.bench import benchmark_suite, benchmark_summaries, encode_benchmark_jsonl
 from echoparley.metrics import accuracy, error_rate, evaluation_table, match_boundaries
 from echoparley.prosody import autocorrelation_f0
 from echoparley.reports import svg_report
@@ -119,6 +120,12 @@ def _run(args: argparse.Namespace) -> int:
         catalog = scenario_catalog(args.seed)
         payload = {"names": sorted(catalog), "statistics": corpus_report(tuple(catalog.values()))}
         print(json.dumps(payload, sort_keys=True))
+        return 0
+    if args.command == "bench":
+        samples = benchmark_suite(args.seed, args.repeats)
+        if args.output:
+            args.output.write_bytes(encode_benchmark_jsonl(samples))
+        print(json.dumps([asdict(item) for item in benchmark_summaries(samples)], sort_keys=True))
         return 0
     table, result = _metrics(args.scenario, args.seed)
     if args.command == "compare":

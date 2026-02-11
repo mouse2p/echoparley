@@ -65,3 +65,16 @@ def test_scenarios_command_is_reproducible(capsys: pytest.CaptureFixture[str]) -
     first = capsys.readouterr().out
     main(["scenarios", "--seed", "5"])
     assert capsys.readouterr().out == first
+
+
+def test_bench_command_exports_checksummed_samples(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    import json
+
+    from echoparley.bench import decode_benchmark_jsonl
+
+    output = tmp_path / "bench.jsonl"
+    assert main(["bench", "--repeats", "1", "--output", str(output)]) == 0
+    assert len(json.loads(capsys.readouterr().out)) == 3
+    assert len(decode_benchmark_jsonl(output.read_bytes())) == 3
