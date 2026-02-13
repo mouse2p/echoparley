@@ -143,3 +143,20 @@ def _run(args: argparse.Namespace) -> int:
 def main(argv: Sequence[str] | None = None) -> int:
     """Run the command-line interface and return a process status."""
     return _run(build_parser().parse_args(argv))
+
+
+def _json_envelope(command: str, data: object) -> dict[str, object]:
+    """Wrap command results in the stable CLI output schema."""
+    if not command:
+        raise ValueError("CLI envelope command cannot be empty")
+    return {"schema_version": "1.0", "command": command, "status": "ok", "data": data}
+
+
+def _emit(args: argparse.Namespace, data: object, *, plain: str | None = None) -> None:
+    """Emit structured JSON on request, otherwise a useful compact representation."""
+    if getattr(args, "json", False):
+        print(json.dumps(_json_envelope(args.command, data), sort_keys=True))
+    elif plain is not None:
+        print(plain)
+    else:
+        print(json.dumps(data, sort_keys=True))

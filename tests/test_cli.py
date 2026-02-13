@@ -83,3 +83,11 @@ def test_bench_command_exports_checksummed_samples(
 def test_bench_command_rejects_nonpositive_repeats() -> None:
     with pytest.raises(ValueError, match="configuration"):
         main(["bench", "--repeats", "0"])
+
+
+def test_cli_json_envelope_schema_is_exhaustive() -> None:
+    from echoparley.cli import _json_envelope
+
+    envelope = _json_envelope("units", {"occupied": 2})
+    assert set(envelope) == {"schema_version", "command", "status", "data"}
+    assert envelope["schema_version"] == "1.0"
