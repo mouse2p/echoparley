@@ -98,3 +98,11 @@ def test_every_subcommand_accepts_json_mode() -> None:
     choices = parser._subparsers._group_actions[0].choices
     for name, subparser in choices.items():
         assert "--json" in subparser.format_help(), name
+
+
+def test_units_json_mode_wraps_result(capsys: pytest.CaptureFixture[str]) -> None:
+    import json
+
+    main(["units", "--json"])
+    envelope = json.loads(capsys.readouterr().out)
+    assert envelope["command"] == "units" and envelope["data"]["occupied"] == 2

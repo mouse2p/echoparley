@@ -81,11 +81,11 @@ def _run(args: argparse.Namespace) -> int:
         rng = np.random.default_rng(args.seed)
         embeddings = np.vstack((rng.normal(-1, 0.1, (12, 3)), rng.normal(1, 0.1, (12, 3))))
         identifiers = fit_unit_extractor(embeddings, 2, 2, seed=args.seed).extract(embeddings)
-        print(json.dumps(asdict(codebook_usage(identifiers, 2)), sort_keys=True))
+        _emit(args, asdict(codebook_usage(identifiers, 2)))
         return 0
     if args.command == "synth":
         scenario = make_scenario(args.scenario, args.seed)
-        print(json.dumps([asdict(turn) for turn in scenario.turns], sort_keys=True))
+        _emit(args, [asdict(turn) for turn in scenario.turns])
         return 0
     if args.command == "train":
         print(f"optional torch {args.model} demo uses only deterministic synthetic data")
