@@ -59,6 +59,8 @@ def build_parser() -> argparse.ArgumentParser:
     bench.add_argument("--seed", type=int, default=0)
     bench.add_argument("--repeats", type=int, default=3)
     bench.add_argument("--output", type=Path)
+    for subparser in commands.choices.values():
+        subparser.add_argument("--json", action="store_true", help="emit a versioned JSON envelope")
     return parser
 
 

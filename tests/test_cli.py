@@ -91,3 +91,10 @@ def test_cli_json_envelope_schema_is_exhaustive() -> None:
     envelope = _json_envelope("units", {"occupied": 2})
     assert set(envelope) == {"schema_version", "command", "status", "data"}
     assert envelope["schema_version"] == "1.0"
+
+
+def test_every_subcommand_accepts_json_mode() -> None:
+    parser = build_parser()
+    choices = parser._subparsers._group_actions[0].choices
+    for name, subparser in choices.items():
+        assert "--json" in subparser.format_help(), name
