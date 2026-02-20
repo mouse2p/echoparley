@@ -88,10 +88,16 @@ def _run(args: argparse.Namespace) -> int:
         _emit(args, [asdict(turn) for turn in scenario.turns])
         return 0
     if args.command == "train":
-        print(f"optional torch {args.model} demo uses only deterministic synthetic data")
+        data = {"model": args.model, "data_origin": "deterministic-synthetic", "trained": False}
+        _emit(
+            args,
+            data,
+            plain=f"optional torch {args.model} demo uses only deterministic synthetic data",
+        )
         return 0
     if args.command == "chat":
-        print(f"scripted offline reply: received {args.message!r}")
+        data = {"mode": "offline-scripted", "received": args.message}
+        _emit(args, data, plain=f"scripted offline reply: received {args.message!r}")
         return 0
     if args.command == "replay":
         events = decode_session(args.path.read_bytes())
@@ -100,7 +106,7 @@ def _run(args: argparse.Namespace) -> int:
             if args.against
             else len(events)
         )
-        print(json.dumps({"differences" if args.against else "events": count}))
+        _emit(args, {"differences" if args.against else "events": count})
         return 0
     if args.command == "prosody":
         if args.frequency <= 0 or args.duration <= 0:
@@ -116,29 +122,29 @@ def _run(args: argparse.Namespace) -> int:
             "frames": len(track.frequencies_hz),
             "median_f0_hz": round(float(np.median(voiced)), 6) if len(voiced) else 0.0,
         }
-        print(json.dumps(payload, sort_keys=True))
+        _emit(args, payload)
         return 0
     if args.command == "scenarios":
         catalog = scenario_catalog(args.seed)
         payload = {"names": sorted(catalog), "statistics": corpus_report(tuple(catalog.values()))}
-        print(json.dumps(payload, sort_keys=True))
+        _emit(args, payload)
         return 0
     if args.command == "bench":
         samples = benchmark_suite(args.seed, args.repeats)
         if args.output:
             args.output.write_bytes(encode_benchmark_jsonl(samples))
-        print(json.dumps([asdict(item) for item in benchmark_summaries(samples)], sort_keys=True))
+        _emit(args, [asdict(item) for item in benchmark_summaries(samples)])
         return 0
     table, result = _metrics(args.scenario, args.seed)
     if args.command == "compare":
-        print(json.dumps({"data_origin": "synthetic-planted", "cascade_ms": 230, "direct_ms": 220}))
+        _emit(args, {"data_origin": "synthetic-planted", "cascade_ms": 230, "direct_ms": 220})
     elif args.command in {"report", "demo"}:
         report = svg_report(result, table, title=f"echoparley {args.scenario}")
         if args.output:
             args.output.write_text(report, encoding="utf-8")
-        print(json.dumps(table, sort_keys=True))
+        _emit(args, table)
     else:
-        print(json.dumps(table, sort_keys=True))
+        _emit(args, table)
     return 0
 
 

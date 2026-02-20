@@ -106,3 +106,13 @@ def test_units_json_mode_wraps_result(capsys: pytest.CaptureFixture[str]) -> Non
     main(["units", "--json"])
     envelope = json.loads(capsys.readouterr().out)
     assert envelope["command"] == "units" and envelope["data"]["occupied"] == 2
+
+
+@pytest.mark.parametrize("command", ["train", "chat", "prosody", "scenarios", "bench"])
+def test_new_commands_share_json_schema(command: str, capsys: pytest.CaptureFixture[str]) -> None:
+    import json
+
+    arguments = [command, "--json"] + (["--repeats", "1"] if command == "bench" else [])
+    assert main(arguments) == 0
+    envelope = json.loads(capsys.readouterr().out)
+    assert envelope["command"] == command and envelope["status"] == "ok"
