@@ -56,8 +56,15 @@ def test_scenarios_command_lists_expanded_templates(capsys: pytest.CaptureFixtur
 
 
 def test_prosody_command_rejects_nonpositive_frequency() -> None:
-    with pytest.raises(ValueError, match="positive"):
-        main(["prosody", "--frequency", "0"])
+    assert main(["prosody", "--frequency", "0"]) == 2
+
+
+def test_cli_json_errors_use_the_error_schema(capsys: pytest.CaptureFixture[str]) -> None:
+    import json
+
+    assert main(["prosody", "--frequency", "0", "--json"]) == 2
+    payload = json.loads(capsys.readouterr().err)
+    assert payload["status"] == "error" and payload["command"] == "prosody"
 
 
 def test_scenarios_command_is_reproducible(capsys: pytest.CaptureFixture[str]) -> None:
@@ -81,8 +88,7 @@ def test_bench_command_exports_checksummed_samples(
 
 
 def test_bench_command_rejects_nonpositive_repeats() -> None:
-    with pytest.raises(ValueError, match="configuration"):
-        main(["bench", "--repeats", "0"])
+    assert main(["bench", "--repeats", "0"]) == 2
 
 
 def test_cli_json_envelope_schema_is_exhaustive() -> None:

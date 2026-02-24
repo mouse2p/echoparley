@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from collections.abc import Sequence
 from dataclasses import asdict
 from pathlib import Path
@@ -150,7 +151,23 @@ def _run(args: argparse.Namespace) -> int:
 
 def main(argv: Sequence[str] | None = None) -> int:
     """Run the command-line interface and return a process status."""
-    return _run(build_parser().parse_args(argv))
+    args = build_parser().parse_args(argv)
+    try:
+        return _run(args)
+    except (OSError, ValueError) as error:
+        payload = {
+            "schema_version": "1.0",
+            "command": args.command,
+            "status": "error",
+            "error": str(error),
+        }
+        print(
+            json.dumps(payload, sort_keys=True)
+            if getattr(args, "json", False)
+            else f"error: {error}",
+            file=sys.stderr,
+        )
+        return 2
 
 
 def _json_envelope(command: str, data: object) -> dict[str, object]:
