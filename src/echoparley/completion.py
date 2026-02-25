@@ -11,3 +11,19 @@ def command_names(parser: argparse.ArgumentParser) -> tuple[str, ...]:
         if isinstance(action, argparse._SubParsersAction):
             return tuple(sorted(action.choices))
     return ()
+
+
+def bash_completion(parser: argparse.ArgumentParser) -> str:
+    """Generate a dependency-free Bash completion function."""
+    commands = " ".join(command_names(parser))
+    return "\n".join(
+        (
+            "_echoparley_complete() {",
+            "  local current",
+            '  current="${COMP_WORDS[COMP_CWORD]}"',
+            f'  COMPREPLY=( $(compgen -W "{commands}" -- "$current") )',
+            "}",
+            "complete -F _echoparley_complete echoparley",
+            "",
+        )
+    )
