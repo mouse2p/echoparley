@@ -27,3 +27,15 @@ def bash_completion(parser: argparse.ArgumentParser) -> str:
             "",
         )
     )
+
+
+def zsh_completion(parser: argparse.ArgumentParser) -> str:
+    """Generate a compact Zsh command completion definition."""
+    commands = " ".join(command_names(parser))
+    return "\n".join(
+        (
+            "#compdef echoparley",
+            f"_arguments '1:command:({commands})' '*::arg:->args'",
+            "",
+        )
+    )

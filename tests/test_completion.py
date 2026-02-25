@@ -14,3 +14,11 @@ def test_bash_completion_registers_the_executable() -> None:
     script = bash_completion(build_parser())
     assert "complete -F _echoparley_complete echoparley" in script
     assert "prosody" in script and script.endswith("\n")
+
+
+def test_zsh_completion_declares_compdef_and_commands() -> None:
+    from echoparley.completion import zsh_completion
+
+    script = zsh_completion(build_parser())
+    assert script.startswith("#compdef echoparley\n")
+    assert "bench" in script and "scenarios" in script
