@@ -22,3 +22,12 @@ def test_zsh_completion_declares_compdef_and_commands() -> None:
     script = zsh_completion(build_parser())
     assert script.startswith("#compdef echoparley\n")
     assert "bench" in script and "scenarios" in script
+
+
+def test_bash_and_zsh_completion_contain_every_command() -> None:
+    from echoparley.completion import bash_completion, zsh_completion
+
+    parser = build_parser()
+    for name in command_names(parser):
+        assert name in bash_completion(parser)
+        assert name in zsh_completion(parser)
