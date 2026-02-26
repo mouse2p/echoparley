@@ -139,3 +139,12 @@ def test_legacy_workflows_share_json_schema(
     assert main([command, "--json"]) == 0
     envelope = json.loads(capsys.readouterr().out)
     assert envelope["schema_version"] == "1.0" and envelope["command"] == command
+
+
+def test_completion_json_mode_wraps_script(capsys: pytest.CaptureFixture[str]) -> None:
+    import json
+
+    assert main(["completion", "zsh", "--json"]) == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["data"]["shell"] == "zsh"
+    assert payload["data"]["script"].startswith("#compdef")
