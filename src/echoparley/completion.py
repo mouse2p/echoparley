@@ -3,6 +3,16 @@
 from __future__ import annotations
 
 import argparse
+import re
+
+_SAFE_TOKEN = re.compile(r"^[a-z0-9][a-z0-9-]*$")
+
+
+def _validated_commands(parser: argparse.ArgumentParser) -> tuple[str, ...]:
+    names = command_names(parser)
+    if any(_SAFE_TOKEN.fullmatch(name) is None for name in names):
+        raise ValueError("completion command contains unsupported shell characters")
+    return names
 
 
 def command_names(parser: argparse.ArgumentParser) -> tuple[str, ...]:
@@ -15,7 +25,7 @@ def command_names(parser: argparse.ArgumentParser) -> tuple[str, ...]:
 
 def bash_completion(parser: argparse.ArgumentParser) -> str:
     """Generate a dependency-free Bash completion function."""
-    commands = " ".join(command_names(parser))
+    commands = " ".join(_validated_commands(parser))
     return "\n".join(
         (
             "_echoparley_complete() {",
@@ -31,7 +41,7 @@ def bash_completion(parser: argparse.ArgumentParser) -> str:
 
 def zsh_completion(parser: argparse.ArgumentParser) -> str:
     """Generate a compact Zsh command completion definition."""
-    commands = " ".join(command_names(parser))
+    commands = " ".join(_validated_commands(parser))
     return "\n".join(
         (
             "#compdef echoparley",
