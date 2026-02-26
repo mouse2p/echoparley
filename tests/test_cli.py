@@ -21,6 +21,7 @@ def test_cli_exposes_required_subcommands() -> None:
         "prosody",
         "scenarios",
         "bench",
+        "completion",
     ):
         assert command in help_text
 
@@ -65,6 +66,11 @@ def test_cli_json_errors_use_the_error_schema(capsys: pytest.CaptureFixture[str]
     assert main(["prosody", "--frequency", "0", "--json"]) == 2
     payload = json.loads(capsys.readouterr().err)
     assert payload["status"] == "error" and payload["command"] == "prosody"
+
+
+def test_completion_command_prints_selected_shell(capsys: pytest.CaptureFixture[str]) -> None:
+    assert main(["completion", "bash"]) == 0
+    assert "complete -F" in capsys.readouterr().out
 
 
 def test_scenarios_command_is_reproducible(capsys: pytest.CaptureFixture[str]) -> None:

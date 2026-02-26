@@ -60,6 +60,8 @@ def build_parser() -> argparse.ArgumentParser:
     bench.add_argument("--seed", type=int, default=0)
     bench.add_argument("--repeats", type=int, default=3)
     bench.add_argument("--output", type=Path)
+    completion = commands.add_parser("completion", help="print a parser-derived shell completion")
+    completion.add_argument("shell", choices=("bash", "zsh"))
     for subparser in commands.choices.values():
         subparser.add_argument("--json", action="store_true", help="emit a versioned JSON envelope")
     return parser
@@ -135,6 +137,16 @@ def _run(args: argparse.Namespace) -> int:
         if args.output:
             args.output.write_bytes(encode_benchmark_jsonl(samples))
         _emit(args, [asdict(item) for item in benchmark_summaries(samples)])
+        return 0
+    if args.command == "completion":
+        from echoparley.completion import bash_completion, zsh_completion
+
+        script = (
+            bash_completion(build_parser())
+            if args.shell == "bash"
+            else zsh_completion(build_parser())
+        )
+        _emit(args, {"shell": args.shell, "script": script}, plain=script.rstrip())
         return 0
     table, result = _metrics(args.scenario, args.seed)
     if args.command == "compare":
