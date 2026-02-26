@@ -39,3 +39,16 @@ def test_command_options_include_json_and_specific_flags() -> None:
     options = command_options(build_parser())
     assert all("--json" in values for values in options.values())
     assert {"--frequency", "--duration"} <= set(options["prosody"])
+
+
+def test_completion_rejects_unsafe_command_names() -> None:
+    import argparse
+
+    import pytest
+
+    from echoparley.completion import bash_completion
+
+    parser = argparse.ArgumentParser()
+    parser.add_subparsers().add_parser("bad name")
+    with pytest.raises(ValueError, match="shell characters"):
+        bash_completion(parser)
