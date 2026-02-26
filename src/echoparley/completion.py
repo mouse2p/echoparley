@@ -39,3 +39,19 @@ def zsh_completion(parser: argparse.ArgumentParser) -> str:
             "",
         )
     )
+
+
+def command_options(parser: argparse.ArgumentParser) -> dict[str, tuple[str, ...]]:
+    """Return sorted long options for each subcommand."""
+    options: dict[str, tuple[str, ...]] = {}
+    for action in parser._actions:
+        if isinstance(action, argparse._SubParsersAction):
+            for name, subparser in action.choices.items():
+                values = {
+                    option
+                    for item in subparser._actions
+                    for option in item.option_strings
+                    if option.startswith("--")
+                }
+                options[name] = tuple(sorted(values))
+    return dict(sorted(options.items()))

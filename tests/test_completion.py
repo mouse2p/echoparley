@@ -31,3 +31,11 @@ def test_bash_and_zsh_completion_contain_every_command() -> None:
     for name in command_names(parser):
         assert name in bash_completion(parser)
         assert name in zsh_completion(parser)
+
+
+def test_command_options_include_json_and_specific_flags() -> None:
+    from echoparley.completion import command_options
+
+    options = command_options(build_parser())
+    assert all("--json" in values for values in options.values())
+    assert {"--frequency", "--duration"} <= set(options["prosody"])
