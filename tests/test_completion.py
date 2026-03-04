@@ -60,3 +60,13 @@ def test_completion_generator_script_is_importable() -> None:
 
     namespace = runpy.run_path(str(Path("scripts/generate_completions.py")))
     assert callable(namespace["main"])
+
+
+def test_checked_in_completion_assets_match_parser() -> None:
+    from pathlib import Path
+
+    from echoparley.completion import bash_completion, zsh_completion
+
+    parser = build_parser()
+    assert Path("completions/echoparley.bash").read_text() == bash_completion(parser)
+    assert Path("completions/_echoparley").read_text() == zsh_completion(parser)
