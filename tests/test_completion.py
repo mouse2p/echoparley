@@ -52,3 +52,11 @@ def test_completion_rejects_unsafe_command_names() -> None:
     parser.add_subparsers().add_parser("bad name")
     with pytest.raises(ValueError, match="shell characters"):
         bash_completion(parser)
+
+
+def test_completion_generator_script_is_importable() -> None:
+    import runpy
+    from pathlib import Path
+
+    namespace = runpy.run_path(str(Path("scripts/generate_completions.py")))
+    assert callable(namespace["main"])
