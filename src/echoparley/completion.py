@@ -26,12 +26,15 @@ def command_names(parser: argparse.ArgumentParser) -> tuple[str, ...]:
 def bash_completion(parser: argparse.ArgumentParser) -> str:
     """Generate a dependency-free Bash completion function."""
     commands = " ".join(_validated_commands(parser))
+    options = " ".join(
+        sorted({option for values in command_options(parser).values() for option in values})
+    )
     return "\n".join(
         (
             "_echoparley_complete() {",
             "  local current",
             '  current="${COMP_WORDS[COMP_CWORD]}"',
-            f'  COMPREPLY=( $(compgen -W "{commands}" -- "$current") )',
+            f'  COMPREPLY=( $(compgen -W "{commands} {options}" -- "$current") )',
             "}",
             "complete -F _echoparley_complete echoparley",
             "",

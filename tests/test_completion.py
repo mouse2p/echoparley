@@ -14,6 +14,7 @@ def test_bash_completion_registers_the_executable() -> None:
     script = bash_completion(build_parser())
     assert "complete -F _echoparley_complete echoparley" in script
     assert "prosody" in script and script.endswith("\n")
+    assert "--json" in script and "--frequency" in script
 
 
 def test_zsh_completion_declares_compdef_and_commands() -> None:
