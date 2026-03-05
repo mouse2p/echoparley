@@ -71,3 +71,9 @@ def test_checked_in_completion_assets_match_parser() -> None:
     parser = build_parser()
     assert Path("completions/echoparley.bash").read_text() == bash_completion(parser)
     assert Path("completions/_echoparley").read_text() == zsh_completion(parser)
+
+
+def test_completion_asset_mapping_has_stable_names() -> None:
+    from echoparley.completion import completion_assets
+
+    assert set(completion_assets(build_parser())) == {"_echoparley", "echoparley.bash"}

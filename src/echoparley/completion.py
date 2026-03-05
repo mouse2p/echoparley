@@ -68,3 +68,8 @@ def command_options(parser: argparse.ArgumentParser) -> dict[str, tuple[str, ...
                 }
                 options[name] = tuple(sorted(values))
     return dict(sorted(options.items()))
+
+
+def completion_assets(parser: argparse.ArgumentParser) -> dict[str, str]:
+    """Return stable relative filenames and generated contents."""
+    return {"_echoparley": zsh_completion(parser), "echoparley.bash": bash_completion(parser)}
