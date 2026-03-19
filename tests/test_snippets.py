@@ -20,3 +20,14 @@ def test_snippet_execution_uses_independent_namespaces() -> None:
     snippets = (PythonSnippet("value = 1\n", 1), PythonSnippet("value = 2\n", 1))
     namespaces = execute_snippets(snippets)
     assert [namespace["value"] for namespace in namespaces] == [1, 2]
+
+
+def test_tutorial_runnable_snippets_execute() -> None:
+    from pathlib import Path
+
+    from echoparley.snippets import execute_snippets
+
+    path = Path("docs/tutorial.md")
+    snippets = extract_python_snippets(path.read_text(encoding="utf-8"))
+    assert len(snippets) == 3
+    assert len(execute_snippets(snippets, filename=str(path))) == 3

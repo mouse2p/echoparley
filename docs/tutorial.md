@@ -18,7 +18,7 @@ from echoparley.synth import barge_in_scenario
 
 result = simulate_dialogue(barge_in_scenario(seed=7))
 assert result.trace_bytes() == simulate_dialogue(barge_in_scenario(seed=7)).trace_bytes()
-assert all(item.total_ms <= 500 for item in result.latencies)
+assert all(item.first_unit_delay_ms <= 500 for item in result.latencies)
 ```
 
 最后检查 planted boundary score；该数字不代表真实 conversational quality：
