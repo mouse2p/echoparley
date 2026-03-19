@@ -12,3 +12,11 @@ def test_snippet_extractor_ignores_unmarked_fences_and_rejects_unterminated() ->
     assert extract_python_snippets("```python\npass\n```\n") == ()
     with pytest.raises(ValueError, match="unterminated"):
         extract_python_snippets("```python echoparley-run\npass\n")
+
+
+def test_snippet_execution_uses_independent_namespaces() -> None:
+    from echoparley.snippets import execute_snippets
+
+    snippets = (PythonSnippet("value = 1\n", 1), PythonSnippet("value = 2\n", 1))
+    namespaces = execute_snippets(snippets)
+    assert [namespace["value"] for namespace in namespaces] == [1, 2]

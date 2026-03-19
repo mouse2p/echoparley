@@ -31,3 +31,16 @@ def extract_python_snippets(markdown: str) -> tuple[PythonSnippet, ...]:
         snippets.append(PythonSnippet("\n".join(body) + "\n", start))
         index += 1
     return tuple(snippets)
+
+
+def execute_snippets(
+    snippets: tuple[PythonSnippet, ...], *, filename: str = "<documentation>"
+) -> tuple[dict[str, object], ...]:
+    """Compile and execute each trusted project-documentation snippet independently."""
+    namespaces = []
+    for snippet in snippets:
+        namespace: dict[str, object] = {"__name__": "__echoparley_snippet__"}
+        padded = "\n" * (snippet.start_line - 1) + snippet.source
+        exec(compile(padded, filename, "exec"), namespace)
+        namespaces.append(namespace)
+    return tuple(namespaces)
