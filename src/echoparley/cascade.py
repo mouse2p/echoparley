@@ -274,3 +274,19 @@ class StageObservation:
     def __post_init__(self) -> None:
         if self.stage not in CASCADE_STAGE_ORDER or self.delay_ms < 0:
             raise ValueError("stage observation is invalid")
+
+
+@dataclass(frozen=True, slots=True)
+class CascadeExecution:
+    """Outputs, timing, and optional failure from one local mock cascade."""
+
+    observations: tuple[StageObservation, ...]
+    ledger: StageLatencyLedger
+    transcript: str
+    response: str
+    aligned_units: tuple[AlignedTTSUnit, ...]
+    degradation: CascadeDegradation | None = None
+
+    @property
+    def succeeded(self) -> bool:
+        return self.degradation is None
