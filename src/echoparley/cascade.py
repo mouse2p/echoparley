@@ -260,3 +260,17 @@ class CascadeConfiguration:
                 for name, delay in zip(self.enabled_stages, self.delays_ms, strict=True)
             )
         )
+
+
+@dataclass(frozen=True, slots=True)
+class StageObservation:
+    """Compact observable input/output labels for one mock pipeline stage."""
+
+    stage: str
+    input_label: str
+    output_label: str
+    delay_ms: int
+
+    def __post_init__(self) -> None:
+        if self.stage not in CASCADE_STAGE_ORDER or self.delay_ms < 0:
+            raise ValueError("stage observation is invalid")
