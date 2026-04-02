@@ -51,3 +51,14 @@ def test_mock_cascade_stops_at_seeded_failure() -> None:
     assert not execution.succeeded
     assert execution.degradation is not None and execution.degradation.failed_stage == "punctuation"
     assert [item.stage for item in execution.observations] == ["vad", "stt"]
+
+
+def test_each_stage_can_fail_deterministically() -> None:
+    from echoparley.cascade import CASCADE_STAGE_ORDER, SeededFaultPlan, execute_mock_cascade
+
+    for stage in CASCADE_STAGE_ORDER:
+        execution = execute_mock_cascade(
+            np.ones(3), "words", "reply", fault_plan=SeededFaultPlan(0, 1, (stage,))
+        )
+        assert execution.degradation is not None
+        assert execution.degradation.failed_stage == stage
