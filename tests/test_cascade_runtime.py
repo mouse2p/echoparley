@@ -32,3 +32,12 @@ def test_mock_cascade_executes_every_default_stage() -> None:
     ]
     assert execution.transcript == "Hello world."
     assert [item.text for item in execution.aligned_units] == ["scripted", "reply"]
+
+
+def test_mock_cascade_keeps_silence_observable() -> None:
+    from echoparley.cascade import execute_mock_cascade
+
+    execution = execute_mock_cascade(np.zeros(4), "", "should not emit")
+    assert execution.observations[0].output_label == "0 speech spans"
+    assert execution.response == ""
+    assert execution.aligned_units == ()
