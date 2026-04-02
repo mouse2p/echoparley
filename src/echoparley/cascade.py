@@ -310,11 +310,13 @@ def execute_mock_cascade(
     for stage, delay in zip(config.enabled_stages, config.delays_ms, strict=True):
         if stage in failures:
             degradation = degrade_after_failure(stage, current_response or current_transcript)
+            attempted = (*observations, StageObservation(stage, "attempted", "failed", delay))
+            ledger = StageLatencyLedger(
+                tuple(StageTiming(item.stage, item.delay_ms) for item in attempted)
+            )
             return CascadeExecution(
                 tuple(observations),
-                StageLatencyLedger(
-                    tuple(StageTiming(item.stage, item.delay_ms) for item in observations)
-                ),
+                ledger,
                 current_transcript,
                 current_response,
                 aligned,
