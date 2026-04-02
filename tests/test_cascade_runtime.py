@@ -63,3 +63,12 @@ def test_each_stage_can_fail_deterministically() -> None:
         )
         assert execution.degradation is not None
         assert execution.degradation.failed_stage == stage
+
+
+def test_mock_cascade_executes_only_enabled_stage_subset() -> None:
+    from echoparley.cascade import CascadeConfiguration, execute_mock_cascade
+
+    config = CascadeConfiguration(("punctuation", "tts"), (7, 11))
+    execution = execute_mock_cascade(np.ones(2), "hello", "two units", configuration=config)
+    assert [item.stage for item in execution.observations] == ["punctuation", "tts"]
+    assert execution.ledger.total_ms == 18
