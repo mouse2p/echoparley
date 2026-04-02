@@ -41,3 +41,13 @@ def test_mock_cascade_keeps_silence_observable() -> None:
     assert execution.observations[0].output_label == "0 speech spans"
     assert execution.response == ""
     assert execution.aligned_units == ()
+
+
+def test_mock_cascade_stops_at_seeded_failure() -> None:
+    from echoparley.cascade import SeededFaultPlan, execute_mock_cascade
+
+    plan = SeededFaultPlan(0, 1, ("punctuation",))
+    execution = execute_mock_cascade(np.ones(2), "raw words", "reply", fault_plan=plan)
+    assert not execution.succeeded
+    assert execution.degradation is not None and execution.degradation.failed_stage == "punctuation"
+    assert [item.stage for item in execution.observations] == ["vad", "stt"]

@@ -298,6 +298,7 @@ def execute_mock_cascade(
     response: str,
     *,
     configuration: CascadeConfiguration | None = None,
+    fault_plan: SeededFaultPlan | None = None,
 ) -> CascadeExecution:
     """Run configured local mock stages and retain observable intermediate labels."""
     config = configuration or CascadeConfiguration()
@@ -305,7 +306,20 @@ def execute_mock_cascade(
     current_transcript = transcript.strip()
     current_response = response.strip()
     aligned: tuple[AlignedTTSUnit, ...] = ()
+    failures = fault_plan.failing_stages() if fault_plan else frozenset()
     for stage, delay in zip(config.enabled_stages, config.delays_ms, strict=True):
+        if stage in failures:
+            degradation = degrade_after_failure(stage, current_response or current_transcript)
+            return CascadeExecution(
+                tuple(observations),
+                StageLatencyLedger(
+                    tuple(StageTiming(item.stage, item.delay_ms) for item in observations)
+                ),
+                current_transcript,
+                current_response,
+                aligned,
+                degradation,
+            )
         before = current_transcript if stage in {"punctuation", "lm"} else stage
         if stage == "vad":
             spans = MockVAD()(frame_energy)
