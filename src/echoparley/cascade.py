@@ -290,3 +290,38 @@ class CascadeExecution:
     @property
     def succeeded(self) -> bool:
         return self.degradation is None
+
+
+def execute_mock_cascade(
+    frame_energy: NDArray[np.float64],
+    transcript: str,
+    response: str,
+    *,
+    configuration: CascadeConfiguration | None = None,
+) -> CascadeExecution:
+    """Run configured local mock stages and retain observable intermediate labels."""
+    config = configuration or CascadeConfiguration()
+    observations: list[StageObservation] = []
+    current_transcript = transcript.strip()
+    current_response = response.strip()
+    aligned: tuple[AlignedTTSUnit, ...] = ()
+    for stage, delay in zip(config.enabled_stages, config.delays_ms, strict=True):
+        before = current_transcript if stage in {"punctuation", "lm"} else stage
+        if stage == "vad":
+            spans = MockVAD()(frame_energy)
+            after = f"{len(spans)} speech spans"
+        elif stage == "stt":
+            after = current_transcript
+        elif stage == "punctuation":
+            current_transcript = MockPunctuation()(current_transcript)
+            after = current_transcript
+        elif stage == "lm":
+            current_response = current_response if current_transcript else ""
+            after = current_response
+        else:
+            aligned = MockTTSAlignment()(current_response)
+            after = f"{len(aligned)} aligned units"
+        observations.append(StageObservation(stage, before, after, delay))
+    return CascadeExecution(
+        tuple(observations), config.latency_ledger(), current_transcript, current_response, aligned
+    )
