@@ -341,3 +341,11 @@ def execute_mock_cascade(
     return CascadeExecution(
         tuple(observations), config.latency_ledger(), current_transcript, current_response, aligned
     )
+
+
+def stage_latency_mapping(execution: CascadeExecution) -> dict[str, int]:
+    """Return per-stage measured mock delays while rejecting duplicates."""
+    names = [item.name for item in execution.ledger.timings]
+    if len(names) != len(set(names)):
+        raise ValueError("cascade execution contains duplicate stage timings")
+    return {item.name: item.delay_ms for item in execution.ledger.timings}

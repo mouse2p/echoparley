@@ -72,3 +72,11 @@ def test_mock_cascade_executes_only_enabled_stage_subset() -> None:
     execution = execute_mock_cascade(np.ones(2), "hello", "two units", configuration=config)
     assert [item.stage for item in execution.observations] == ["punctuation", "tts"]
     assert execution.ledger.total_ms == 18
+
+
+def test_stage_latency_mapping_preserves_pipeline_order() -> None:
+    from echoparley.cascade import execute_mock_cascade, stage_latency_mapping
+
+    mapping = stage_latency_mapping(execute_mock_cascade(np.ones(2), "hello", "reply"))
+    assert list(mapping) == ["vad", "stt", "punctuation", "lm", "tts"]
+    assert sum(mapping.values()) == 255
