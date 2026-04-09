@@ -112,3 +112,19 @@ def test_cascade_execution_mapping_has_exhaustive_schema() -> None:
         "fallback",
     }
     assert mapping["succeeded"] is True and mapping["failed_stage"] is None
+
+
+def test_cascade_execution_comparison_uses_actual_ledgers() -> None:
+    from echoparley.cascade import (
+        CascadeConfiguration,
+        compare_cascade_executions,
+        execute_mock_cascade,
+    )
+
+    left = execute_mock_cascade(np.ones(2), "hello", "reply")
+    right = execute_mock_cascade(
+        np.ones(2), "hello", "reply", configuration=CascadeConfiguration().with_delay("tts", 120)
+    )
+    comparison = compare_cascade_executions(left, right)
+    assert comparison["stage_delta_ms"]["tts"] == 30
+    assert comparison["data_origin"] == "synthetic-planted"

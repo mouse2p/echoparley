@@ -363,3 +363,20 @@ def cascade_execution_mapping(execution: CascadeExecution) -> dict[str, object]:
         "failed_stage": execution.degradation.failed_stage if execution.degradation else None,
         "fallback": execution.degradation.fallback if execution.degradation else None,
     }
+
+
+def compare_cascade_executions(
+    left: CascadeExecution, right: CascadeExecution
+) -> dict[str, object]:
+    """Compare stage delays and output sizes from two synthetic executions."""
+    left_delays, right_delays = stage_latency_mapping(left), stage_latency_mapping(right)
+    stages = tuple(dict.fromkeys((*left_delays, *right_delays)))
+    return {
+        "data_origin": "synthetic-planted",
+        "stage_delta_ms": {
+            stage: right_delays.get(stage, 0) - left_delays.get(stage, 0) for stage in stages
+        },
+        "left_units": len(left.aligned_units),
+        "right_units": len(right.aligned_units),
+        "same_transcript": left.transcript == right.transcript,
+    }
