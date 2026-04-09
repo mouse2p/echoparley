@@ -136,3 +136,19 @@ def test_text_stage_transformations_are_independently_reusable() -> None:
     assert transform_cascade_text("stt", " words ", "r") == ("words", "r")
     assert transform_cascade_text("punctuation", "hello", "r") == ("Hello.", "r")
     assert transform_cascade_text("lm", "", " reply ") == ("", "")
+
+
+def test_cascade_comparison_rejects_duplicate_stage_ledgers() -> None:
+    from echoparley.cascade import (
+        CascadeExecution,
+        StageLatencyLedger,
+        StageTiming,
+        compare_cascade_executions,
+    )
+
+    bad = CascadeExecution(
+        (), StageLatencyLedger((StageTiming("stt", 1), StageTiming("stt", 2))), "", "", ()
+    )
+    good = CascadeExecution((), StageLatencyLedger(), "", "", ())
+    with pytest.raises(ValueError, match="duplicate"):
+        compare_cascade_executions(bad, good)
