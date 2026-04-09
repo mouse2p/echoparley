@@ -380,3 +380,14 @@ def compare_cascade_executions(
         "right_units": len(right.aligned_units),
         "same_transcript": left.transcript == right.transcript,
     }
+
+
+def transform_cascade_text(stage: str, transcript: str, response: str) -> tuple[str, str]:
+    """Apply the text-only portion of one named mock cascade stage."""
+    if stage == "stt":
+        return transcript.strip(), response
+    if stage == "punctuation":
+        return MockPunctuation()(transcript), response
+    if stage == "lm":
+        return transcript, response.strip() if transcript else ""
+    raise ValueError(f"stage is not a text transform: {stage}")

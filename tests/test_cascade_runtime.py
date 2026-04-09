@@ -128,3 +128,11 @@ def test_cascade_execution_comparison_uses_actual_ledgers() -> None:
     comparison = compare_cascade_executions(left, right)
     assert comparison["stage_delta_ms"]["tts"] == 30
     assert comparison["data_origin"] == "synthetic-planted"
+
+
+def test_text_stage_transformations_are_independently_reusable() -> None:
+    from echoparley.cascade import transform_cascade_text
+
+    assert transform_cascade_text("stt", " words ", "r") == ("words", "r")
+    assert transform_cascade_text("punctuation", "hello", "r") == ("Hello.", "r")
+    assert transform_cascade_text("lm", "", " reply ") == ("", "")
