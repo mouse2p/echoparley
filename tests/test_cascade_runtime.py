@@ -152,3 +152,16 @@ def test_cascade_comparison_rejects_duplicate_stage_ledgers() -> None:
     good = CascadeExecution((), StageLatencyLedger(), "", "", ())
     with pytest.raises(ValueError, match="duplicate"):
         compare_cascade_executions(bad, good)
+
+
+def test_integrated_cascade_execution_is_reproducible() -> None:
+    from echoparley.cascade import SeededFaultPlan, cascade_execution_mapping, execute_mock_cascade
+
+    plan = SeededFaultPlan(9, 0.3)
+    first = execute_mock_cascade(
+        np.array([0.0, 0.2, 0.0]), "hello", "scripted answer", fault_plan=plan
+    )
+    second = execute_mock_cascade(
+        np.array([0.0, 0.2, 0.0]), "hello", "scripted answer", fault_plan=plan
+    )
+    assert cascade_execution_mapping(first) == cascade_execution_mapping(second)
