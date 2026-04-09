@@ -91,3 +91,14 @@ def test_retention_score_counts_planted_relevant_topics() -> None:
         total_relevant=2,
     )
     assert score.retained_relevant == 1 and score.recall == 0.5
+
+
+def test_planted_topic_salience_prioritizes_relevant_turns() -> None:
+    from echoparley.context import planted_topic_salience
+
+    turns = (
+        ConversationTurn("a", "x", 1, 0, 1, "keep"),
+        ConversationTurn("b", "y", 1, 2, 3, "other"),
+    )
+    scores = planted_topic_salience(turns, frozenset({"keep"}))
+    assert scores[0] > scores[1]

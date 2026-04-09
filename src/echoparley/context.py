@@ -142,3 +142,14 @@ def context_retention_score(
     if total < relevant:
         raise ValueError("total relevant turns cannot be smaller than retained count")
     return RetentionScore(policy, relevant, total, window.used_tokens)
+
+
+def planted_topic_salience(
+    turns: tuple[ConversationTurn, ...], relevant_topics: frozenset[str]
+) -> tuple[float, ...]:
+    """Assign transparent salience using planted topic membership and recency."""
+    total = max(1, len(turns))
+    return tuple(
+        round((1.0 if turn.topic in relevant_topics else 0.1) + index / total * 0.01, 6)
+        for index, turn in enumerate(turns)
+    )
