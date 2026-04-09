@@ -80,3 +80,18 @@ def test_stage_latency_mapping_preserves_pipeline_order() -> None:
     mapping = stage_latency_mapping(execute_mock_cascade(np.ones(2), "hello", "reply"))
     assert list(mapping) == ["vad", "stt", "punctuation", "lm", "tts"]
     assert sum(mapping.values()) == 255
+
+
+def test_stage_latency_mapping_rejects_duplicate_names() -> None:
+    from echoparley.cascade import (
+        CascadeExecution,
+        StageLatencyLedger,
+        StageTiming,
+        stage_latency_mapping,
+    )
+
+    execution = CascadeExecution(
+        (), StageLatencyLedger((StageTiming("stt", 1), StageTiming("stt", 2))), "", "", ()
+    )
+    with pytest.raises(ValueError, match="duplicate"):
+        stage_latency_mapping(execution)
