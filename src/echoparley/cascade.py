@@ -349,3 +349,17 @@ def stage_latency_mapping(execution: CascadeExecution) -> dict[str, int]:
     if len(names) != len(set(names)):
         raise ValueError("cascade execution contains duplicate stage timings")
     return {item.name: item.delay_ms for item in execution.ledger.timings}
+
+
+def cascade_execution_mapping(execution: CascadeExecution) -> dict[str, object]:
+    """Serialize observable cascade results without raw synthetic audio."""
+    return {
+        "schema_version": "1.0",
+        "succeeded": execution.succeeded,
+        "transcript": execution.transcript,
+        "response": execution.response,
+        "units": [item.identifier for item in execution.aligned_units],
+        "stage_delays_ms": stage_latency_mapping(execution),
+        "failed_stage": execution.degradation.failed_stage if execution.degradation else None,
+        "fallback": execution.degradation.fallback if execution.degradation else None,
+    }

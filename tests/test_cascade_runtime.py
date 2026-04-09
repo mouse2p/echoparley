@@ -95,3 +95,20 @@ def test_stage_latency_mapping_rejects_duplicate_names() -> None:
     )
     with pytest.raises(ValueError, match="duplicate"):
         stage_latency_mapping(execution)
+
+
+def test_cascade_execution_mapping_has_exhaustive_schema() -> None:
+    from echoparley.cascade import cascade_execution_mapping, execute_mock_cascade
+
+    mapping = cascade_execution_mapping(execute_mock_cascade(np.ones(2), "hello", "reply"))
+    assert set(mapping) == {
+        "schema_version",
+        "succeeded",
+        "transcript",
+        "response",
+        "units",
+        "stage_delays_ms",
+        "failed_stage",
+        "fallback",
+    }
+    assert mapping["succeeded"] is True and mapping["failed_stage"] is None
