@@ -152,3 +152,12 @@ def test_context_benchmark_report_is_honestly_labeled() -> None:
     )
     assert report["data_origin"] == "synthetic-planted"
     assert len(report["policies"]) == 3
+
+
+def test_context_benchmark_report_rejects_missing_policies() -> None:
+    import pytest
+
+    from echoparley.context import context_benchmark_report
+
+    with pytest.raises(ValueError, match="every policy"):
+        context_benchmark_report(())
