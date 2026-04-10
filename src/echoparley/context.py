@@ -153,3 +153,17 @@ def planted_topic_salience(
         round((1.0 if turn.topic in relevant_topics else 0.1) + index / total * 0.01, 6)
         for index, turn in enumerate(turns)
     )
+
+
+@dataclass(frozen=True, slots=True)
+class ContextBenchmarkConfig:
+    token_budget: int
+    relevant_topics: frozenset[str]
+
+    def __post_init__(self) -> None:
+        if (
+            self.token_budget < 0
+            or not self.relevant_topics
+            or any(not item for item in self.relevant_topics)
+        ):
+            raise ValueError("context benchmark configuration is invalid")

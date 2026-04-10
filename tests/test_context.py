@@ -102,3 +102,13 @@ def test_planted_topic_salience_prioritizes_relevant_turns() -> None:
     )
     scores = planted_topic_salience(turns, frozenset({"keep"}))
     assert scores[0] > scores[1]
+
+
+def test_context_benchmark_configuration_validates_scope() -> None:
+    import pytest
+
+    from echoparley.context import ContextBenchmarkConfig
+
+    assert ContextBenchmarkConfig(10, frozenset({"target"})).token_budget == 10
+    with pytest.raises(ValueError, match="invalid"):
+        ContextBenchmarkConfig(-1, frozenset({"target"}))
