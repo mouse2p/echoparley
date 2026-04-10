@@ -112,3 +112,15 @@ def test_context_benchmark_configuration_validates_scope() -> None:
     assert ContextBenchmarkConfig(10, frozenset({"target"})).token_budget == 10
     with pytest.raises(ValueError, match="invalid"):
         ContextBenchmarkConfig(-1, frozenset({"target"}))
+
+
+def test_context_benchmark_uses_identical_token_budgets() -> None:
+    from echoparley.context import ContextBenchmarkConfig, benchmark_context_policies
+
+    turns = tuple(
+        ConversationTurn("a", str(i), 2, i, i + 1, "keep" if i == 0 else "other") for i in range(5)
+    )
+    scores = benchmark_context_policies(turns, ContextBenchmarkConfig(4, frozenset({"keep"})))
+    assert [score.policy.value for score in scores] == ["recency", "turn-boundary", "salience"]
+    assert all(score.used_tokens <= 4 for score in scores)
+    assert scores[-1].recall == 1.0

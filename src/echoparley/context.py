@@ -167,3 +167,22 @@ class ContextBenchmarkConfig:
             or any(not item for item in self.relevant_topics)
         ):
             raise ValueError("context benchmark configuration is invalid")
+
+
+def benchmark_context_policies(
+    turns: tuple[ConversationTurn, ...], config: ContextBenchmarkConfig
+) -> tuple[RetentionScore, ...]:
+    """Measure relevant-turn retention for all policies on the same history."""
+    total_relevant = sum(turn.topic in config.relevant_topics for turn in turns)
+    salience = planted_topic_salience(turns, config.relevant_topics)
+    windows = {
+        EvictionPolicy.RECENCY: select_context(turns, config.token_budget),
+        EvictionPolicy.TURN_BOUNDARY: select_turn_boundary_context(turns, config.token_budget),
+        EvictionPolicy.SALIENCE: select_salient_context(turns, config.token_budget, salience),
+    }
+    return tuple(
+        context_retention_score(
+            window, policy, config.relevant_topics, total_relevant=total_relevant
+        )
+        for policy, window in windows.items()
+    )
