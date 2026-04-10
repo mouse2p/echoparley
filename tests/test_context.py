@@ -124,3 +124,16 @@ def test_context_benchmark_uses_identical_token_budgets() -> None:
     assert [score.policy.value for score in scores] == ["recency", "turn-boundary", "salience"]
     assert all(score.used_tokens <= 4 for score in scores)
     assert scores[-1].recall == 1.0
+
+
+def test_context_benchmark_exposes_recency_salience_tradeoff() -> None:
+    from echoparley.context import ContextBenchmarkConfig, benchmark_context_policies
+
+    turns = tuple(
+        ConversationTurn("a", str(i), 2, i, i + 1, "target" if i in {0, 2} else "other")
+        for i in range(6)
+    )
+    scores = benchmark_context_policies(turns, ContextBenchmarkConfig(4, frozenset({"target"})))
+    by_policy = {score.policy.value: score for score in scores}
+    assert by_policy["recency"].recall == 0.0
+    assert by_policy["salience"].recall == 1.0
