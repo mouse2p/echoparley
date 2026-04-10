@@ -137,3 +137,18 @@ def test_context_benchmark_exposes_recency_salience_tradeoff() -> None:
     by_policy = {score.policy.value: score for score in scores}
     assert by_policy["recency"].recall == 0.0
     assert by_policy["salience"].recall == 1.0
+
+
+def test_context_benchmark_report_is_honestly_labeled() -> None:
+    from echoparley.context import (
+        ContextBenchmarkConfig,
+        benchmark_context_policies,
+        context_benchmark_report,
+    )
+
+    turns = (ConversationTurn("a", "x", 1, 0, 1, "target"),)
+    report = context_benchmark_report(
+        benchmark_context_policies(turns, ContextBenchmarkConfig(1, frozenset({"target"})))
+    )
+    assert report["data_origin"] == "synthetic-planted"
+    assert len(report["policies"]) == 3

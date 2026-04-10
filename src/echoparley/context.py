@@ -186,3 +186,23 @@ def benchmark_context_policies(
         )
         for policy, window in windows.items()
     )
+
+
+def context_benchmark_report(scores: tuple[RetentionScore, ...]) -> dict[str, object]:
+    """Serialize measured policy retention with stable policy ordering."""
+    if {score.policy for score in scores} != set(EvictionPolicy):
+        raise ValueError("context benchmark report requires every policy")
+    return {
+        "schema_version": "1.0",
+        "data_origin": "synthetic-planted",
+        "policies": [
+            {
+                "policy": score.policy.value,
+                "retained_relevant": score.retained_relevant,
+                "total_relevant": score.total_relevant,
+                "recall": score.recall,
+                "used_tokens": score.used_tokens,
+            }
+            for score in scores
+        ],
+    }
