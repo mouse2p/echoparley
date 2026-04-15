@@ -171,3 +171,16 @@ def test_best_context_policy_uses_stable_tie_breaks() -> None:
         RetentionScore(EvictionPolicy.SALIENCE, 1, 2, 3),
     )
     assert best_retention_policy(scores) is EvictionPolicy.SALIENCE
+
+
+def test_long_dialogue_context_benchmark_is_deterministic() -> None:
+    from echoparley.context import ContextBenchmarkConfig, benchmark_context_policies
+    from echoparley.scenarios import long_topic_scenario
+
+    scenario = long_topic_scenario(3, 30)
+    turns = tuple(
+        ConversationTurn(turn.speaker, turn.text, 3, turn.start_ms, turn.end_ms, turn.topic)
+        for turn in scenario.turns
+    )
+    config = ContextBenchmarkConfig(18, frozenset({"target"}))
+    assert benchmark_context_policies(turns, config) == benchmark_context_policies(turns, config)
