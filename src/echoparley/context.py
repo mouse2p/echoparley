@@ -206,3 +206,12 @@ def context_benchmark_report(scores: tuple[RetentionScore, ...]) -> dict[str, ob
             for score in scores
         ],
     }
+
+
+def best_retention_policy(scores: tuple[RetentionScore, ...]) -> EvictionPolicy:
+    """Choose highest recall, then lowest token use, then stable policy name."""
+    if not scores:
+        raise ValueError("best policy requires benchmark scores")
+    return max(
+        scores, key=lambda score: (score.recall, -score.used_tokens, score.policy.value)
+    ).policy

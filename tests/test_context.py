@@ -161,3 +161,13 @@ def test_context_benchmark_report_rejects_missing_policies() -> None:
 
     with pytest.raises(ValueError, match="every policy"):
         context_benchmark_report(())
+
+
+def test_best_context_policy_uses_stable_tie_breaks() -> None:
+    from echoparley.context import EvictionPolicy, RetentionScore, best_retention_policy
+
+    scores = (
+        RetentionScore(EvictionPolicy.RECENCY, 1, 2, 4),
+        RetentionScore(EvictionPolicy.SALIENCE, 1, 2, 3),
+    )
+    assert best_retention_policy(scores) is EvictionPolicy.SALIENCE
