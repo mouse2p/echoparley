@@ -198,3 +198,12 @@ def prosody_array(features: ProsodicFeatures) -> FloatArray:
         ],
         dtype=np.float64,
     )
+
+
+def smooth_pitch_track(
+    track: PitchTrack, *, median_width: int = 3, average_width: int = 3
+) -> PitchTrack:
+    """Apply median suppression followed by spline-free moving averaging."""
+    filtered = median_contour(track.frequencies_hz, median_width)
+    smoothed = moving_average_contour(filtered, average_width)
+    return PitchTrack(track.times_seconds.copy(), smoothed, track.strengths.copy())

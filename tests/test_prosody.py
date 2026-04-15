@@ -87,3 +87,12 @@ def test_prosody_array_has_a_stable_documented_order() -> None:
 
     value = ProsodicFeatures(2.0, 0.3, 0.1, 40.0, -5.0)
     assert prosody_array(value).tolist() == [2.0, 0.3, 0.1, 40.0, -5.0]
+
+
+def test_pitch_track_smoothing_preserves_timing_and_voicing_gaps() -> None:
+    from echoparley.prosody import PitchTrack, smooth_pitch_track
+
+    track = PitchTrack(np.arange(5.0), np.array([100.0, 300.0, 0.0, 100.0, 102.0]), np.ones(5))
+    result = smooth_pitch_track(track)
+    np.testing.assert_array_equal(result.times_seconds, track.times_seconds)
+    assert result.frequencies_hz[2] == 0
