@@ -355,3 +355,21 @@ def scenario_catalog(seed: int = 0) -> dict[str, DialogueScenario]:
         three_speaker_scenario(seed),
     )
     return {scenario.name: scenario for scenario in scenarios}
+
+
+def long_topic_scenario(seed: int = 0, turn_count: int = 30) -> DialogueScenario:
+    """Generate a long two-speaker history with sparse planted target-topic turns."""
+    if turn_count <= 0:
+        raise ValueError("long scenario turn count must be positive")
+    topics = ("target", "travel", "music", "study")
+    turns = tuple(
+        TurnAnnotation(
+            ("a", "b")[index % 2],
+            index * 220,
+            index * 220 + 160,
+            f"synthetic long turn {index}",
+            topic=topics[0] if index % 7 == seed % 7 else topics[1 + index % 3],
+        )
+        for index in range(turn_count)
+    )
+    return DialogueScenario("long-topic", seed, turns)

@@ -244,3 +244,11 @@ def test_scenario_catalog_contains_every_expanded_template() -> None:
         "casual-backchannel",
         "three-speaker-contention",
     }
+
+
+def test_long_topic_scenario_is_seeded_and_sparse() -> None:
+    from echoparley.scenarios import long_topic_scenario
+
+    scenario = long_topic_scenario(2, 20)
+    assert scenario == long_topic_scenario(2, 20)
+    assert 1 < sum(turn.topic == "target" for turn in scenario.turns) < 10
