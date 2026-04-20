@@ -110,3 +110,13 @@ def test_pitch_summary_ignores_unvoiced_frames() -> None:
 
     track = PitchTrack(np.arange(4.0), np.array([0.0, 100.0, 120.0, 0.0]), np.ones(4))
     assert summarize_pitch(track) == PitchSummary(2, 0.5, 100.0, 110.0, 120.0)
+
+
+def test_tone_scenario_records_exact_planted_boundaries() -> None:
+    from echoparley.prosody import synthesize_tone_scenario
+
+    scenario = synthesize_tone_scenario(
+        (100.0, 200.0, 300.0), segment_seconds=0.1, sample_rate=8_000
+    )
+    assert len(scenario.samples) == 2400
+    assert scenario.boundaries == (800, 1600)

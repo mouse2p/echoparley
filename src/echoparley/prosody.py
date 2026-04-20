@@ -240,3 +240,29 @@ def summarize_pitch(track: PitchTrack) -> PitchSummary:
         round(float(np.median(voiced)), 6),
         round(float(np.max(voiced)), 6),
     )
+
+
+@dataclass(frozen=True, slots=True)
+class ToneScenario:
+    samples: FloatArray
+    sample_rate: int
+    frequencies_hz: tuple[float, ...]
+    boundaries: tuple[int, ...]
+
+
+def synthesize_tone_scenario(
+    frequencies_hz: tuple[float, ...], *, segment_seconds: float = 0.2, sample_rate: int = 8_000
+) -> ToneScenario:
+    """Create contiguous pure-tone segments with planted sample boundaries."""
+    if (
+        not frequencies_hz
+        or any(value <= 0 for value in frequencies_hz)
+        or segment_seconds <= 0
+        or sample_rate <= 0
+    ):
+        raise ValueError("tone scenario configuration is invalid")
+    count = round(segment_seconds * sample_rate)
+    time = np.arange(count, dtype=np.float64) / sample_rate
+    segments = tuple(np.sin(2 * np.pi * frequency * time) for frequency in frequencies_hz)
+    boundaries = tuple(count * index for index in range(1, len(segments)))
+    return ToneScenario(np.concatenate(segments), sample_rate, frequencies_hz, boundaries)
