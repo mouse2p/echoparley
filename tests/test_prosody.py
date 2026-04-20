@@ -96,3 +96,10 @@ def test_pitch_track_smoothing_preserves_timing_and_voicing_gaps() -> None:
     result = smooth_pitch_track(track)
     np.testing.assert_array_equal(result.times_seconds, track.times_seconds)
     assert result.frequencies_hz[2] == 0
+
+
+def test_voiced_segments_use_half_open_frame_spans() -> None:
+    from echoparley.prosody import PitchTrack, voiced_segments
+
+    track = PitchTrack(np.arange(6.0), np.array([0, 100, 110, 0, 120, 0]), np.ones(6))
+    assert voiced_segments(track) == ((1, 3), (4, 5))

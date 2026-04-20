@@ -207,3 +207,12 @@ def smooth_pitch_track(
     filtered = median_contour(track.frequencies_hz, median_width)
     smoothed = moving_average_contour(filtered, average_width)
     return PitchTrack(track.times_seconds.copy(), smoothed, track.strengths.copy())
+
+
+def voiced_segments(track: PitchTrack) -> tuple[tuple[int, int], ...]:
+    """Return half-open frame spans for contiguous positive-F0 regions."""
+    if not (len(track.times_seconds) == len(track.frequencies_hz) == len(track.strengths)):
+        raise ValueError("pitch track arrays must have equal lengths")
+    active = track.frequencies_hz > 0
+    boundaries = np.flatnonzero(np.diff(np.concatenate(([False], active, [False]))))
+    return tuple((int(start), int(end)) for start, end in boundaries.reshape(-1, 2))
