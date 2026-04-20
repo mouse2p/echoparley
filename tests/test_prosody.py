@@ -120,3 +120,12 @@ def test_tone_scenario_records_exact_planted_boundaries() -> None:
     )
     assert len(scenario.samples) == 2400
     assert scenario.boundaries == (800, 1600)
+
+
+def test_autocorrelation_f0_tracks_multiple_pure_tones_within_tolerance() -> None:
+    from echoparley.prosody import autocorrelation_f0, synthesize_tone_scenario
+
+    for frequency in (100.0, 160.0, 250.0):
+        scenario = synthesize_tone_scenario((frequency,), segment_seconds=0.3)
+        track = autocorrelation_f0(scenario.samples, scenario.sample_rate)
+        assert abs(float(np.median(track.frequencies_hz)) - frequency) < 5.0
