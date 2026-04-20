@@ -216,3 +216,27 @@ def voiced_segments(track: PitchTrack) -> tuple[tuple[int, int], ...]:
     active = track.frequencies_hz > 0
     boundaries = np.flatnonzero(np.diff(np.concatenate(([False], active, [False]))))
     return tuple((int(start), int(end)) for start, end in boundaries.reshape(-1, 2))
+
+
+@dataclass(frozen=True, slots=True)
+class PitchSummary:
+    voiced_frames: int
+    voiced_fraction: float
+    minimum_hz: float
+    median_hz: float
+    maximum_hz: float
+
+
+def summarize_pitch(track: PitchTrack) -> PitchSummary:
+    """Summarize voiced F0 frames with explicit empty-track identities."""
+    voiced = track.frequencies_hz[track.frequencies_hz > 0]
+    fraction = len(voiced) / len(track.frequencies_hz) if len(track.frequencies_hz) else 0.0
+    if not len(voiced):
+        return PitchSummary(0, round(fraction, 6), 0.0, 0.0, 0.0)
+    return PitchSummary(
+        len(voiced),
+        round(fraction, 6),
+        round(float(np.min(voiced)), 6),
+        round(float(np.median(voiced)), 6),
+        round(float(np.max(voiced)), 6),
+    )

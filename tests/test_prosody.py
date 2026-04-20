@@ -103,3 +103,10 @@ def test_voiced_segments_use_half_open_frame_spans() -> None:
 
     track = PitchTrack(np.arange(6.0), np.array([0, 100, 110, 0, 120, 0]), np.ones(6))
     assert voiced_segments(track) == ((1, 3), (4, 5))
+
+
+def test_pitch_summary_ignores_unvoiced_frames() -> None:
+    from echoparley.prosody import PitchSummary, PitchTrack, summarize_pitch
+
+    track = PitchTrack(np.arange(4.0), np.array([0.0, 100.0, 120.0, 0.0]), np.ones(4))
+    assert summarize_pitch(track) == PitchSummary(2, 0.5, 100.0, 110.0, 120.0)
