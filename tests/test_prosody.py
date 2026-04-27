@@ -110,6 +110,10 @@ def test_pitch_summary_ignores_unvoiced_frames() -> None:
 
     track = PitchTrack(np.arange(4.0), np.array([0.0, 100.0, 120.0, 0.0]), np.ones(4))
     assert summarize_pitch(track) == PitchSummary(2, 0.5, 100.0, 110.0, 120.0)
+    import pytest
+
+    with pytest.raises(ValueError, match="equal lengths"):
+        summarize_pitch(PitchTrack(np.array([0.0]), np.array([]), np.array([])))
 
 
 def test_tone_scenario_records_exact_planted_boundaries() -> None:

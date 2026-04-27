@@ -229,6 +229,8 @@ class PitchSummary:
 
 def summarize_pitch(track: PitchTrack) -> PitchSummary:
     """Summarize voiced F0 frames with explicit empty-track identities."""
+    if not (len(track.times_seconds) == len(track.frequencies_hz) == len(track.strengths)):
+        raise ValueError("pitch track arrays must have equal lengths")
     voiced = track.frequencies_hz[track.frequencies_hz > 0]
     fraction = len(voiced) / len(track.frequencies_hz) if len(track.frequencies_hz) else 0.0
     if not len(voiced):
