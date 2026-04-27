@@ -165,3 +165,20 @@ def bootstrap_mean_interval(
     return ConfidenceInterval(
         round(float(np.mean(data)), 6), round(float(lower), 6), round(float(upper), 6), confidence
     )
+
+
+@dataclass(frozen=True, slots=True)
+class BoundaryConfusion:
+    true_positive: int
+    false_positive: int
+    false_negative: int
+
+
+def boundary_confusion(
+    predicted: tuple[int, ...], planted: tuple[int, ...], tolerance_ms: int = 100
+) -> BoundaryConfusion:
+    """Return one-to-one greedy boundary match counts."""
+    scores = match_boundaries(predicted, planted, tolerance_ms)
+    return BoundaryConfusion(
+        scores.matches, len(predicted) - scores.matches, len(planted) - scores.matches
+    )

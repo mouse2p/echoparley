@@ -101,3 +101,9 @@ def test_bootstrap_interval_validates_confidence_and_finite_values() -> None:
         bootstrap_mean_interval((1.0,), confidence=1.0)
     with pytest.raises(ValueError, match="invalid"):
         bootstrap_mean_interval((float("nan"),))
+
+
+def test_boundary_confusion_matches_hand_counts() -> None:
+    from echoparley.metrics import BoundaryConfusion, boundary_confusion
+
+    assert boundary_confusion((100, 500, 900), (90, 300, 510), 20) == BoundaryConfusion(2, 1, 1)
