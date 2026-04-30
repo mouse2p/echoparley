@@ -182,3 +182,18 @@ def boundary_confusion(
     return BoundaryConfusion(
         scores.matches, len(predicted) - scores.matches, len(planted) - scores.matches
     )
+
+
+def boundary_decisions(
+    boundaries_ms: tuple[int, ...], *, duration_ms: int, bin_ms: int = 100
+) -> tuple[bool, ...]:
+    """Project boundary timestamps onto fixed half-open agreement bins."""
+    if (
+        duration_ms < 0
+        or bin_ms <= 0
+        or any(value < 0 or value > duration_ms for value in boundaries_ms)
+    ):
+        raise ValueError("boundary binning configuration is invalid")
+    count = max(1, (duration_ms + bin_ms - 1) // bin_ms)
+    occupied = {min(value // bin_ms, count - 1) for value in boundaries_ms}
+    return tuple(index in occupied for index in range(count))

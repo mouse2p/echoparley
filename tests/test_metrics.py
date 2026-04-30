@@ -115,3 +115,10 @@ def test_boundary_confusion_handles_empty_sides() -> None:
     assert boundary_confusion((), ()) == BoundaryConfusion(0, 0, 0)
     assert boundary_confusion((1, 2), ()) == BoundaryConfusion(0, 2, 0)
     assert boundary_confusion((), (1,)) == BoundaryConfusion(0, 0, 1)
+
+
+def test_boundary_decisions_use_half_open_bins() -> None:
+    from echoparley.metrics import boundary_decisions
+
+    assert boundary_decisions((0, 99, 100, 250), duration_ms=300, bin_ms=100) == (True, True, True)
+    assert boundary_decisions((), duration_ms=0) == (False,)
