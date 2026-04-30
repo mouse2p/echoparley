@@ -107,3 +107,11 @@ def test_boundary_confusion_matches_hand_counts() -> None:
     from echoparley.metrics import BoundaryConfusion, boundary_confusion
 
     assert boundary_confusion((100, 500, 900), (90, 300, 510), 20) == BoundaryConfusion(2, 1, 1)
+
+
+def test_boundary_confusion_handles_empty_sides() -> None:
+    from echoparley.metrics import BoundaryConfusion, boundary_confusion
+
+    assert boundary_confusion((), ()) == BoundaryConfusion(0, 0, 0)
+    assert boundary_confusion((1, 2), ()) == BoundaryConfusion(0, 2, 0)
+    assert boundary_confusion((), (1,)) == BoundaryConfusion(0, 0, 1)
