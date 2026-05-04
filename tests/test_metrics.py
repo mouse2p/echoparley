@@ -128,3 +128,11 @@ def test_transition_matrix_counts_self_and_cross_transitions() -> None:
     from echoparley.metrics import transition_matrix
 
     assert transition_matrix(("a", "b", "b", "a")) == {"a": {"a": 0, "b": 1}, "b": {"a": 1, "b": 1}}
+
+
+def test_transition_matrix_total_matches_entropy_opportunities() -> None:
+    from echoparley.metrics import transition_matrix
+
+    speakers = ("a", "b", "a", "c", "a")
+    matrix = transition_matrix(speakers)
+    assert sum(sum(row.values()) for row in matrix.values()) == len(speakers) - 1
