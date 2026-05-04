@@ -208,3 +208,13 @@ def transition_matrix(speakers: tuple[str, ...]) -> dict[str, dict[str, int]]:
     for left, right in itertools.pairwise(speakers):
         matrix[left][right] += 1
     return matrix
+
+
+def normalized_transition_entropy(speakers: tuple[str, ...]) -> float:
+    """Scale observed transition entropy by the maximum for observed pairs."""
+    pairs = tuple(itertools.pairwise(speakers))
+    if len(pairs) <= 1:
+        return 0.0
+    categories = len(set(pairs))
+    maximum = math.log2(categories) if categories > 1 else 0.0
+    return round(transition_entropy(speakers) / maximum, 6) if maximum else 0.0

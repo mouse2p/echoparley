@@ -136,3 +136,10 @@ def test_transition_matrix_total_matches_entropy_opportunities() -> None:
     speakers = ("a", "b", "a", "c", "a")
     matrix = transition_matrix(speakers)
     assert sum(sum(row.values()) for row in matrix.values()) == len(speakers) - 1
+
+
+def test_normalized_transition_entropy_is_bounded() -> None:
+    from echoparley.metrics import normalized_transition_entropy
+
+    assert normalized_transition_entropy(("a", "b", "a", "a", "b")) == 0.946395
+    assert normalized_transition_entropy(("a", "a", "a")) == 0.0
