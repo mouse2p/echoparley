@@ -143,3 +143,10 @@ def test_normalized_transition_entropy_is_bounded() -> None:
 
     assert normalized_transition_entropy(("a", "b", "a", "a", "b")) == 0.946395
     assert normalized_transition_entropy(("a", "a", "a")) == 0.0
+
+
+def test_floor_dominance_uses_occupancy_and_duration_denominators() -> None:
+    from echoparley.metrics import FloorControl, FloorDominance, floor_dominance
+
+    result = floor_dominance(FloorControl({"a": 6, "b": 3}, overlap_ms=1, silence_ms=2))
+    assert result == FloorDominance("a", 0.666667, 0.1, 0.2)

@@ -218,3 +218,31 @@ def normalized_transition_entropy(speakers: tuple[str, ...]) -> float:
     categories = len(set(pairs))
     maximum = math.log2(categories) if categories > 1 else 0.0
     return round(transition_entropy(speakers) / maximum, 6) if maximum else 0.0
+
+
+@dataclass(frozen=True, slots=True)
+class FloorDominance:
+    dominant_speaker: str | None
+    dominant_share: float
+    overlap_share: float
+    silence_share: float
+
+
+def floor_dominance(statistics: FloorControl) -> FloorDominance:
+    """Summarize occupancy shares over a measured dialogue duration."""
+    total = statistics.total_ms
+    if total < 0:
+        raise ValueError("floor-control total cannot be negative")
+    dominant = max(
+        statistics.speaker_ms,
+        key=lambda speaker: (statistics.speaker_ms[speaker], speaker),
+        default=None,
+    )
+    occupied_total = sum(statistics.speaker_ms.values())
+    share = statistics.speaker_ms[dominant] / occupied_total if dominant and occupied_total else 0.0
+    return FloorDominance(
+        dominant,
+        round(share, 6),
+        round(statistics.overlap_ms / total, 6) if total else 0.0,
+        round(statistics.silence_ms / total, 6) if total else 0.0,
+    )
