@@ -197,3 +197,14 @@ def boundary_decisions(
     count = max(1, (duration_ms + bin_ms - 1) // bin_ms)
     occupied = {min(value // bin_ms, count - 1) for value in boundaries_ms}
     return tuple(index in occupied for index in range(count))
+
+
+def transition_matrix(speakers: tuple[str, ...]) -> dict[str, dict[str, int]]:
+    """Count ordered speaker transitions with stable row and column keys."""
+    if any(not speaker for speaker in speakers):
+        raise ValueError("speaker labels cannot be empty")
+    labels = sorted(set(speakers))
+    matrix = {left: {right: 0 for right in labels} for left in labels}
+    for left, right in itertools.pairwise(speakers):
+        matrix[left][right] += 1
+    return matrix

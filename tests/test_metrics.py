@@ -122,3 +122,9 @@ def test_boundary_decisions_use_half_open_bins() -> None:
 
     assert boundary_decisions((0, 99, 100, 250), duration_ms=300, bin_ms=100) == (True, True, True)
     assert boundary_decisions((), duration_ms=0) == (False,)
+
+
+def test_transition_matrix_counts_self_and_cross_transitions() -> None:
+    from echoparley.metrics import transition_matrix
+
+    assert transition_matrix(("a", "b", "b", "a")) == {"a": {"a": 0, "b": 1}, "b": {"a": 1, "b": 1}}
