@@ -158,3 +158,11 @@ def test_empty_floor_control_has_zero_shares() -> None:
     result = floor_dominance(FloorControl({}, 0, 0))
     assert result.dominant_speaker is None
     assert result.dominant_share == result.overlap_share == result.silence_share == 0
+
+
+def test_latency_distribution_matches_hand_checked_values() -> None:
+    from echoparley.metrics import latency_distribution
+
+    result = latency_distribution((10, 20, 30))
+    assert result.count == 3 and result.minimum_ms == 10 and result.maximum_ms == 30
+    assert result.mean_ms == 20 and abs(result.stdev_ms - 8.164966) < 1e-6

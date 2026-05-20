@@ -246,3 +246,27 @@ def floor_dominance(statistics: FloorControl) -> FloorDominance:
         round(statistics.overlap_ms / total, 6) if total else 0.0,
         round(statistics.silence_ms / total, 6) if total else 0.0,
     )
+
+
+@dataclass(frozen=True, slots=True)
+class LatencyDistribution:
+    count: int
+    minimum_ms: int
+    mean_ms: float
+    stdev_ms: float
+    maximum_ms: int
+    percentiles: LatencyPercentiles
+
+
+def latency_distribution(values_ms: tuple[int, ...]) -> LatencyDistribution:
+    """Summarize non-negative response latencies with population deviation."""
+    percentiles = latency_percentiles(values_ms)
+    values = np.asarray(values_ms, dtype=np.float64)
+    return LatencyDistribution(
+        len(values_ms),
+        min(values_ms),
+        round(float(np.mean(values)), 6),
+        round(float(np.std(values)), 6),
+        max(values_ms),
+        percentiles,
+    )
