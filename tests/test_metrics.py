@@ -150,3 +150,11 @@ def test_floor_dominance_uses_occupancy_and_duration_denominators() -> None:
 
     result = floor_dominance(FloorControl({"a": 6, "b": 3}, overlap_ms=1, silence_ms=2))
     assert result == FloorDominance("a", 0.666667, 0.1, 0.2)
+
+
+def test_empty_floor_control_has_zero_shares() -> None:
+    from echoparley.metrics import FloorControl, floor_dominance
+
+    result = floor_dominance(FloorControl({}, 0, 0))
+    assert result.dominant_speaker is None
+    assert result.dominant_share == result.overlap_share == result.silence_share == 0
