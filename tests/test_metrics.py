@@ -166,3 +166,9 @@ def test_latency_distribution_matches_hand_checked_values() -> None:
     result = latency_distribution((10, 20, 30))
     assert result.count == 3 and result.minimum_ms == 10 and result.maximum_ms == 30
     assert result.mean_ms == 20 and abs(result.stdev_ms - 8.164966) < 1e-6
+
+
+def test_latency_cdf_collapses_duplicate_thresholds() -> None:
+    from echoparley.metrics import latency_cdf
+
+    assert latency_cdf((20, 10, 20, 30)) == ((10, 0.25), (20, 0.75), (30, 1.0))

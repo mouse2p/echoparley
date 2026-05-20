@@ -270,3 +270,14 @@ def latency_distribution(values_ms: tuple[int, ...]) -> LatencyDistribution:
         max(values_ms),
         percentiles,
     )
+
+
+def latency_cdf(values_ms: tuple[int, ...]) -> tuple[tuple[int, float], ...]:
+    """Return unique latency thresholds and cumulative observed fractions."""
+    if not values_ms or any(value < 0 for value in values_ms):
+        raise ValueError("latency CDF requires nonempty non-negative values")
+    ordered = sorted(values_ms)
+    return tuple(
+        (value, round(sum(item <= value for item in ordered) / len(ordered), 6))
+        for value in sorted(set(ordered))
+    )
