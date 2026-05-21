@@ -297,3 +297,46 @@ def bootstrap_median_interval(
     return ConfidenceInterval(
         round(float(np.median(data)), 6), round(float(lower), 6), round(float(upper), 6), confidence
     )
+
+
+def expanded_evaluation_record(
+    confusion: BoundaryConfusion,
+    agreement: float,
+    entropy: float,
+    dominance: FloorDominance,
+    latencies: LatencyDistribution,
+) -> dict[str, object]:
+    """Assemble measured synthetic turn-taking metrics under schema 1.0."""
+    values = (
+        agreement,
+        entropy,
+        dominance.dominant_share,
+        dominance.overlap_share,
+        dominance.silence_share,
+    )
+    if any(not np.isfinite(value) or not 0 <= value <= 1 for value in values):
+        raise ValueError("expanded evaluation values must be finite and bounded")
+    return {
+        "schema_version": "1.0",
+        "data_origin": "synthetic-planted",
+        "boundary": {
+            "tp": confusion.true_positive,
+            "fp": confusion.false_positive,
+            "fn": confusion.false_negative,
+            "agreement": round(agreement, 6),
+        },
+        "transition_entropy": round(entropy, 6),
+        "floor": {
+            "dominant_speaker": dominance.dominant_speaker,
+            "dominant_share": dominance.dominant_share,
+            "overlap_share": dominance.overlap_share,
+            "silence_share": dominance.silence_share,
+        },
+        "latency": {
+            "count": latencies.count,
+            "mean_ms": latencies.mean_ms,
+            "p50_ms": latencies.percentiles.p50_ms,
+            "p90_ms": latencies.percentiles.p90_ms,
+            "p99_ms": latencies.percentiles.p99_ms,
+        },
+    }

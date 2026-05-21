@@ -201,3 +201,23 @@ def test_bootstrap_mean_and_median_report_distinct_estimates() -> None:
         bootstrap_mean_interval(values, samples=100).estimate
         != bootstrap_median_interval(values, samples=100).estimate
     )
+
+
+def test_expanded_evaluation_record_has_versioned_schema() -> None:
+    from echoparley.metrics import (
+        BoundaryConfusion,
+        FloorControl,
+        expanded_evaluation_record,
+        floor_dominance,
+        latency_distribution,
+    )
+
+    record = expanded_evaluation_record(
+        BoundaryConfusion(2, 1, 1),
+        0.5,
+        0.75,
+        floor_dominance(FloorControl({"a": 4}, 0, 0)),
+        latency_distribution((10, 20)),
+    )
+    assert record["schema_version"] == "1.0" and record["data_origin"] == "synthetic-planted"
+    assert record["boundary"] == {"tp": 2, "fp": 1, "fn": 1, "agreement": 0.5}
