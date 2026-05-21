@@ -221,3 +221,24 @@ def test_expanded_evaluation_record_has_versioned_schema() -> None:
     )
     assert record["schema_version"] == "1.0" and record["data_origin"] == "synthetic-planted"
     assert record["boundary"] == {"tp": 2, "fp": 1, "fn": 1, "agreement": 0.5}
+
+
+def test_expanded_evaluation_rejects_nonfinite_values() -> None:
+    import pytest
+
+    from echoparley.metrics import (
+        BoundaryConfusion,
+        FloorControl,
+        expanded_evaluation_record,
+        floor_dominance,
+        latency_distribution,
+    )
+
+    with pytest.raises(ValueError, match="finite"):
+        expanded_evaluation_record(
+            BoundaryConfusion(0, 0, 0),
+            float("nan"),
+            0.0,
+            floor_dominance(FloorControl({}, 0, 0)),
+            latency_distribution((1,)),
+        )
