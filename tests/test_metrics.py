@@ -191,3 +191,13 @@ def test_bootstrap_median_interval_is_seeded() -> None:
     first = bootstrap_median_interval((1.0, 2.0, 9.0), seed=4, samples=200)
     assert first == bootstrap_median_interval((1.0, 2.0, 9.0), seed=4, samples=200)
     assert first.estimate == 2.0 and first.lower <= 2 <= first.upper
+
+
+def test_bootstrap_mean_and_median_report_distinct_estimates() -> None:
+    from echoparley.metrics import bootstrap_mean_interval, bootstrap_median_interval
+
+    values = (1.0, 2.0, 100.0)
+    assert (
+        bootstrap_mean_interval(values, samples=100).estimate
+        != bootstrap_median_interval(values, samples=100).estimate
+    )
