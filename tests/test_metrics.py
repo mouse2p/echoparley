@@ -172,3 +172,14 @@ def test_latency_cdf_collapses_duplicate_thresholds() -> None:
     from echoparley.metrics import latency_cdf
 
     assert latency_cdf((20, 10, 20, 30)) == ((10, 0.25), (20, 0.75), (30, 1.0))
+
+
+def test_latency_cdf_rejects_empty_and_negative_samples() -> None:
+    import pytest
+
+    from echoparley.metrics import latency_cdf
+
+    with pytest.raises(ValueError, match="nonempty"):
+        latency_cdf(())
+    with pytest.raises(ValueError, match="non-negative"):
+        latency_cdf((-1,))
