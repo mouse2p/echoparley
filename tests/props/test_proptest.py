@@ -115,3 +115,11 @@ def test_sequence_shrinking_finds_minimal_nonmonotone_trace() -> None:
     assert failure is not None
     assert not monotone(failure.minimal)
     assert len(failure.minimal) <= len(failure.original)
+
+
+def test_endpoint_trace_shrinker_preserves_monotone_time() -> None:
+    from echoparley.proptest import generate_endpoint_traces, shrink_endpoint_trace
+
+    trace = generate_endpoint_traces(5, 1).values[0]
+    for candidate in shrink_endpoint_trace(trace):
+        assert [item.time_ms for item in candidate] == sorted(item.time_ms for item in candidate)

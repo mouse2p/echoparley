@@ -216,3 +216,10 @@ def context_budget_invariant(turns: tuple[ConversationTurn, ...], budget: int) -
         window.used_tokens == sum(turn.token_count for turn in window.turns)
         and window.used_tokens <= budget
     )
+
+
+def shrink_endpoint_trace(
+    events: tuple[EndpointEvent, ...],
+) -> tuple[tuple[EndpointEvent, ...], ...]:
+    """Remove event chunks while preserving each retained event timestamp."""
+    return shrink_sequence(events)
