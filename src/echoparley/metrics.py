@@ -281,3 +281,19 @@ def latency_cdf(values_ms: tuple[int, ...]) -> tuple[tuple[int, float], ...]:
         (value, round(sum(item <= value for item in ordered) / len(ordered), 6))
         for value in sorted(set(ordered))
     )
+
+
+def bootstrap_median_interval(
+    values: tuple[float, ...], *, seed: int = 0, samples: int = 1_000, confidence: float = 0.95
+) -> ConfidenceInterval:
+    """Estimate a deterministic percentile bootstrap interval for the median."""
+    if not values or samples <= 0 or not 0 < confidence < 1 or not np.all(np.isfinite(values)):
+        raise ValueError("bootstrap inputs are invalid")
+    data = np.asarray(values, dtype=np.float64)
+    rng = np.random.default_rng(seed)
+    medians = np.median(rng.choice(data, size=(samples, len(data)), replace=True), axis=1)
+    tail = (1 - confidence) / 2
+    lower, upper = np.quantile(medians, (tail, 1 - tail))
+    return ConfidenceInterval(
+        round(float(np.median(data)), 6), round(float(lower), 6), round(float(upper), 6), confidence
+    )

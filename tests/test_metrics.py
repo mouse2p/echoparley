@@ -183,3 +183,11 @@ def test_latency_cdf_rejects_empty_and_negative_samples() -> None:
         latency_cdf(())
     with pytest.raises(ValueError, match="non-negative"):
         latency_cdf((-1,))
+
+
+def test_bootstrap_median_interval_is_seeded() -> None:
+    from echoparley.metrics import bootstrap_median_interval
+
+    first = bootstrap_median_interval((1.0, 2.0, 9.0), seed=4, samples=200)
+    assert first == bootstrap_median_interval((1.0, 2.0, 9.0), seed=4, samples=200)
+    assert first.estimate == 2.0 and first.lower <= 2 <= first.upper
