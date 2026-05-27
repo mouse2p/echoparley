@@ -244,3 +244,17 @@ def shrink_stream(value: UnifiedStream) -> tuple[UnifiedStream, ...]:
         UnifiedStream(tokens, value.policy, value.schema_version)
         for tokens in shrink_sequence(value.tokens)
     )
+
+
+@dataclass(frozen=True, slots=True)
+class PropertyRun:
+    """Summary of evaluated cases plus an optional minimized failure."""
+
+    name: str
+    seed: int
+    checked: int
+    failure: PropertyFailure[object] | None = None
+
+    @property
+    def passed(self) -> bool:
+        return self.failure is None

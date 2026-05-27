@@ -160,3 +160,10 @@ def test_stream_shrinker_includes_empty_valid_stream() -> None:
     candidates = shrink_stream(generate_streams(8, 1).values[0])
     assert candidates[0].tokens == ()
     assert candidates[0].schema_version == "1.0"
+
+
+def test_property_run_passed_flag_reflects_failure() -> None:
+    from echoparley.proptest import PropertyFailure, PropertyRun
+
+    assert PropertyRun("x", 1, 3).passed
+    assert not PropertyRun("x", 1, 1, PropertyFailure(1, 0, 2, 0)).passed
