@@ -132,3 +132,13 @@ def test_endpoint_shrinker_includes_single_event_removals() -> None:
     events = tuple(EndpointEvent(EventKind.DECISION_TICK, index) for index in range(3))
     candidates = shrink_endpoint_trace(events)
     assert () in candidates and events[1:] in candidates
+
+
+def test_session_shrinker_preserves_encodable_sequences() -> None:
+    from echoparley.proptest import generate_sessions, shrink_session
+    from echoparley.session import encode_session
+
+    events = generate_sessions(6, 1).values[0]
+    for candidate in shrink_session(events):
+        encode_session(candidate)
+        assert [item.sequence for item in candidate] == list(range(len(candidate)))

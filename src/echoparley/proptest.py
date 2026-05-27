@@ -223,3 +223,16 @@ def shrink_endpoint_trace(
 ) -> tuple[tuple[EndpointEvent, ...], ...]:
     """Remove event chunks while preserving each retained event timestamp."""
     return shrink_sequence(events)
+
+
+def shrink_session(events: tuple[SessionEvent, ...]) -> tuple[tuple[SessionEvent, ...], ...]:
+    """Remove chunks and renumber retained events for valid replay artifacts."""
+    candidates = []
+    for candidate in shrink_sequence(events):
+        candidates.append(
+            tuple(
+                SessionEvent(index, item.time_ms, item.kind, item.payload)
+                for index, item in enumerate(candidate)
+            )
+        )
+    return tuple(candidates)
