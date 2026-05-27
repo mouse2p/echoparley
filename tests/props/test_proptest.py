@@ -152,3 +152,11 @@ def test_stream_shrinker_retains_policy_and_roundtrip() -> None:
         item.policy == stream.policy and stream_roundtrip_invariant(item)
         for item in shrink_stream(stream)
     )
+
+
+def test_stream_shrinker_includes_empty_valid_stream() -> None:
+    from echoparley.proptest import generate_streams, shrink_stream
+
+    candidates = shrink_stream(generate_streams(8, 1).values[0])
+    assert candidates[0].tokens == ()
+    assert candidates[0].schema_version == "1.0"
