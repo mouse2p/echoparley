@@ -123,3 +123,12 @@ def test_endpoint_trace_shrinker_preserves_monotone_time() -> None:
     trace = generate_endpoint_traces(5, 1).values[0]
     for candidate in shrink_endpoint_trace(trace):
         assert [item.time_ms for item in candidate] == sorted(item.time_ms for item in candidate)
+
+
+def test_endpoint_shrinker_includes_single_event_removals() -> None:
+    from echoparley.events import EndpointEvent, EventKind
+    from echoparley.proptest import shrink_endpoint_trace
+
+    events = tuple(EndpointEvent(EventKind.DECISION_TICK, index) for index in range(3))
+    candidates = shrink_endpoint_trace(events)
+    assert () in candidates and events[1:] in candidates
