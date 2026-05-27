@@ -236,3 +236,11 @@ def shrink_session(events: tuple[SessionEvent, ...]) -> tuple[tuple[SessionEvent
             )
         )
     return tuple(candidates)
+
+
+def shrink_stream(value: UnifiedStream) -> tuple[UnifiedStream, ...]:
+    """Shrink token content while retaining policy and schema metadata."""
+    return tuple(
+        UnifiedStream(tokens, value.policy, value.schema_version)
+        for tokens in shrink_sequence(value.tokens)
+    )

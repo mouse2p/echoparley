@@ -142,3 +142,13 @@ def test_session_shrinker_preserves_encodable_sequences() -> None:
     for candidate in shrink_session(events):
         encode_session(candidate)
         assert [item.sequence for item in candidate] == list(range(len(candidate)))
+
+
+def test_stream_shrinker_retains_policy_and_roundtrip() -> None:
+    from echoparley.proptest import generate_streams, shrink_stream, stream_roundtrip_invariant
+
+    stream = generate_streams(7, 1).values[0]
+    assert all(
+        item.policy == stream.policy and stream_roundtrip_invariant(item)
+        for item in shrink_stream(stream)
+    )
