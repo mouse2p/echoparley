@@ -177,3 +177,10 @@ def test_property_evaluation_stops_at_first_failure() -> None:
     run = evaluate_property("under-five", CaseSet(2, (1, 2, 8, 3)), lambda value: value < 5)
     assert not run.passed and run.checked == 3
     assert run.failure is not None and run.failure.original == 8
+
+
+def test_stream_property_suite_checks_requested_cases() -> None:
+    from echoparley.proptest import run_stream_suite
+
+    run = run_stream_suite(10, 12)
+    assert run.passed and run.checked == 12 and run.seed == 10

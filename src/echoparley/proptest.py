@@ -276,3 +276,9 @@ def evaluate_property(
     failure = check_cases(cases, predicate, shrinker)
     checked = len(cases.values) if failure is None else failure.case_index + 1
     return PropertyRun(name, cases.seed, checked, failure)
+
+
+def run_stream_suite(seed: int, count: int = 50) -> PropertyRun:
+    """Evaluate exact mapping roundtrip across generated unified streams."""
+    cases = generate_streams(seed, count)
+    return evaluate_property("stream-roundtrip", cases, stream_roundtrip_invariant, shrink_stream)
