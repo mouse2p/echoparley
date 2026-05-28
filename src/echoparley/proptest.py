@@ -290,3 +290,11 @@ def run_session_suite(seed: int, count: int = 50) -> PropertyRun:
     return evaluate_property(
         "session-roundtrip", cases, session_roundtrip_invariant, shrink_session
     )
+
+
+def run_duplex_suite(seed: int, count: int = 50) -> PropertyRun:
+    """Evaluate legal state entry across generated endpoint traces."""
+    cases = generate_endpoint_traces(seed, count)
+    return evaluate_property(
+        "duplex-legality", cases, legal_duplex_invariant, shrink_endpoint_trace
+    )

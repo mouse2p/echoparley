@@ -198,3 +198,9 @@ def test_every_shrunk_session_roundtrips_exactly() -> None:
 
     events = generate_sessions(12, 1).values[0]
     assert all(session_roundtrip_invariant(candidate) for candidate in shrink_session(events))
+
+
+def test_duplex_property_suite_checks_requested_cases() -> None:
+    from echoparley.proptest import run_duplex_suite
+
+    assert run_duplex_suite(13, 15).passed
