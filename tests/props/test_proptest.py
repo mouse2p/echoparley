@@ -211,3 +211,17 @@ def test_context_property_suite_covers_budget_grid() -> None:
 
     run = run_context_suite(14, count=3, maximum_budget=4)
     assert run.passed and run.checked == 15
+
+
+def test_property_suite_report_sums_executed_cases() -> None:
+    from echoparley.proptest import (
+        property_suite_report,
+        run_duplex_suite,
+        run_session_suite,
+        run_stream_suite,
+    )
+
+    report = property_suite_report(
+        (run_stream_suite(1, 2), run_session_suite(2, 3), run_duplex_suite(3, 4))
+    )
+    assert report["passed"] is True and report["checked"] == 9

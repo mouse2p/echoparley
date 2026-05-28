@@ -312,3 +312,19 @@ def run_context_suite(seed: int, count: int = 30, maximum_budget: int = 32) -> P
     return evaluate_property(
         "context-budget", cases, lambda item: context_budget_invariant(item[0], item[1])
     )
+
+
+def property_suite_report(runs: tuple[PropertyRun, ...]) -> dict[str, object]:
+    """Combine distinct executable property runs into a stable report."""
+    names = tuple(run.name for run in runs)
+    if not runs or len(names) != len(set(names)):
+        raise ValueError("property suite report requires distinct runs")
+    return {
+        "schema_version": "1.0",
+        "passed": all(run.passed for run in runs),
+        "checked": sum(run.checked for run in runs),
+        "runs": [
+            {"name": run.name, "seed": run.seed, "checked": run.checked, "passed": run.passed}
+            for run in runs
+        ],
+    }
