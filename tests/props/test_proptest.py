@@ -184,3 +184,10 @@ def test_stream_property_suite_checks_requested_cases() -> None:
 
     run = run_stream_suite(10, 12)
     assert run.passed and run.checked == 12 and run.seed == 10
+
+
+def test_session_property_suite_checks_requested_cases() -> None:
+    from echoparley.proptest import run_session_suite
+
+    run = run_session_suite(11, 10)
+    assert run.passed and run.checked == 10

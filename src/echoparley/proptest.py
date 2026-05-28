@@ -282,3 +282,11 @@ def run_stream_suite(seed: int, count: int = 50) -> PropertyRun:
     """Evaluate exact mapping roundtrip across generated unified streams."""
     cases = generate_streams(seed, count)
     return evaluate_property("stream-roundtrip", cases, stream_roundtrip_invariant, shrink_stream)
+
+
+def run_session_suite(seed: int, count: int = 50) -> PropertyRun:
+    """Evaluate byte-identical replay across generated event sessions."""
+    cases = generate_sessions(seed, count)
+    return evaluate_property(
+        "session-roundtrip", cases, session_roundtrip_invariant, shrink_session
+    )
