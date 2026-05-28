@@ -204,3 +204,10 @@ def test_duplex_property_suite_checks_requested_cases() -> None:
     from echoparley.proptest import run_duplex_suite
 
     assert run_duplex_suite(13, 15).passed
+
+
+def test_context_property_suite_covers_budget_grid() -> None:
+    from echoparley.proptest import run_context_suite
+
+    run = run_context_suite(14, count=3, maximum_budget=4)
+    assert run.passed and run.checked == 15

@@ -298,3 +298,17 @@ def run_duplex_suite(seed: int, count: int = 50) -> PropertyRun:
     return evaluate_property(
         "duplex-legality", cases, legal_duplex_invariant, shrink_endpoint_trace
     )
+
+
+def run_context_suite(seed: int, count: int = 30, maximum_budget: int = 32) -> PropertyRun:
+    """Evaluate exact token accounting over generated histories and budgets."""
+    histories = generate_turns(seed, count)
+    cases = CaseSet(
+        seed,
+        tuple(
+            (turns, budget) for turns in histories.values for budget in range(maximum_budget + 1)
+        ),
+    )
+    return evaluate_property(
+        "context-budget", cases, lambda item: context_budget_invariant(item[0], item[1])
+    )
