@@ -167,6 +167,8 @@ def test_property_run_passed_flag_reflects_failure() -> None:
 
     assert PropertyRun("x", 1, 3).passed
     assert not PropertyRun("x", 1, 1, PropertyFailure(1, 0, 2, 0)).passed
+    with pytest.raises(ValueError, match="invalid"):
+        PropertyRun("", 1, 0)
 
 
 def test_property_evaluation_stops_at_first_failure() -> None:

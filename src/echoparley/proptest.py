@@ -255,6 +255,10 @@ class PropertyRun:
     checked: int
     failure: PropertyFailure[object] | None = None
 
+    def __post_init__(self) -> None:
+        if not self.name or self.seed < 0 or self.checked < 0:
+            raise ValueError("property run fields are invalid")
+
     @property
     def passed(self) -> bool:
         return self.failure is None
