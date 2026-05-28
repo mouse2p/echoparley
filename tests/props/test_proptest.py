@@ -167,3 +167,11 @@ def test_property_run_passed_flag_reflects_failure() -> None:
 
     assert PropertyRun("x", 1, 3).passed
     assert not PropertyRun("x", 1, 1, PropertyFailure(1, 0, 2, 0)).passed
+
+
+def test_property_evaluation_stops_at_first_failure() -> None:
+    from echoparley.proptest import evaluate_property
+
+    run = evaluate_property("under-five", CaseSet(2, (1, 2, 8, 3)), lambda value: value < 5)
+    assert not run.passed and run.checked == 3
+    assert run.failure is not None and run.failure.original == 8

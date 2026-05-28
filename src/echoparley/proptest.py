@@ -258,3 +258,17 @@ class PropertyRun:
     @property
     def passed(self) -> bool:
         return self.failure is None
+
+
+def evaluate_property(
+    name: str,
+    cases: CaseSet[T],
+    predicate: Callable[[T], bool],
+    shrinker: Callable[[T], tuple[T, ...]] | None = None,
+) -> PropertyRun:
+    """Evaluate a named property and report how many cases reached the failure."""
+    if not name:
+        raise ValueError("property name cannot be empty")
+    failure = check_cases(cases, predicate, shrinker)
+    checked = len(cases.values) if failure is None else failure.case_index + 1
+    return PropertyRun(name, cases.seed, checked, failure)
