@@ -191,3 +191,10 @@ def test_session_property_suite_checks_requested_cases() -> None:
 
     run = run_session_suite(11, 10)
     assert run.passed and run.checked == 10
+
+
+def test_every_shrunk_session_roundtrips_exactly() -> None:
+    from echoparley.proptest import generate_sessions, session_roundtrip_invariant, shrink_session
+
+    events = generate_sessions(12, 1).values[0]
+    assert all(session_roundtrip_invariant(candidate) for candidate in shrink_session(events))
