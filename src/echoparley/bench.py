@@ -188,5 +188,5 @@ class BenchmarkEnvironment:
 def benchmark_environment() -> BenchmarkEnvironment:
     """Capture versions needed to interpret machine-dependent measurements."""
     return BenchmarkEnvironment(
-        platform.python_version(), np.__version__, platform.system(), __version__
+        platform.python_version(), np.__version__, platform.system() or "unknown", __version__
     )

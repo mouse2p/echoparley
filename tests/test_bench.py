@@ -142,3 +142,12 @@ def test_benchmark_environment_reports_runtime_versions() -> None:
     environment = benchmark_environment()
     assert environment.python and environment.numpy and environment.platform
     assert environment.package.count(".") == 2
+
+
+def test_benchmark_environment_labels_unknown_platform(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import echoparley.bench
+
+    monkeypatch.setattr(echoparley.bench.platform, "system", lambda: "")
+    assert echoparley.bench.benchmark_environment().platform == "unknown"
