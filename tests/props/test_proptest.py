@@ -225,3 +225,10 @@ def test_property_suite_report_sums_executed_cases() -> None:
         (run_stream_suite(1, 2), run_session_suite(2, 3), run_duplex_suite(3, 4))
     )
     assert report["passed"] is True and report["checked"] == 9
+
+
+def test_property_suite_report_rejects_duplicate_names() -> None:
+    from echoparley.proptest import PropertyRun, property_suite_report
+
+    with pytest.raises(ValueError, match="distinct"):
+        property_suite_report((PropertyRun("same", 1, 1), PropertyRun("same", 2, 1)))
