@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import platform
 import statistics
 import time
 from collections.abc import Callable
@@ -9,6 +10,7 @@ from dataclasses import asdict, dataclass
 
 import numpy as np
 
+from echoparley import __version__
 from echoparley.artifacts import ArtifactEnvelope, decode_jsonl, encode_jsonl
 from echoparley.units import fit_unit_extractor
 
@@ -172,4 +174,19 @@ def benchmark_summaries(samples: tuple[BenchmarkSample, ...]) -> tuple[Benchmark
     return tuple(
         summarize_samples(tuple(sample for sample in samples if sample.case == case))
         for case in cases
+    )
+
+
+@dataclass(frozen=True, slots=True)
+class BenchmarkEnvironment:
+    python: str
+    numpy: str
+    platform: str
+    package: str
+
+
+def benchmark_environment() -> BenchmarkEnvironment:
+    """Capture versions needed to interpret machine-dependent measurements."""
+    return BenchmarkEnvironment(
+        platform.python_version(), np.__version__, platform.system(), __version__
     )

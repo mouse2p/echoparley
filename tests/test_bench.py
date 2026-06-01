@@ -134,3 +134,11 @@ def test_benchmark_suite_groups_three_stable_cases() -> None:
     summaries = benchmark_summaries(benchmark_suite(0, 1))
     assert [item.case for item in summaries] == ["unit-extraction", "stream-roundtrip", "simulator"]
     assert all(item.repeats == 1 for item in summaries)
+
+
+def test_benchmark_environment_reports_runtime_versions() -> None:
+    from echoparley.bench import benchmark_environment
+
+    environment = benchmark_environment()
+    assert environment.python and environment.numpy and environment.platform
+    assert environment.package.count(".") == 2
