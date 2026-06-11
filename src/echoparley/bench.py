@@ -190,3 +190,17 @@ def benchmark_environment() -> BenchmarkEnvironment:
     return BenchmarkEnvironment(
         platform.python_version(), np.__version__, platform.system() or "unknown", __version__
     )
+
+
+def benchmark_run_metadata(seed: int, repeats: int) -> dict[str, object]:
+    """Describe reproducibility inputs without treating timings as portable."""
+    if seed < 0 or repeats <= 0:
+        raise ValueError("benchmark metadata inputs are invalid")
+    environment = asdict(benchmark_environment())
+    return {
+        "schema_version": "1.0",
+        "seed": seed,
+        "repeats": repeats,
+        "environment": environment,
+        "machine_dependent": True,
+    }

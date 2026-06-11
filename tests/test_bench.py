@@ -151,3 +151,10 @@ def test_benchmark_environment_labels_unknown_platform(
 
     monkeypatch.setattr(echoparley.bench.platform, "system", lambda: "")
     assert echoparley.bench.benchmark_environment().platform == "unknown"
+
+
+def test_benchmark_metadata_labels_machine_dependence() -> None:
+    from echoparley.bench import benchmark_run_metadata
+
+    metadata = benchmark_run_metadata(4, 3)
+    assert metadata["seed"] == 4 and metadata["machine_dependent"] is True
