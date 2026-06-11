@@ -174,3 +174,11 @@ def test_benchmark_throughput_rejects_zero_work_or_time() -> None:
         benchmark_throughput(BenchmarkSummary("x", 1, 1, 1, 1, 0), 0)
     with pytest.raises(ValueError, match="positive"):
         benchmark_throughput(BenchmarkSummary("x", 1, 0, 0, 0, 0), 1)
+
+
+def test_benchmark_baseline_requires_loose_positive_ratio() -> None:
+    from echoparley.bench import BenchmarkBaseline
+
+    assert BenchmarkBaseline("units", 10).tolerance_ratio == 10
+    with pytest.raises(ValueError, match="invalid"):
+        BenchmarkBaseline("units", 10, 0.5)

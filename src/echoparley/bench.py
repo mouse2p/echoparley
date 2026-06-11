@@ -220,3 +220,14 @@ def benchmark_throughput(summary: BenchmarkSummary, work_items: int) -> Throughp
     return ThroughputSummary(
         summary.case, work_items, round(work_items / (summary.mean_ms / 1000), 6)
     )
+
+
+@dataclass(frozen=True, slots=True)
+class BenchmarkBaseline:
+    case: str
+    mean_ms: float
+    tolerance_ratio: float = 10.0
+
+    def __post_init__(self) -> None:
+        if not self.case or self.mean_ms <= 0 or self.tolerance_ratio < 1:
+            raise ValueError("benchmark baseline fields are invalid")
