@@ -190,3 +190,10 @@ def test_baseline_comparison_uses_loose_ratio() -> None:
     summary = BenchmarkSummary("units", 1, 25, 25, 25, 0)
     result = compare_benchmark_baseline(summary, BenchmarkBaseline("units", 10, 3))
     assert result.ratio == 2.5 and result.within_tolerance
+
+
+def test_baseline_comparison_rejects_mismatched_case() -> None:
+    from echoparley.bench import BenchmarkBaseline, BenchmarkSummary, compare_benchmark_baseline
+
+    with pytest.raises(ValueError, match="does not match"):
+        compare_benchmark_baseline(BenchmarkSummary("a", 1, 1, 1, 1, 0), BenchmarkBaseline("b", 1))
