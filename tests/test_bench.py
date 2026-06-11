@@ -158,3 +158,10 @@ def test_benchmark_metadata_labels_machine_dependence() -> None:
 
     metadata = benchmark_run_metadata(4, 3)
     assert metadata["seed"] == 4 and metadata["machine_dependent"] is True
+
+
+def test_benchmark_throughput_matches_hand_calculation() -> None:
+    from echoparley.bench import BenchmarkSummary, ThroughputSummary, benchmark_throughput
+
+    summary = BenchmarkSummary("stream", 3, 50, 50, 50, 0)
+    assert benchmark_throughput(summary, 10) == ThroughputSummary("stream", 10, 200.0)

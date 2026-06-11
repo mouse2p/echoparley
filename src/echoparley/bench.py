@@ -204,3 +204,19 @@ def benchmark_run_metadata(seed: int, repeats: int) -> dict[str, object]:
         "environment": environment,
         "machine_dependent": True,
     }
+
+
+@dataclass(frozen=True, slots=True)
+class ThroughputSummary:
+    case: str
+    work_items: int
+    items_per_second: float
+
+
+def benchmark_throughput(summary: BenchmarkSummary, work_items: int) -> ThroughputSummary:
+    """Convert measured mean latency to item throughput."""
+    if work_items <= 0 or summary.mean_ms <= 0:
+        raise ValueError("throughput requires positive work and elapsed time")
+    return ThroughputSummary(
+        summary.case, work_items, round(work_items / (summary.mean_ms / 1000), 6)
+    )
