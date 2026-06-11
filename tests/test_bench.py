@@ -165,3 +165,12 @@ def test_benchmark_throughput_matches_hand_calculation() -> None:
 
     summary = BenchmarkSummary("stream", 3, 50, 50, 50, 0)
     assert benchmark_throughput(summary, 10) == ThroughputSummary("stream", 10, 200.0)
+
+
+def test_benchmark_throughput_rejects_zero_work_or_time() -> None:
+    from echoparley.bench import BenchmarkSummary, benchmark_throughput
+
+    with pytest.raises(ValueError, match="positive"):
+        benchmark_throughput(BenchmarkSummary("x", 1, 1, 1, 1, 0), 0)
+    with pytest.raises(ValueError, match="positive"):
+        benchmark_throughput(BenchmarkSummary("x", 1, 0, 0, 0, 0), 1)
