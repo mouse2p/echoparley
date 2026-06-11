@@ -231,3 +231,20 @@ class BenchmarkBaseline:
     def __post_init__(self) -> None:
         if not self.case or self.mean_ms <= 0 or self.tolerance_ratio < 1:
             raise ValueError("benchmark baseline fields are invalid")
+
+
+@dataclass(frozen=True, slots=True)
+class BaselineComparison:
+    case: str
+    ratio: float
+    within_tolerance: bool
+
+
+def compare_benchmark_baseline(
+    summary: BenchmarkSummary, baseline: BenchmarkBaseline
+) -> BaselineComparison:
+    """Compare means by ratio so only order-of-magnitude drift fails."""
+    if summary.case != baseline.case:
+        raise ValueError("benchmark baseline case does not match summary")
+    ratio = summary.mean_ms / baseline.mean_ms
+    return BaselineComparison(summary.case, round(ratio, 6), ratio <= baseline.tolerance_ratio)

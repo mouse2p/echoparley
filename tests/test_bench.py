@@ -182,3 +182,11 @@ def test_benchmark_baseline_requires_loose_positive_ratio() -> None:
     assert BenchmarkBaseline("units", 10).tolerance_ratio == 10
     with pytest.raises(ValueError, match="invalid"):
         BenchmarkBaseline("units", 10, 0.5)
+
+
+def test_baseline_comparison_uses_loose_ratio() -> None:
+    from echoparley.bench import BenchmarkBaseline, BenchmarkSummary, compare_benchmark_baseline
+
+    summary = BenchmarkSummary("units", 1, 25, 25, 25, 0)
+    result = compare_benchmark_baseline(summary, BenchmarkBaseline("units", 10, 3))
+    assert result.ratio == 2.5 and result.within_tolerance
