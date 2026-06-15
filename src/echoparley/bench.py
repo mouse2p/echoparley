@@ -248,3 +248,15 @@ def compare_benchmark_baseline(
         raise ValueError("benchmark baseline case does not match summary")
     ratio = summary.mean_ms / baseline.mean_ms
     return BaselineComparison(summary.case, round(ratio, 6), ratio <= baseline.tolerance_ratio)
+
+
+def benchmark_result_record(
+    samples: tuple[BenchmarkSample, ...], *, seed: int, repeats: int
+) -> dict[str, object]:
+    """Assemble metadata and computed summaries for a benchmark suite."""
+    summaries = benchmark_summaries(samples)
+    return {
+        "metadata": benchmark_run_metadata(seed, repeats),
+        "summaries": [asdict(summary) for summary in summaries],
+        "samples": len(samples),
+    }

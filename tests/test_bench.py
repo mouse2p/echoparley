@@ -197,3 +197,11 @@ def test_baseline_comparison_rejects_mismatched_case() -> None:
 
     with pytest.raises(ValueError, match="does not match"):
         compare_benchmark_baseline(BenchmarkSummary("a", 1, 1, 1, 1, 0), BenchmarkBaseline("b", 1))
+
+
+def test_benchmark_result_record_contains_computed_summaries() -> None:
+    from echoparley.bench import BenchmarkSample, benchmark_result_record
+
+    record = benchmark_result_record((BenchmarkSample("x", 0, 2),), seed=1, repeats=1)
+    assert record["samples"] == 1
+    assert record["summaries"][0]["mean_ms"] == 2
