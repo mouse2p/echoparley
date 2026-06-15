@@ -216,3 +216,10 @@ def test_benchmark_summary_artifacts_roundtrip() -> None:
 
     summaries = (BenchmarkSummary("x", 2, 1.5, 1.5, 2, 0.7),)
     assert decode_benchmark_summaries(encode_benchmark_summaries(summaries)) == summaries
+
+
+def test_summary_decoder_rejects_raw_sample_artifacts() -> None:
+    from echoparley.bench import BenchmarkSample, decode_benchmark_summaries, encode_benchmark_jsonl
+
+    with pytest.raises(ValueError, match="unsupported"):
+        decode_benchmark_summaries(encode_benchmark_jsonl((BenchmarkSample("x", 0, 1),)))
