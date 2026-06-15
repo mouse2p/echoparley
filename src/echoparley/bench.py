@@ -171,10 +171,7 @@ def benchmark_suite(seed: int = 0, repeats: int = 3) -> tuple[BenchmarkSample, .
 def benchmark_summaries(samples: tuple[BenchmarkSample, ...]) -> tuple[BenchmarkSummary, ...]:
     """Group suite samples by case in stable first-seen order."""
     cases = tuple(dict.fromkeys(sample.case for sample in samples))
-    return tuple(
-        summarize_samples(tuple(sample for sample in samples if sample.case == case))
-        for case in cases
-    )
+    return tuple(summarize_samples(select_benchmark_case(samples, case)) for case in cases)
 
 
 @dataclass(frozen=True, slots=True)
