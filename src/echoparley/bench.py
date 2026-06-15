@@ -285,3 +285,16 @@ def select_benchmark_case(
     if not selected:
         raise KeyError(f"benchmark case not found: {case}")
     return selected
+
+
+def merge_benchmark_runs(
+    runs: tuple[tuple[BenchmarkSample, ...], ...],
+) -> tuple[BenchmarkSample, ...]:
+    """Merge runs and resequence repeats independently for each case."""
+    counters: dict[str, int] = {}
+    merged = []
+    for sample in (item for run in runs for item in run):
+        repeat = counters.get(sample.case, 0)
+        merged.append(BenchmarkSample(sample.case, repeat, sample.elapsed_ms, sample.work_seconds))
+        counters[sample.case] = repeat + 1
+    return tuple(merged)

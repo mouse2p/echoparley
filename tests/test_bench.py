@@ -232,3 +232,11 @@ def test_benchmark_case_selection_preserves_repeats() -> None:
     assert [item.repeat for item in select_benchmark_case(samples, "a")] == [0, 1]
     with pytest.raises(KeyError, match="not found"):
         select_benchmark_case(samples, "missing")
+
+
+def test_benchmark_run_merge_resequences_each_case() -> None:
+    from echoparley.bench import BenchmarkSample, merge_benchmark_runs
+
+    first = (BenchmarkSample("a", 0, 1), BenchmarkSample("b", 0, 2))
+    second = (BenchmarkSample("a", 0, 3),)
+    assert [item.repeat for item in merge_benchmark_runs((first, second))] == [0, 0, 1]
