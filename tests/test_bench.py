@@ -205,3 +205,14 @@ def test_benchmark_result_record_contains_computed_summaries() -> None:
     record = benchmark_result_record((BenchmarkSample("x", 0, 2),), seed=1, repeats=1)
     assert record["samples"] == 1
     assert record["summaries"][0]["mean_ms"] == 2
+
+
+def test_benchmark_summary_artifacts_roundtrip() -> None:
+    from echoparley.bench import (
+        BenchmarkSummary,
+        decode_benchmark_summaries,
+        encode_benchmark_summaries,
+    )
+
+    summaries = (BenchmarkSummary("x", 2, 1.5, 1.5, 2, 0.7),)
+    assert decode_benchmark_summaries(encode_benchmark_summaries(summaries)) == summaries

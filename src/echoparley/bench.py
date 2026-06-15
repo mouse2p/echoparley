@@ -260,3 +260,18 @@ def benchmark_result_record(
         "summaries": [asdict(summary) for summary in summaries],
         "samples": len(samples),
     }
+
+
+def encode_benchmark_summaries(summaries: tuple[BenchmarkSummary, ...]) -> bytes:
+    """Encode checksummed summary artifacts distinct from raw samples."""
+    return encode_jsonl(
+        ArtifactEnvelope.create("benchmark-summary", asdict(summary), "1.0")
+        for summary in summaries
+    )
+
+
+def decode_benchmark_summaries(data: bytes) -> tuple[BenchmarkSummary, ...]:
+    envelopes = decode_jsonl(data)
+    if any(item.kind != "benchmark-summary" or item.schema_version != "1.0" for item in envelopes):
+        raise ValueError("benchmark summary JSONL contains an unsupported artifact")
+    return tuple(BenchmarkSummary(**item.payload) for item in envelopes)
