@@ -275,3 +275,13 @@ def decode_benchmark_summaries(data: bytes) -> tuple[BenchmarkSummary, ...]:
     if any(item.kind != "benchmark-summary" or item.schema_version != "1.0" for item in envelopes):
         raise ValueError("benchmark summary JSONL contains an unsupported artifact")
     return tuple(BenchmarkSummary(**item.payload) for item in envelopes)
+
+
+def select_benchmark_case(
+    samples: tuple[BenchmarkSample, ...], case: str
+) -> tuple[BenchmarkSample, ...]:
+    """Select one nonempty case from a combined benchmark run."""
+    selected = tuple(sample for sample in samples if sample.case == case)
+    if not selected:
+        raise KeyError(f"benchmark case not found: {case}")
+    return selected

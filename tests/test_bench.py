@@ -223,3 +223,12 @@ def test_summary_decoder_rejects_raw_sample_artifacts() -> None:
 
     with pytest.raises(ValueError, match="unsupported"):
         decode_benchmark_summaries(encode_benchmark_jsonl((BenchmarkSample("x", 0, 1),)))
+
+
+def test_benchmark_case_selection_preserves_repeats() -> None:
+    from echoparley.bench import BenchmarkSample, select_benchmark_case
+
+    samples = (BenchmarkSample("a", 0, 1), BenchmarkSample("b", 0, 2), BenchmarkSample("a", 1, 3))
+    assert [item.repeat for item in select_benchmark_case(samples, "a")] == [0, 1]
+    with pytest.raises(KeyError, match="not found"):
+        select_benchmark_case(samples, "missing")
