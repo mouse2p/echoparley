@@ -24,3 +24,14 @@ def test_module_reference_contains_public_completion_functions() -> None:
     rendered = render_module_reference("echoparley.completion")
     assert rendered.startswith("## `echoparley.completion`\n")
     assert "`bash_completion`" in rendered and "`zsh_completion`" in rendered
+
+
+def test_module_reference_follows_inventory_order() -> None:
+    from echoparley.apidoc import render_module_reference
+
+    rendered = render_module_reference("echoparley.snippets")
+    positions = [
+        rendered.index(f"`{name}`")
+        for name in ("PythonSnippet", "execute_snippets", "extract_python_snippets")
+    ]
+    assert positions == sorted(positions)
