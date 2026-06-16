@@ -38,3 +38,9 @@ def public_api_entries(module_name: str) -> tuple[APIEntry, ...]:
 def missing_docstrings(module_name: str) -> tuple[str, ...]:
     """Return public names that lack a usable docstring summary."""
     return tuple(entry.name for entry in public_api_entries(module_name) if not entry.summary)
+
+
+def render_api_entry(entry: APIEntry) -> str:
+    """Render one API entry as a compact Markdown definition item."""
+    summary = entry.summary or "未提供 docstring。"
+    return f"- `{entry.name}` ({entry.kind}): {summary}"
