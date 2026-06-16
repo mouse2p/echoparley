@@ -7,6 +7,8 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True, slots=True)
 class PythonSnippet:
+    """Runnable source plus its one-based Markdown starting line."""
+
     source: str
     start_line: int
 
