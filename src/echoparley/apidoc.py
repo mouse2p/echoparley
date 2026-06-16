@@ -9,6 +9,8 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True, slots=True)
 class APIEntry:
+    """One public module-local function or class and its docstring summary."""
+
     module: str
     name: str
     kind: str
@@ -34,4 +36,5 @@ def public_api_entries(module_name: str) -> tuple[APIEntry, ...]:
 
 
 def missing_docstrings(module_name: str) -> tuple[str, ...]:
+    """Return public names that lack a usable docstring summary."""
     return tuple(entry.name for entry in public_api_entries(module_name) if not entry.summary)
