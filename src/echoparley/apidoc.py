@@ -44,3 +44,12 @@ def render_api_entry(entry: APIEntry) -> str:
     """Render one API entry as a compact Markdown definition item."""
     summary = entry.summary or "未提供 docstring。"
     return f"- `{entry.name}` ({entry.kind}): {summary}"
+
+
+def render_module_reference(module_name: str) -> str:
+    """Render all public module-local APIs from live docstrings."""
+    entries = public_api_entries(module_name)
+    lines = [f"## `{module_name}`", ""]
+    lines.extend(render_api_entry(entry) for entry in entries)
+    lines.append("")
+    return "\n".join(lines)

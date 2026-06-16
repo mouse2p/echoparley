@@ -16,3 +16,11 @@ def test_api_entry_renderer_uses_docstring_summary() -> None:
 
     entry = APIEntry("echoparley.example", "run", "function", "Run one example.")
     assert render_api_entry(entry) == "- `run` (function): Run one example."
+
+
+def test_module_reference_contains_public_completion_functions() -> None:
+    from echoparley.apidoc import render_module_reference
+
+    rendered = render_module_reference("echoparley.completion")
+    assert rendered.startswith("## `echoparley.completion`\n")
+    assert "`bash_completion`" in rendered and "`zsh_completion`" in rendered
