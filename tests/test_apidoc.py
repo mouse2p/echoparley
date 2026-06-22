@@ -43,3 +43,14 @@ def test_multi_module_reference_has_one_section_each() -> None:
     rendered = render_api_reference(("echoparley.completion", "echoparley.snippets"))
     assert rendered.count("## `echoparley.") == 2
     assert rendered.endswith("\n")
+
+
+def test_api_reference_rejects_empty_and_duplicate_modules() -> None:
+    import pytest
+
+    from echoparley.apidoc import render_api_reference
+
+    with pytest.raises(ValueError, match="distinct"):
+        render_api_reference(())
+    with pytest.raises(ValueError, match="distinct"):
+        render_api_reference(("echoparley.snippets", "echoparley.snippets"))
