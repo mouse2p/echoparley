@@ -54,3 +54,9 @@ def test_api_reference_rejects_empty_and_duplicate_modules() -> None:
         render_api_reference(())
     with pytest.raises(ValueError, match="distinct"):
         render_api_reference(("echoparley.snippets", "echoparley.snippets"))
+
+
+def test_phase_two_reference_modules_have_complete_docstrings() -> None:
+    from echoparley.apidoc import PHASE_TWO_API_MODULES
+
+    assert all(missing_docstrings(module) == () for module in PHASE_TWO_API_MODULES)

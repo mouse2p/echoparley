@@ -61,3 +61,10 @@ def render_api_reference(modules: tuple[str, ...]) -> str:
         raise ValueError("API reference modules must be nonempty and distinct")
     sections = "\n".join(render_module_reference(module) for module in modules)
     return "# Generated API reference\n\n" + sections
+
+
+PHASE_TWO_API_MODULES = (
+    "echoparley.apidoc",
+    "echoparley.completion",
+    "echoparley.snippets",
+)
