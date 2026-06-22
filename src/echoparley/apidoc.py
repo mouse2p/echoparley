@@ -68,3 +68,22 @@ PHASE_TWO_API_MODULES = (
     "echoparley.completion",
     "echoparley.snippets",
 )
+
+
+def api_inventory_mapping(modules: tuple[str, ...]) -> dict[str, object]:
+    """Return exhaustive JSON-compatible API entries under schema 1.0."""
+    if not modules:
+        raise ValueError("API inventory requires modules")
+    return {
+        "schema_version": "1.0",
+        "modules": [
+            {
+                "name": module,
+                "entries": [
+                    {"name": entry.name, "kind": entry.kind, "summary": entry.summary}
+                    for entry in public_api_entries(module)
+                ],
+            }
+            for module in modules
+        ],
+    }

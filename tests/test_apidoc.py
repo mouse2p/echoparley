@@ -60,3 +60,14 @@ def test_phase_two_reference_modules_have_complete_docstrings() -> None:
     from echoparley.apidoc import PHASE_TWO_API_MODULES
 
     assert all(missing_docstrings(module) == () for module in PHASE_TWO_API_MODULES)
+
+
+def test_api_inventory_mapping_fields_are_exhaustive() -> None:
+    from echoparley.apidoc import api_inventory_mapping
+
+    mapping = api_inventory_mapping(("echoparley.snippets",))
+    assert set(mapping) == {"schema_version", "modules"}
+    assert set(mapping["modules"][0]) == {"name", "entries"}
+    assert all(
+        set(entry) == {"name", "kind", "summary"} for entry in mapping["modules"][0]["entries"]
+    )
