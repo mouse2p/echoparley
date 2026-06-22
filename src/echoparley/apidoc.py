@@ -53,3 +53,11 @@ def render_module_reference(module_name: str) -> str:
     lines.extend(render_api_entry(entry) for entry in entries)
     lines.append("")
     return "\n".join(lines)
+
+
+def render_api_reference(modules: tuple[str, ...]) -> str:
+    """Render a complete Markdown reference for distinct module names."""
+    if not modules or len(modules) != len(set(modules)):
+        raise ValueError("API reference modules must be nonempty and distinct")
+    sections = "\n".join(render_module_reference(module) for module in modules)
+    return "# Generated API reference\n\n" + sections

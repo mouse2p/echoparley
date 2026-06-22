@@ -35,3 +35,11 @@ def test_module_reference_follows_inventory_order() -> None:
         for name in ("PythonSnippet", "execute_snippets", "extract_python_snippets")
     ]
     assert positions == sorted(positions)
+
+
+def test_multi_module_reference_has_one_section_each() -> None:
+    from echoparley.apidoc import render_api_reference
+
+    rendered = render_api_reference(("echoparley.completion", "echoparley.snippets"))
+    assert rendered.count("## `echoparley.") == 2
+    assert rendered.endswith("\n")
