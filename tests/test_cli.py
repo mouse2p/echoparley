@@ -22,6 +22,7 @@ def test_cli_exposes_required_subcommands() -> None:
         "scenarios",
         "bench",
         "completion",
+        "api-docs",
     ):
         assert command in help_text
 
@@ -71,6 +72,11 @@ def test_cli_json_errors_use_the_error_schema(capsys: pytest.CaptureFixture[str]
 def test_completion_command_prints_selected_shell(capsys: pytest.CaptureFixture[str]) -> None:
     assert main(["completion", "bash"]) == 0
     assert "complete -F" in capsys.readouterr().out
+
+
+def test_api_docs_command_prints_generated_reference(capsys: pytest.CaptureFixture[str]) -> None:
+    assert main(["api-docs"]) == 0
+    assert capsys.readouterr().out.startswith("# Generated API reference")
 
 
 def test_scenarios_command_is_reproducible(capsys: pytest.CaptureFixture[str]) -> None:
