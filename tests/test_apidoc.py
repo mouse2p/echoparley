@@ -71,3 +71,12 @@ def test_api_inventory_mapping_fields_are_exhaustive() -> None:
     assert all(
         set(entry) == {"name", "kind", "summary"} for entry in mapping["modules"][0]["entries"]
     )
+
+
+def test_api_inventory_mapping_requires_modules() -> None:
+    import pytest
+
+    from echoparley.apidoc import api_inventory_mapping
+
+    with pytest.raises(ValueError, match="requires"):
+        api_inventory_mapping(())
