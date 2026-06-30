@@ -80,3 +80,10 @@ def test_api_inventory_mapping_requires_modules() -> None:
 
     with pytest.raises(ValueError, match="requires"):
         api_inventory_mapping(())
+
+
+def test_api_generator_script_exposes_main() -> None:
+    import runpy
+
+    namespace = runpy.run_path("scripts/generate_api_reference.py")
+    assert callable(namespace["main"])
