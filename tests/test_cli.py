@@ -154,3 +154,12 @@ def test_completion_json_mode_wraps_script(capsys: pytest.CaptureFixture[str]) -
     payload = json.loads(capsys.readouterr().out)
     assert payload["data"]["shell"] == "zsh"
     assert payload["data"]["script"].startswith("#compdef")
+
+
+def test_api_docs_json_mode_wraps_markdown(capsys: pytest.CaptureFixture[str]) -> None:
+    import json
+
+    assert main(["api-docs", "--json"]) == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["command"] == "api-docs"
+    assert payload["data"]["markdown"].startswith("# Generated")
