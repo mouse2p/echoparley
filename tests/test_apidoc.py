@@ -87,3 +87,12 @@ def test_api_generator_script_exposes_main() -> None:
 
     namespace = runpy.run_path("scripts/generate_api_reference.py")
     assert callable(namespace["main"])
+
+
+def test_generated_api_reference_matches_live_docstrings() -> None:
+    from pathlib import Path
+
+    from echoparley.apidoc import PHASE_TWO_API_MODULES, render_api_reference
+
+    expected = render_api_reference(PHASE_TWO_API_MODULES)
+    assert Path("docs/api-generated.md").read_text(encoding="utf-8") == expected
