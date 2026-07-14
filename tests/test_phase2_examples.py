@@ -20,3 +20,24 @@ def test_scenario_walkthrough_checksums_all_expanded_templates() -> None:
     assert len(result["scenario_names"]) == 6
     assert result["corpus"]["dialogues"] == 6
     assert len(result["corpus"]["checksum"]) == 64
+
+
+def test_context_walkthrough_compares_every_policy() -> None:
+    result = _run("examples/context_policies/run.py")
+    assert result["data_origin"] == "synthetic-planted"
+    assert {row["policy"] for row in result["policies"]} == {
+        "recency",
+        "turn-boundary",
+        "salience",
+    }
+    assert result["best_policy"] in {row["policy"] for row in result["policies"]}
+
+
+def test_overlap_walkthrough_uses_shared_evidence() -> None:
+    result = _run("examples/overlap_strategies/run.py")
+    assert result["posteriors"] == [0.5, 0.76, 0.85, 0.95]
+    assert [row["strategy"] for row in result["strategies"]] == [
+        "immediate-yield",
+        "grace-window",
+        "competitive-floor",
+    ]
