@@ -41,3 +41,14 @@ def test_overlap_walkthrough_uses_shared_evidence() -> None:
         "grace-window",
         "competitive-floor",
     ]
+
+
+def test_runtime_benchmark_walkthrough_labels_machine_dependence() -> None:
+    result = _run("examples/runtime_benchmark/run.py")
+    assert result["metadata"]["machine_dependent"] is True
+    assert result["samples"] == 3
+    assert [row["case"] for row in result["summaries"]] == [
+        "unit-extraction",
+        "stream-roundtrip",
+        "simulator",
+    ]
