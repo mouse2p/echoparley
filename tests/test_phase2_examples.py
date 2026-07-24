@@ -52,3 +52,11 @@ def test_runtime_benchmark_walkthrough_labels_machine_dependence() -> None:
         "stream-roundtrip",
         "simulator",
     ]
+
+
+def test_session_diff_walkthrough_renders_changed_event() -> None:
+    namespace = runpy.run_path("examples/session_diff/run.py")
+    svg, metadata = namespace["build"]()
+    assert 'class="diff change"' in svg
+    assert metadata["differences"] == 1
+    assert len(metadata["checksum"]) == 64
