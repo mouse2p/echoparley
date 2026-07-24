@@ -112,6 +112,7 @@ def encode_benchmark_jsonl(samples: tuple[BenchmarkSample, ...]) -> bytes:
 
 
 def decode_benchmark_jsonl(data: bytes) -> tuple[BenchmarkSample, ...]:
+    """Decode verified benchmark-sample envelopes from canonical JSONL."""
     envelopes = decode_jsonl(data)
     if any(item.kind != "benchmark-sample" or item.schema_version != "1.0" for item in envelopes):
         raise ValueError("benchmark JSONL contains an unsupported artifact")
@@ -268,6 +269,7 @@ def encode_benchmark_summaries(summaries: tuple[BenchmarkSummary, ...]) -> bytes
 
 
 def decode_benchmark_summaries(data: bytes) -> tuple[BenchmarkSummary, ...]:
+    """Decode verified benchmark-summary envelopes from canonical JSONL."""
     envelopes = decode_jsonl(data)
     if any(item.kind != "benchmark-summary" or item.schema_version != "1.0" for item in envelopes):
         raise ValueError("benchmark summary JSONL contains an unsupported artifact")

@@ -7,6 +7,7 @@ from echoparley.state import ConversationState, ConversationTurn
 
 
 def dump_memory(value: ConversationState) -> bytes:
+    """Encode one conversation state in a checksummed JSONL envelope."""
     payload = {
         "topics": list(value.topic_stack),
         "pending_acts": list(value.pending_acts),
@@ -26,6 +27,7 @@ def dump_memory(value: ConversationState) -> bytes:
 
 
 def load_memory(data: bytes) -> ConversationState:
+    """Decode exactly one verified conversation-memory envelope."""
     envelopes = decode_jsonl(data)
     if len(envelopes) != 1 or envelopes[0].kind != "conversation-memory":
         raise ValueError("memory file must contain one conversation-memory artifact")

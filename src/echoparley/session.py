@@ -49,6 +49,7 @@ class SessionRecorder:
 
 
 def encode_session(events: tuple[SessionEvent, ...]) -> bytes:
+    """Encode contiguous session events as canonical checksummed JSONL."""
     if any(event.sequence != index for index, event in enumerate(events)):
         raise ValueError("session sequences must be contiguous before encoding")
     envelopes = [
@@ -67,6 +68,7 @@ def encode_session(events: tuple[SessionEvent, ...]) -> bytes:
 
 
 def decode_session(data: bytes) -> tuple[SessionEvent, ...]:
+    """Decode verified session events and enforce contiguous sequences."""
     envelopes = decode_jsonl(data)
     events = tuple(
         SessionEvent(**envelope.payload)
