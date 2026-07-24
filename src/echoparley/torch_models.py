@@ -6,6 +6,7 @@ from dataclasses import dataclass
 
 
 def torch_available() -> bool:
+    """Report whether the optional CPU-oriented PyTorch extra can be imported."""
     try:
         import torch  # noqa: F401
     except ImportError:

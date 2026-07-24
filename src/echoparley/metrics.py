@@ -58,6 +58,7 @@ def evaluation_table(
     missed_barge_ins: float,
     floor_hold_accuracy: float,
 ) -> dict[str, float | int | str]:
+    """Assemble bounded turn metrics with an explicit synthetic provenance label."""
     values = (false_interrupts, missed_barge_ins, floor_hold_accuracy)
     if any(not 0 <= value <= 1 for value in values):
         raise ValueError("evaluation metrics must be in [0, 1]")

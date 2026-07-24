@@ -29,6 +29,7 @@ def _scenario_argument(parser: argparse.ArgumentParser) -> None:
 
 
 def build_parser() -> argparse.ArgumentParser:
+    """Build the complete offline CLI parser shared with completion generation."""
     parser = argparse.ArgumentParser(
         prog="echoparley", description="Offline full-duplex spoken-dialogue mechanics workbench"
     )
