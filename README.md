@@ -47,6 +47,12 @@ assert result.trace_bytes() == simulate_dialogue(barge_in_scenario(seed=7)).trac
 - `examples/duplex_barge_in`：重放打断场景并输出 SVG timeline。
 - `examples/session_replay`：验证 event trace byte-identical replay。
 - `examples/path_comparison`：比较 scripted cascade 与直接路径的延迟记账。
+- `examples/prosody_analysis`：测量植入纯音的 F0 与 tone event。
+- `examples/scenario_corpus`：汇总扩展 synthetic scenario catalog。
+- `examples/context_policies`：比较相同 token budget 下的 context retention。
+- `examples/overlap_strategies`：扫描三种 barge-in policy。
+- `examples/runtime_benchmark`：运行带 warmup 的本机性能测量。
+- `examples/session_diff`：生成两个 session 的确定性 SVG diff。
 
 ## 限制与诚实说明
 
