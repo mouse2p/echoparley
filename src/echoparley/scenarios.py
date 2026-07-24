@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import StrEnum
 
-from echoparley.artifacts import content_checksum
+from echoparley.artifacts import ArtifactEnvelope, content_checksum
 from echoparley.synth import DialogueScenario, TurnAnnotation
 
 
@@ -255,6 +255,15 @@ def scenario_manifest(
             for index, turn in enumerate(scenario.turns)
         ],
     }
+
+
+def scenario_manifest_envelope(
+    scenario: DialogueScenario, annotations: ScenarioAnnotations | None = None
+) -> ArtifactEnvelope:
+    """Wrap schema-2 planted ground truth in a checksummed artifact envelope."""
+    return ArtifactEnvelope.create(
+        "dialogue-scenario", scenario_manifest(scenario, annotations), "2.0"
+    )
 
 
 def migrate_scenario_manifest(value: dict[str, object]) -> dict[str, object]:
