@@ -252,3 +252,13 @@ def test_long_topic_scenario_is_seeded_and_sparse() -> None:
     scenario = long_topic_scenario(2, 20)
     assert scenario == long_topic_scenario(2, 20)
     assert 1 < sum(turn.topic == "target" for turn in scenario.turns) < 10
+
+
+def test_scenario_manifest_envelope_covers_schema_two_payload() -> None:
+    from echoparley.scenarios import scenario_manifest_envelope
+
+    envelope = scenario_manifest_envelope(tutorial_scenario(4))
+    assert envelope.kind == "dialogue-scenario"
+    assert envelope.schema_version == "2.0"
+    assert envelope.payload["seed"] == 4
+    envelope.verify()
