@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import StrEnum
 
-from echoparley.artifacts import ArtifactEnvelope, content_checksum
+from echoparley.artifacts import ArtifactEnvelope, content_checksum, encode_jsonl
 from echoparley.synth import DialogueScenario, TurnAnnotation
 
 
@@ -263,6 +263,17 @@ def scenario_manifest_envelope(
     """Wrap schema-2 planted ground truth in a checksummed artifact envelope."""
     return ArtifactEnvelope.create(
         "dialogue-scenario", scenario_manifest(scenario, annotations), "2.0"
+    )
+
+
+def encode_scenario_corpus(
+    records: tuple[tuple[DialogueScenario, ScenarioAnnotations | None], ...],
+) -> bytes:
+    """Encode a nonempty ordered corpus of planted scenario manifests."""
+    if not records:
+        raise ValueError("scenario corpus cannot be empty")
+    return encode_jsonl(
+        scenario_manifest_envelope(scenario, annotations) for scenario, annotations in records
     )
 
 
