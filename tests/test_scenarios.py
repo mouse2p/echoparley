@@ -275,3 +275,20 @@ def test_scenario_corpus_encoding_is_canonical_and_nonempty() -> None:
     assert first.endswith(b"\n")
     with pytest.raises(ValueError, match="empty"):
         encode_scenario_corpus(())
+
+
+def test_scenario_corpus_decoder_roundtrips_and_rejects_other_kinds() -> None:
+    import pytest
+
+    from echoparley.artifacts import ArtifactEnvelope, encode_jsonl
+    from echoparley.scenarios import decode_scenario_corpus, encode_scenario_corpus
+
+    scenario = tutorial_scenario(3)
+    assert decode_scenario_corpus(encode_scenario_corpus(((scenario, None),)))[0][0] == scenario
+    unrelated = encode_jsonl((ArtifactEnvelope.create("other", {}),))
+    with pytest.raises(ValueError, match="unsupported"):
+        decode_scenario_corpus(unrelated)
+    damaged = bytearray(encode_scenario_corpus(((scenario, None),)))
+    damaged[-3] = ord("x")
+    with pytest.raises(ValueError, match="invalid JSONL"):
+        decode_scenario_corpus(bytes(damaged))
