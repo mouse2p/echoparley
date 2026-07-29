@@ -20,6 +20,8 @@ def test_scenario_walkthrough_checksums_all_expanded_templates() -> None:
     assert len(result["scenario_names"]) == 6
     assert result["corpus"]["dialogues"] == 6
     assert len(result["corpus"]["checksum"]) == 64
+    assert result["manifest_bytes"] > 0
+    assert len(result["manifest_checksum"]) == 64
 
 
 def test_context_walkthrough_compares_every_policy() -> None:
