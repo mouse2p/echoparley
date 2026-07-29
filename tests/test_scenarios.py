@@ -262,3 +262,16 @@ def test_scenario_manifest_envelope_covers_schema_two_payload() -> None:
     assert envelope.schema_version == "2.0"
     assert envelope.payload["seed"] == 4
     envelope.verify()
+
+
+def test_scenario_corpus_encoding_is_canonical_and_nonempty() -> None:
+    import pytest
+
+    from echoparley.scenarios import encode_scenario_corpus
+
+    records = ((tutorial_scenario(2), None),)
+    first = encode_scenario_corpus(records)
+    assert first == encode_scenario_corpus(records)
+    assert first.endswith(b"\n")
+    with pytest.raises(ValueError, match="empty"):
+        encode_scenario_corpus(())
