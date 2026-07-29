@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import StrEnum
 
-from echoparley.artifacts import ArtifactEnvelope, content_checksum, encode_jsonl
+from echoparley.artifacts import ArtifactEnvelope, content_checksum, decode_jsonl, encode_jsonl
 from echoparley.synth import DialogueScenario, TurnAnnotation
 
 
@@ -275,6 +275,18 @@ def encode_scenario_corpus(
     return encode_jsonl(
         scenario_manifest_envelope(scenario, annotations) for scenario, annotations in records
     )
+
+
+def decode_scenario_corpus(
+    data: bytes,
+) -> tuple[tuple[DialogueScenario, ScenarioAnnotations], ...]:
+    """Decode schema-2 scenario artifacts and restore their typed annotations."""
+    envelopes = decode_jsonl(data)
+    if not envelopes or any(
+        item.kind != "dialogue-scenario" or item.schema_version != "2.0" for item in envelopes
+    ):
+        raise ValueError("scenario corpus contains an unsupported artifact")
+    return tuple(scenario_from_manifest(item.payload) for item in envelopes)
 
 
 def migrate_scenario_manifest(value: dict[str, object]) -> dict[str, object]:
