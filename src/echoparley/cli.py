@@ -16,7 +16,7 @@ from echoparley.bench import benchmark_suite, benchmark_summaries, encode_benchm
 from echoparley.metrics import accuracy, error_rate, evaluation_table, match_boundaries
 from echoparley.prosody import autocorrelation_f0
 from echoparley.reports import svg_report
-from echoparley.scenarios import corpus_report, scenario_catalog
+from echoparley.scenarios import corpus_report, encode_scenario_corpus, scenario_catalog
 from echoparley.session import decode_session, diff_sessions
 from echoparley.simulator import SimulationResult, simulate_dialogue
 from echoparley.synth import SCENARIO_FACTORIES, make_scenario
@@ -57,6 +57,7 @@ def build_parser() -> argparse.ArgumentParser:
     prosody.add_argument("--seed", type=int, default=0)
     scenarios = commands.add_parser("scenarios", help="list expanded planted scenarios")
     scenarios.add_argument("--seed", type=int, default=0)
+    scenarios.add_argument("--output", type=Path)
     bench = commands.add_parser("bench", help="run loose offline performance measurements")
     bench.add_argument("--seed", type=int, default=0)
     bench.add_argument("--repeats", type=int, default=3)
@@ -131,6 +132,9 @@ def _run(args: argparse.Namespace) -> int:
         return 0
     if args.command == "scenarios":
         catalog = scenario_catalog(args.seed)
+        if args.output:
+            records = tuple((scenario, None) for scenario in catalog.values())
+            args.output.write_bytes(encode_scenario_corpus(records))
         payload = {"names": sorted(catalog), "statistics": corpus_report(tuple(catalog.values()))}
         _emit(args, payload)
         return 0
