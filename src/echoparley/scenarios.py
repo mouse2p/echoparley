@@ -272,6 +272,9 @@ def encode_scenario_corpus(
     """Encode a nonempty ordered corpus of planted scenario manifests."""
     if not records:
         raise ValueError("scenario corpus cannot be empty")
+    names = tuple(scenario.name for scenario, _ in records)
+    if len(names) != len(set(names)):
+        raise ValueError("scenario corpus names must be unique")
     return encode_jsonl(
         scenario_manifest_envelope(scenario, annotations) for scenario, annotations in records
     )
@@ -286,7 +289,11 @@ def decode_scenario_corpus(
         item.kind != "dialogue-scenario" or item.schema_version != "2.0" for item in envelopes
     ):
         raise ValueError("scenario corpus contains an unsupported artifact")
-    return tuple(scenario_from_manifest(item.payload) for item in envelopes)
+    decoded = tuple(scenario_from_manifest(item.payload) for item in envelopes)
+    names = tuple(scenario.name for scenario, _ in decoded)
+    if len(names) != len(set(names)):
+        raise ValueError("scenario corpus names must be unique")
+    return decoded
 
 
 def migrate_scenario_manifest(value: dict[str, object]) -> dict[str, object]:
