@@ -163,3 +163,13 @@ def test_api_docs_json_mode_wraps_markdown(capsys: pytest.CaptureFixture[str]) -
     payload = json.loads(capsys.readouterr().out)
     assert payload["command"] == "api-docs"
     assert payload["data"]["markdown"].startswith("# Generated")
+
+
+def test_scenarios_command_exports_checksummed_manifest_jsonl(tmp_path: Path) -> None:
+    from echoparley.scenarios import decode_scenario_corpus
+
+    output = tmp_path / "scenarios.jsonl"
+    assert main(["scenarios", "--seed", "6", "--output", str(output)]) == 0
+    decoded = decode_scenario_corpus(output.read_bytes())
+    assert len(decoded) == 6
+    assert {scenario.seed for scenario, _ in decoded} == {6}
