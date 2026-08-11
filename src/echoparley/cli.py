@@ -155,9 +155,9 @@ def _run(args: argparse.Namespace) -> int:
         _emit(args, {"shell": args.shell, "script": script}, plain=script.rstrip())
         return 0
     if args.command == "api-docs":
-        from echoparley.apidoc import PHASE_TWO_API_MODULES, render_api_reference
+        from echoparley.apidoc import PUBLIC_API_MODULES, render_api_reference
 
-        reference = render_api_reference(PHASE_TWO_API_MODULES)
+        reference = render_api_reference(PUBLIC_API_MODULES)
         _emit(args, {"markdown": reference}, plain=reference.rstrip())
         return 0
     table, result = _metrics(args.scenario, args.seed)

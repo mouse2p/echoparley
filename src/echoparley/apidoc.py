@@ -63,10 +63,40 @@ def render_api_reference(modules: tuple[str, ...]) -> str:
     return "# Generated API reference\n\n" + sections
 
 
-PHASE_TWO_API_MODULES = (
+PUBLIC_API_MODULES = (
+    "echoparley.adapters",
     "echoparley.apidoc",
+    "echoparley.artifacts",
+    "echoparley.audio",
+    "echoparley.bench",
+    "echoparley.cascade",
+    "echoparley.cli",
     "echoparley.completion",
+    "echoparley.config",
+    "echoparley.context",
+    "echoparley.duplex",
+    "echoparley.events",
+    "echoparley.features",
+    "echoparley.latency",
+    "echoparley.memory",
+    "echoparley.metrics",
+    "echoparley.proptest",
+    "echoparley.prosody",
+    "echoparley.reports",
+    "echoparley.runtime",
+    "echoparley.scenarios",
+    "echoparley.schema",
+    "echoparley.session",
+    "echoparley.simulator",
     "echoparley.snippets",
+    "echoparley.state",
+    "echoparley.stream",
+    "echoparley.synth",
+    "echoparley.text",
+    "echoparley.topics",
+    "echoparley.torch_models",
+    "echoparley.units",
+    "echoparley.vq",
 )
 
 

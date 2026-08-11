@@ -56,10 +56,10 @@ def test_api_reference_rejects_empty_and_duplicate_modules() -> None:
         render_api_reference(("echoparley.snippets", "echoparley.snippets"))
 
 
-def test_phase_two_reference_modules_have_complete_docstrings() -> None:
-    from echoparley.apidoc import PHASE_TWO_API_MODULES
+def test_public_reference_modules_have_complete_docstrings() -> None:
+    from echoparley.apidoc import PUBLIC_API_MODULES
 
-    assert all(missing_docstrings(module) == () for module in PHASE_TWO_API_MODULES)
+    assert all(missing_docstrings(module) == () for module in PUBLIC_API_MODULES)
 
 
 def test_api_inventory_mapping_fields_are_exhaustive() -> None:
@@ -92,7 +92,20 @@ def test_api_generator_script_exposes_main() -> None:
 def test_generated_api_reference_matches_live_docstrings() -> None:
     from pathlib import Path
 
-    from echoparley.apidoc import PHASE_TWO_API_MODULES, render_api_reference
+    from echoparley.apidoc import PUBLIC_API_MODULES, render_api_reference
 
-    expected = render_api_reference(PHASE_TWO_API_MODULES)
+    expected = render_api_reference(PUBLIC_API_MODULES)
     assert Path("docs/api-generated.md").read_text(encoding="utf-8") == expected
+
+
+def test_public_reference_covers_every_package_module() -> None:
+    from pathlib import Path
+
+    from echoparley.apidoc import PUBLIC_API_MODULES
+
+    package_files = {
+        f"echoparley.{path.stem}"
+        for path in Path("src/echoparley").glob("*.py")
+        if not path.stem.startswith("_")
+    }
+    assert set(PUBLIC_API_MODULES) == package_files
