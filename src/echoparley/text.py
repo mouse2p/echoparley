@@ -145,5 +145,10 @@ def bpe_from_mapping(value: dict[str, object]) -> BPEModel:
         or value["schema_version"] != "1.0"
     ):
         raise ValueError("unsupported BPE schema")
-    merges = tuple((str(pair[0]), str(pair[1])) for pair in value["merges"])  # type: ignore[index,union-attr]
+    raw_merges = value["merges"]
+    if not isinstance(raw_merges, list) or any(
+        not isinstance(pair, list) or len(pair) != 2 for pair in raw_merges
+    ):
+        raise TypeError("BPE merges must be two-item arrays")
+    merges = tuple((str(pair[0]), str(pair[1])) for pair in raw_merges)
     return BPEModel(merges, str(value["end_of_word"]))
