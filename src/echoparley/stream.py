@@ -76,6 +76,9 @@ def stream_from_mapping(value: dict[str, object]) -> UnifiedStream:
     """Restore a stream from a trusted JSON-compatible mapping."""
     if value.keys() != {"schema_version", "policy", "tokens"}:
         raise ValueError("stream fields do not match schema")
+    raw_tokens = value["tokens"]
+    if not isinstance(raw_tokens, list) or any(not isinstance(item, dict) for item in raw_tokens):
+        raise TypeError("stream tokens must be an array of objects")
     tokens = tuple(
         StreamToken(
             TokenKind(item["kind"]),
@@ -84,7 +87,7 @@ def stream_from_mapping(value: dict[str, object]) -> UnifiedStream:
             int(item["start_ms"]),
             int(item["end_ms"]),
         )
-        for item in value["tokens"]  # type: ignore[union-attr]
+        for item in raw_tokens
     )
     for token in tokens:
         validate_token_namespace(token)
