@@ -292,3 +292,23 @@ def test_scenario_corpus_decoder_roundtrips_and_rejects_other_kinds() -> None:
     damaged[-3] = ord("x")
     with pytest.raises(ValueError, match="invalid JSONL"):
         decode_scenario_corpus(bytes(damaged))
+
+
+def test_scenario_corpus_requires_unique_names_when_encoding_and_decoding() -> None:
+    import pytest
+
+    from echoparley.artifacts import encode_jsonl
+    from echoparley.scenarios import (
+        decode_scenario_corpus,
+        encode_scenario_corpus,
+        scenario_manifest_envelope,
+    )
+
+    scenario = tutorial_scenario(0)
+    with pytest.raises(ValueError, match="unique"):
+        encode_scenario_corpus(((scenario, None), (scenario, None)))
+    duplicate_bytes = encode_jsonl(
+        (scenario_manifest_envelope(scenario), scenario_manifest_envelope(scenario))
+    )
+    with pytest.raises(ValueError, match="unique"):
+        decode_scenario_corpus(duplicate_bytes)
