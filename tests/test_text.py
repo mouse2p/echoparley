@@ -76,3 +76,15 @@ def test_bpe_mapping_roundtrip_has_exact_schema() -> None:
     assert text.bpe_from_mapping(mapping) == model
     with pytest.raises(ValueError, match="unsupported"):
         text.bpe_from_mapping({"schema_version": "2.0"})
+
+
+def test_bpe_mapping_rejects_non_array_and_ragged_merges() -> None:
+    import pytest
+
+    from echoparley.text import bpe_from_mapping
+
+    base = {"schema_version": "1.0", "end_of_word": "</w>"}
+    with pytest.raises(TypeError, match="two-item"):
+        bpe_from_mapping({**base, "merges": "ab"})
+    with pytest.raises(TypeError, match="two-item"):
+        bpe_from_mapping({**base, "merges": [["a"]]})
