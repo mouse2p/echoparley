@@ -71,11 +71,21 @@ class ReplayAdapter:
         self.cursor += 1
         if record.keys() != {"tokens", "delay_ms", "finished"}:
             raise ValueError("replay action fields do not match schema")
+        raw_tokens = record["tokens"]
+        raw_delay = record["delay_ms"]
+        raw_finished = record["finished"]
+        if (
+            not isinstance(raw_tokens, list)
+            or not isinstance(raw_delay, int)
+            or isinstance(raw_delay, bool)
+            or not isinstance(raw_finished, bool)
+        ):
+            raise TypeError("replay action values do not match schema types")
         return AdapterAction(
-            tuple(str(token) for token in record["tokens"]),
-            int(record["delay_ms"]),
-            bool(record["finished"]),
-        )  # type: ignore[union-attr]
+            tuple(str(token) for token in raw_tokens),
+            raw_delay,
+            raw_finished,
+        )
 
 
 @dataclass(slots=True)
