@@ -116,3 +116,15 @@ def test_time_aligned_stream_rejects_timestamp_regression() -> None:
     )
     with pytest.raises(ValueError, match="must be ordered"):
         stream.UnifiedStream(tokens, "time-aligned")
+
+
+def test_stream_mapping_rejects_non_object_token_records() -> None:
+    import pytest
+
+    from echoparley.stream import stream_from_mapping
+
+    base = {"schema_version": "1.0", "policy": "strict-turn"}
+    with pytest.raises(TypeError, match="array of objects"):
+        stream_from_mapping({**base, "tokens": "not-a-list"})
+    with pytest.raises(TypeError, match="array of objects"):
+        stream_from_mapping({**base, "tokens": ["not-an-object"]})
