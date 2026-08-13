@@ -84,3 +84,15 @@ def test_adapter_capabilities_distinguish_loopback() -> None:
         "offline": True,
         "protocol": "observe-act/v1",
     }
+
+
+def test_replay_adapter_rejects_coercible_wrong_types() -> None:
+    from echoparley.adapters import ReplayAdapter
+
+    records = (
+        {"tokens": "ok", "delay_ms": "2", "finished": 1},
+        {"tokens": ["ok"], "delay_ms": True, "finished": True},
+    )
+    for record in records:
+        with pytest.raises(TypeError, match="schema types"):
+            ReplayAdapter((record,)).act(())
