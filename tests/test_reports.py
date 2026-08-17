@@ -25,6 +25,8 @@ def test_strategy_comparison_svg_is_stable_and_labeled() -> None:
     svg = strategy_comparison_svg(({"strategy": "grace-window", "yield_rate": 0.5},))
     assert 'width="200"' in svg
     assert "synthetic-planted" in svg and svg.endswith("\n")
+    with pytest.raises(TypeError, match="numeric"):
+        strategy_comparison_svg(({"strategy": "bad", "yield_rate": "0.5"},))
 
 
 def test_session_timeline_group_scales_events_and_escapes_labels() -> None:
