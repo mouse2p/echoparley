@@ -300,10 +300,15 @@ def migrate_scenario_manifest(value: dict[str, object]) -> dict[str, object]:
     """Upgrade a trusted schema-1 manifest to schema 2 without changing turns."""
     if value.get("schema_version") == "2.0":
         return value
-    if value.get("schema_version") != "1.0" or not isinstance(value.get("turns"), list):
+    raw_turns = value.get("turns")
+    if (
+        value.get("schema_version") != "1.0"
+        or not isinstance(raw_turns, list)
+        or any(not isinstance(turn, dict) for turn in raw_turns)
+    ):
         raise ValueError("unsupported dialogue manifest schema")
     migrated = {**value, "schema_version": "2.0"}
-    turns = [{**turn, "backchannel_kind": None} for turn in value["turns"]]
+    turns = [{**turn, "backchannel_kind": None} for turn in raw_turns]
     migrated["turns"] = turns
     migrated["speakers"] = sorted({str(turn["speaker"]) for turn in turns})
     return migrated
@@ -317,8 +322,16 @@ def scenario_from_manifest(
     if set(manifest) != {"schema_version", "name", "seed", "speakers", "turns"}:
         raise ValueError("dialogue manifest fields do not match schema 2")
     raw_turns = manifest["turns"]
-    if not isinstance(raw_turns, list):
-        raise TypeError("dialogue manifest turns must be a list")
+    raw_seed = manifest["seed"]
+    raw_speakers = manifest["speakers"]
+    if (
+        not isinstance(raw_turns, list)
+        or any(not isinstance(item, dict) for item in raw_turns)
+        or not isinstance(raw_seed, int)
+        or isinstance(raw_seed, bool)
+        or not isinstance(raw_speakers, list)
+    ):
+        raise TypeError("dialogue manifest primitive types are invalid")
     turns = tuple(
         TurnAnnotation(
             str(item["speaker"]),
@@ -335,10 +348,10 @@ def scenario_from_manifest(
         for index, item in enumerate(raw_turns)
         if item["backchannel_kind"] is not None
     )
-    scenario = DialogueScenario(str(manifest["name"]), int(manifest["seed"]), turns)
+    scenario = DialogueScenario(str(manifest["name"]), raw_seed, turns)
     annotations = ScenarioAnnotations(labels)
     validate_scenario_annotations(scenario, annotations)
-    if sorted({turn.speaker for turn in turns}) != manifest["speakers"]:
+    if sorted({turn.speaker for turn in turns}) != raw_speakers:
         raise ValueError("dialogue manifest speaker index does not match turns")
     return scenario, annotations
 
