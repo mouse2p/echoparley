@@ -155,7 +155,7 @@ def strategy_comparison_table(
     points: tuple[StrategySweepPoint, ...],
 ) -> tuple[dict[str, object], ...]:
     """Aggregate yielded proportions for a synthetic parameter sweep."""
-    rows = []
+    rows: list[dict[str, object]] = []
     for mode in BargeInMode:
         selected = tuple(point for point in points if point.mode is mode)
         if selected:

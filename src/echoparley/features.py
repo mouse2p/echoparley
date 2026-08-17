@@ -31,7 +31,8 @@ def power_spectrum(frames: FloatArray, *, window: str = "hann") -> FloatArray:
     if values.ndim != 2 or values.shape[1] == 0:
         raise ValueError("frames must be a nonempty-width matrix")
     transformed = np.fft.rfft(values * analysis_window(values.shape[1], window), axis=1)
-    return np.abs(transformed) ** 2 / values.shape[1]
+    result: FloatArray = np.asarray(np.abs(transformed) ** 2 / values.shape[1], dtype=np.float64)
+    return result
 
 
 def hertz_to_mel(frequency: FloatArray | float) -> FloatArray:

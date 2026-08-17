@@ -67,7 +67,10 @@ def strategy_comparison_svg(rows: tuple[dict[str, object], ...]) -> str:
     """Render measured synthetic strategy yield rates as deterministic bars."""
     bars = []
     for index, row in enumerate(rows):
-        rate = float(row["yield_rate"])
+        raw_rate = row.get("yield_rate")
+        if isinstance(raw_rate, bool) or not isinstance(raw_rate, (int, float)):
+            raise TypeError("strategy yield rate must be numeric")
+        rate = float(raw_rate)
         if not 0 <= rate <= 1:
             raise ValueError("strategy yield rates must be bounded")
         width = round(rate * 400)

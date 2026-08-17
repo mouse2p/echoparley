@@ -133,7 +133,7 @@ def floor_control_statistics(
         for speaker, start, end in intervals
     ):
         raise ValueError("floor intervals must fit the dialogue duration")
-    active = [set() for _ in range(duration_ms)]
+    active: list[set[str]] = [set() for _ in range(duration_ms)]
     for speaker, start, end in intervals:
         for time_ms in range(start, end):
             active[time_ms].add(speaker)
