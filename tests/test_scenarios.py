@@ -312,3 +312,18 @@ def test_scenario_corpus_requires_unique_names_when_encoding_and_decoding() -> N
     )
     with pytest.raises(ValueError, match="unique"):
         decode_scenario_corpus(duplicate_bytes)
+
+
+def test_manifest_reader_rejects_wrong_primitive_types() -> None:
+    import pytest
+
+    from echoparley.scenarios import scenario_from_manifest, scenario_manifest
+
+    manifest = scenario_manifest(tutorial_scenario())
+    manifest["seed"] = "0"
+    with pytest.raises(TypeError, match="primitive"):
+        scenario_from_manifest(manifest)
+    manifest = scenario_manifest(tutorial_scenario())
+    manifest["turns"] = ["not-an-object"]
+    with pytest.raises(TypeError, match="primitive"):
+        scenario_from_manifest(manifest)
