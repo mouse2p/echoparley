@@ -29,7 +29,7 @@ class CancellationToken:
 
 def run_ticks(
     count: int,
-    callback: Callable[[int], None],
+    callback: Callable[[int], object],
     config: TickConfig | None = None,
     cancellation: CancellationToken | None = None,
 ) -> tuple[int, ...]:

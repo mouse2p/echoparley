@@ -5,7 +5,7 @@ from __future__ import annotations
 import random
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Generic, TypeVar
+from typing import Generic, TypeVar, cast
 
 from echoparley.events import EndpointEvent, EventKind
 from echoparley.session import SessionEvent
@@ -275,7 +275,8 @@ def evaluate_property(
         raise ValueError("property name cannot be empty")
     failure = check_cases(cases, predicate, shrinker)
     checked = len(cases.values) if failure is None else failure.case_index + 1
-    return PropertyRun(name, cases.seed, checked, failure)
+    erased_failure = cast(PropertyFailure[object] | None, failure)
+    return PropertyRun(name, cases.seed, checked, erased_failure)
 
 
 def run_stream_suite(seed: int, count: int = 50) -> PropertyRun:
