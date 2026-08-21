@@ -42,7 +42,7 @@ def train_vq_demo(seed: int = 0, steps: int = 40) -> TrainingSummary:
         quantized = latent + (quantized - latent).detach()
         loss = torch.mean((decoder(quantized) - inputs) ** 2)
         optimizer.zero_grad()
-        loss.backward()
+        loss.backward()  # type: ignore[no-untyped-call]
         optimizer.step()
         losses.append(float(loss.detach()))
     return TrainingSummary(round(losses[0], 6), round(losses[-1], 6), steps)
@@ -64,7 +64,7 @@ def train_lm_demo(seed: int = 0, steps: int = 30) -> TrainingSummary:
     for _ in range(steps):
         loss = torch.nn.functional.cross_entropy(logits[sequence[:-1]], sequence[1:])
         optimizer.zero_grad()
-        loss.backward()
+        loss.backward()  # type: ignore[no-untyped-call]
         optimizer.step()
         losses.append(float(loss.detach()))
     return TrainingSummary(round(losses[0], 6), round(losses[-1], 6), steps)

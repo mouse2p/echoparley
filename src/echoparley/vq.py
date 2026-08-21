@@ -205,7 +205,7 @@ def train_vq_loss_curve(seed: int = 0, steps: int = 20) -> VQLossCurve:
         quantization_loss = torch.mean((latent - quantized.detach()) ** 2)
         loss = reconstruction_loss + 0.25 * quantization_loss
         optimizer.zero_grad()
-        loss.backward()
+        loss.backward()  # type: ignore[no-untyped-call]
         optimizer.step()
         reconstruction.append(round(float(reconstruction_loss.detach()), 6))
         quantization.append(round(float(quantization_loss.detach()), 6))
