@@ -35,7 +35,7 @@ def svg_report(result: SimulationResult, metrics: Mapping[str, object], *, title
             f'<text x="40" y="{130 + index * 24}" class="metric">'
             f"{html.escape(key)}: {html.escape(str(value))}</text>"
         )
-    metadata = {"metrics": metrics, "title": title, "trace_events": len(result.trace)}
+    metadata = {"metrics": dict(metrics), "title": title, "trace_events": len(result.trace)}
     digest = content_checksum(metadata)[:16]
     return "\n".join(
         [

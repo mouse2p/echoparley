@@ -153,3 +153,11 @@ def test_normalized_session_diff_has_stable_structural_digest() -> None:
     second = normalize_svg(session_diff_report_svg(left, right))
     assert bytes_checksum(first.encode()) == bytes_checksum(second.encode())
     assert first.count("<svg") == 1 and first.count("</svg>") == 1
+
+
+def test_svg_report_accepts_read_only_metric_mappings() -> None:
+    from types import MappingProxyType
+
+    metrics = MappingProxyType({"boundary_f1": 0.5})
+    result = SimulationResult((), (), ())
+    assert "boundary_f1: 0.5" in svg_report(result, metrics, title="read only")
