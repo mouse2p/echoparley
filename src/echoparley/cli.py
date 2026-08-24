@@ -70,7 +70,7 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def _metrics(name: str, seed: int) -> tuple[dict[str, object], SimulationResult]:
+def _metrics(name: str, seed: int) -> tuple[dict[str, float | int | str], SimulationResult]:
     scenario = make_scenario(name, seed)
     result = simulate_dialogue(scenario)
     predicted = tuple(event.time_ms for event in result.trace)
