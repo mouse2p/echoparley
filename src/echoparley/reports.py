@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import html
 import re
+from collections.abc import Mapping
 
 from echoparley.artifacts import content_checksum
 from echoparley.session import (
@@ -16,7 +17,7 @@ from echoparley.session import (
 from echoparley.simulator import SimulationResult
 
 
-def svg_report(result: SimulationResult, metrics: dict[str, object], *, title: str) -> str:
+def svg_report(result: SimulationResult, metrics: Mapping[str, object], *, title: str) -> str:
     """Render a timeline and metric table with stable ordering."""
     width, height = 800, 180 + 24 * len(metrics)
     maximum = max((event.time_ms for event in result.trace), default=1)
