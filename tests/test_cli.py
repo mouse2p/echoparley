@@ -173,3 +173,14 @@ def test_scenarios_command_exports_checksummed_manifest_jsonl(tmp_path: Path) ->
     decoded = decode_scenario_corpus(output.read_bytes())
     assert len(decoded) == 6
     assert {scenario.seed for scenario, _ in decoded} == {6}
+
+
+def test_plain_validation_error_uses_status_two(capsys: pytest.CaptureFixture[str]) -> None:
+    assert main(["prosody", "--duration", "0"]) == 2
+    assert capsys.readouterr().err.startswith("error: prosody frequency and duration")
+
+
+def test_argument_parser_uses_status_two_for_invalid_choices() -> None:
+    with pytest.raises(SystemExit) as captured:
+        main(["synth", "--scenario", "not-a-scenario"])
+    assert captured.value.code == 2
