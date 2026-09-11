@@ -25,3 +25,10 @@ def test_public_api_exports_foundations() -> None:
     assert echoparley.__all__ == ["ExperimentConfig", "SchemaVersion", "__version__"]
     assert ExperimentConfig().seed == 0
     assert str(SchemaVersion(1)) == "1.0"
+
+
+def test_package_checker_verifies_metadata_and_cli() -> None:
+    import runpy
+
+    namespace = runpy.run_path("scripts/check_package.py")
+    assert namespace["main"]() == 0
