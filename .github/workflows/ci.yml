@@ -18,6 +18,11 @@ jobs:
       - run: uv venv .venv --python ${{ matrix.python }}
       - run: uv pip install --python .venv/bin/python -e '.[dev,torch]' --extra-index-url https://download.pytorch.org/whl/cpu
       - run: make build
+      - name: Smoke test installed wheel
+        run: |
+          uv venv .wheel-venv --python ${{ matrix.python }}
+          uv pip install --python .wheel-venv/bin/python dist/*.whl
+          .wheel-venv/bin/python scripts/check_package.py
       - run: make test-all
       - run: make format-check
       - run: make lint
