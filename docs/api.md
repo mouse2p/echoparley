@@ -19,3 +19,7 @@
 - `echoparley.snippets` / `apidoc`：可执行 tutorial fence 与 docstring inventory。
 
 public dataclass 会在构造时验证边界。schema mapping 拒绝未知字段；JSONL decoder 验证 checksum。
+
+完整 public symbol 与 live docstring 的同步清单见 [generated API](api-generated.md)。
+`scenario_manifest_envelope`、`encode_scenario_corpus` 与 `decode_scenario_corpus` 使用
+通用 artifact envelope，并额外校验 schema 2.0、artifact kind 和 scenario name 唯一性。
