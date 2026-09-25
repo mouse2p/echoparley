@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "echoparley"
-version = "0.1.0"
+version = "0.1.1"
 description = "Offline-first mechanics workbench for full-duplex spoken dialogue"
 keywords = ["speech", "dialogue", "turn-taking", "offline", "evaluation"]
 readme = "README.md"
