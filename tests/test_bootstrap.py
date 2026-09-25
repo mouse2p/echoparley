@@ -32,3 +32,17 @@ def test_package_checker_verifies_metadata_and_cli() -> None:
 
     namespace = runpy.run_path("scripts/check_package.py")
     assert namespace["main"]() == 0
+
+
+def test_release_version_matches_project_lock_and_changelog() -> None:
+    import re
+    import tomllib
+    from pathlib import Path
+
+    project = tomllib.loads(Path("pyproject.toml").read_text(encoding="utf-8"))
+    lock = tomllib.loads(Path("uv.lock").read_text(encoding="utf-8"))
+    locked = next(item["version"] for item in lock["package"] if item["name"] == "echoparley")
+    changelog = Path("CHANGELOG.md").read_text(encoding="utf-8")
+    released = re.search(r"^## ([0-9]+\.[0-9]+\.[0-9]+)$", changelog, re.MULTILINE)
+    assert released is not None
+    assert __version__ == project["project"]["version"] == locked == released.group(1)
