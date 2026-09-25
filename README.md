@@ -24,6 +24,10 @@ python -m venv .venv
 ```bash
 echoparley demo --scenario barge-in --seed 7 --output report.svg
 echoparley compare --scenario booking --seed 4
+echoparley prosody --frequency 200 --json
+echoparley scenarios --seed 7 --output scenarios.jsonl
+echoparley bench --repeats 3 --output samples.jsonl
+echoparley api-docs
 echoparley --help
 ```
 
@@ -62,4 +66,5 @@ assert result.trace_bytes() == simulate_dialogue(barge_in_scenario(seed=7)).trac
 - PyTorch VQ/LM demo 只要求在 synthetic data 上真实降低 loss；它不生成可用语音模型。
 - simulator 是 accelerated logical time，不替代真实设备、网络和人类交互测量。
 
-详见 [架构](docs/architecture.md)、[使用指南](docs/usage.md) 与 [API](docs/api.md)。项目使用 [MIT](LICENSE) 许可证。
+详见 [架构](docs/architecture.md)、[使用指南](docs/usage.md)、[Context policy](docs/context.md)、
+[VQ toolkit](docs/vq.md) 与 [完整 API](docs/api-generated.md)。项目使用 [MIT](LICENSE) 许可证。
