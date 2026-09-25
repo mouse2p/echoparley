@@ -70,7 +70,8 @@ class KMeansCodebook:
         if matrix.ndim != 2 or matrix.shape[1] != self.centroids.shape[1]:
             raise ValueError("feature width does not match codebook")
         distances = np.sum((matrix[:, None, :] - self.centroids[None, :, :]) ** 2, axis=2)
-        return np.argmin(distances, axis=1).astype(np.int64)
+        assignments: IntArray = np.argmin(distances, axis=1).astype(np.int64)
+        return assignments
 
 
 def fit_kmeans(
