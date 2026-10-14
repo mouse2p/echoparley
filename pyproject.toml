@@ -27,7 +27,7 @@ dependencies = ["numpy>=2.0,<3"]
 dev = [
   "build>=1.2,<2",
   "hatchling>=1.27,<2",
-  "mypy>=1.13,<2",
+  "mypy>=1.13,<3",
   "pytest>=8.3,<9",
   "ruff>=0.8,<1",
 ]
